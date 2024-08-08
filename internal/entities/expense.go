@@ -9,7 +9,7 @@ type Expense struct {
 	UserID   string   `json:"user_id"`
 	Amount   float64  `json:"amount"`
 	Category Category `json:"category"`
-	Notes    string   `json:"notes,omitempty"`
+	Notes    string   `json:"notes"`
 }
 
 func NewExpense(userID string, amount float64, category Category, notes string) (*Expense, []error) {
@@ -41,10 +41,6 @@ func ValidateExpense(userID string, amount float64, category Category, notes str
 
 	if category.ID == "" {
 		validationErrors = append(validationErrors, fmt.Errorf("missing category ID"))
-	}
-
-	if notes == "" {
-		validationErrors = append(validationErrors, fmt.Errorf("missing notes"))
 	}
 
 	if len(notes) > 200 {
