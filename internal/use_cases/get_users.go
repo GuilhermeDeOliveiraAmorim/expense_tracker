@@ -5,25 +5,24 @@ import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 )
 
-type GetUserInputDto struct {
-	UserID string `json:"user_id"`
+type GetUsersInputDto struct {
 }
 
-type GetUserOutputDto struct {
-	User entities.User `json:"user"`
+type GetUsersOutputDto struct {
+	Users []entities.User `json:"users"`
 }
 
-type GetUserUseCase struct {
+type GetUsersUseCase struct {
 	UserRepository repositories.UserRepositoryInterface
 }
 
-func (c *GetUserUseCase) Execute(input GetUserInputDto) (GetUserOutputDto, []error) {
-	searchedUser, err := c.UserRepository.GetUser(input.UserID)
+func (c *GetUsersUseCase) Execute(input GetUsersInputDto) (GetUsersOutputDto, []error) {
+	searchedsUsers, err := c.UserRepository.GetUsers()
 	if err != nil {
-		return GetUserOutputDto{}, err
+		return GetUsersOutputDto{}, err
 	}
 
-	return GetUserOutputDto{
-		User: searchedUser,
+	return GetUsersOutputDto{
+		Users: searchedsUsers,
 	}, nil
 }
