@@ -10,7 +10,7 @@ type User struct {
 	Login Login  `json:"login"`
 }
 
-func NewUser(name string) (*User, []error) {
+func NewUser(name string, login Login) (*User, []error) {
 	validationErrors := ValidateUser(name)
 
 	if len(validationErrors) > 0 {
@@ -20,6 +20,7 @@ func NewUser(name string) (*User, []error) {
 	return &User{
 		SharedEntity: *NewSharedEntity(),
 		Name:         name,
+		Login:        login,
 	}, nil
 }
 
