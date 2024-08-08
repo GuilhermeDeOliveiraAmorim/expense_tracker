@@ -25,6 +25,9 @@ func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputD
 		return CreateUserOutputDto{}, err
 	}
 
+	newLogin.EncryptEmail()
+	newLogin.EncryptPassword()
+
 	newUser, err := entities.NewUser(input.Name, *newLogin)
 	if err != nil {
 		return CreateUserOutputDto{}, err

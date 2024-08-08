@@ -88,35 +88,35 @@ func compareAndDecrypt(hashedData string, data string) bool {
 	return err == nil
 }
 
-func (lo *Login) EncryptEmail(email string) (string, error) {
-	hashedEmail, err := hashString(email)
+func (lo *Login) EncryptEmail() (string, error) {
+	hashedEmail, err := hashString(lo.Email)
 	if err != nil {
 		return "", err
 	}
 	return hashedEmail, nil
 }
 
-func (lo *Login) EncryptPassword(password string) (string, error) {
-	hashedPassword, err := hashString(password)
+func (lo *Login) EncryptPassword() (string, error) {
+	hashedPassword, err := hashString(lo.Password)
 	if err != nil {
 		return "", err
 	}
 	return hashedPassword, nil
 }
 
-func (lo *Login) DecryptEmail(hashedEmail string, email string) string {
-	if compareAndDecrypt(hashedEmail, email) {
-		return email
+func (lo *Login) DecryptEmail(email string) bool {
+	if compareAndDecrypt(lo.Email, email) {
+		return true
 	} else {
-		return ""
+		return false
 	}
 }
 
-func (lo *Login) DecryptPassword(hashedPassword string, password string) string {
-	if compareAndDecrypt(hashedPassword, password) {
-		return password
+func (lo *Login) DecryptPassword(password string) bool {
+	if compareAndDecrypt(lo.Password, password) {
+		return true
 	} else {
-		return ""
+		return false
 	}
 }
 
