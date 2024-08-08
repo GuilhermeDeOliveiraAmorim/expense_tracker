@@ -5,30 +5,30 @@ import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 )
 
-type AddCategoryInputDto struct {
+type CreateCategoryInputDto struct {
 	Name string `json:"name"`
 }
 
-type AddCategoryOutputDto struct {
+type CreateCategoryOutputDto struct {
 	ID string `json:"id"`
 }
 
-type AddCategoryUseCase struct {
+type CreateCategoryUseCase struct {
 	CategoryRepository repositories.CategoryRepositoryInterface
 }
 
-func (c *AddCategoryUseCase) Execute(input AddCategoryInputDto) (AddCategoryOutputDto, []error) {
+func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCategoryOutputDto, []error) {
 	newCategory, err := entities.NewCategory(input.Name)
 	if err != nil {
-		return AddCategoryOutputDto{}, err
+		return CreateCategoryOutputDto{}, err
 	}
 
 	err = c.CategoryRepository.CreateCategory(*newCategory)
 	if err != nil {
-		return AddCategoryOutputDto{}, err
+		return CreateCategoryOutputDto{}, err
 	}
 
-	return AddCategoryOutputDto{
+	return CreateCategoryOutputDto{
 		ID: newCategory.ID,
 	}, nil
 }

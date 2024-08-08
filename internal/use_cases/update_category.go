@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"fmt"
+
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 )
 
@@ -23,14 +25,20 @@ func (c *UpdateCategoryUseCase) Execute(input UpdateCategoryInputDto) (UpdateCat
 		return UpdateCategoryOutputDto{}, err
 	}
 
-	err = searchedCategory.ChangeName(input.Name)
-	if len(err) > 0 {
-		return UpdateCategoryOutputDto{}, err
-	}
+	if input.Name != searchedCategory.Name {
+		err = searchedCategory.ChangeName(input.Name)
+		if len(err) > 0 {
+			return UpdateCategoryOutputDto{}, err
+		}
 
-	err = c.CategoryRepository.UpdateCategory(searchedCategory)
-	if err != nil {
-		return UpdateCategoryOutputDto{}, err
+		err = c.CategoryRepository.UpdateCategory(searchedCategory)
+		if err != nil {
+			return UpdateCategoryOutputDto{}, err
+		}
+	} else {
+		return UpdateCategoryOutputDto{}, []error{
+			fmt.Errorf("mame cannot be the same as the current one"),
+		}
 	}
 
 	return UpdateCategoryOutputDto{
