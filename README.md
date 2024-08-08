@@ -93,10 +93,10 @@ A API estará disponível em `http://localhost:8080`.
 
 ## Tarefas
 
-- [ ] Configurar o ambiente de desenvolvimento
-- [ ] Implementar a camada de domínio
-  - [ ] Criar entidades (Expense, User)
-  - [ ] Definir interfaces (ports)
+- [X] Configurar o ambiente de desenvolvimento
+- [X] Implementar a camada de domínio
+  - [X] Criar entidades (Expense, User, Category)
+  - [X] Definir interfaces (ports)
 - [ ] Implementar a camada de aplicação
   - [ ] Criar casos de uso (AddExpense, GetUserExpenses, UpdateUserExpense, RemoveExpense)
 - [ ] Implementar a camada de interface (API)
