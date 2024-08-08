@@ -37,7 +37,7 @@ func (c *UpdateCategoryUseCase) Execute(input UpdateCategoryInputDto) (UpdateCat
 		}
 	} else {
 		return UpdateCategoryOutputDto{}, []error{
-			fmt.Errorf("mame cannot be the same as the current one"),
+			fmt.Errorf("name cannot be the same as the current one"),
 		}
 	}
 
