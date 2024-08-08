@@ -2,6 +2,7 @@ package entities
 
 import (
 	"fmt"
+	"time"
 )
 
 type User struct {
@@ -34,6 +35,19 @@ func ValidateUser(name string) []error {
 	if len(name) > 100 {
 		validationErrors = append(validationErrors, fmt.Errorf("user name cannot exceed 100 characters"))
 	}
+
+	return validationErrors
+}
+
+func (u *User) ChangeName(newName string) []error {
+	validationErrors := ValidateUser(newName)
+
+	if len(validationErrors) > 0 {
+		return validationErrors
+	}
+
+	u.UpdatedAt = time.Now()
+	u.Name = newName
 
 	return validationErrors
 }
