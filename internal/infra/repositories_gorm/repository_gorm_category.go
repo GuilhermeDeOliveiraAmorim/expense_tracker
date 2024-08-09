@@ -32,14 +32,27 @@ func (c *CategoryRepository) Create(category *entities.Category) error {
 	return nil
 }
 
-func (cr *CategoryRepository) Delete(category *entities.Category) error {
-	err := cr.gorm.Model(&Categories{}).Where("id = ?", category.ID).Updates(map[string]interface{}{
+func (c *CategoryRepository) Delete(category *entities.Category) error {
+	err := c.gorm.Model(&Categories{}).Where("id = ?", category.ID).Updates(map[string]interface{}{
 		"Active":        category.Active,
 		"DeactivatedAt": category.DeactivatedAt,
 	}).Error
 
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (c *CategoryRepository) Update(category *entities.Category) error {
+	result := c.gorm.Model(&Categories{}).Where("id", category.ID).Updates(Categories{
+		UpdatedAt: category.UpdatedAt,
+		Name:      category.Name,
+	})
+
+	if result.Error != nil {
+		return errors.New(result.Error.Error())
 	}
 
 	return nil
