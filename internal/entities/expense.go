@@ -2,6 +2,7 @@ package entities
 
 import (
 	"fmt"
+	"time"
 )
 
 type Expense struct {
@@ -46,6 +47,45 @@ func ValidateExpense(userID string, amount float64, category Category, notes str
 	if len(notes) > 200 {
 		validationErrors = append(validationErrors, fmt.Errorf("notes cannot exceed 200 characters"))
 	}
+
+	return validationErrors
+}
+
+func (e *Expense) ChangeAmount(newAmount float64) []error {
+	var validationErrors []error
+
+	if newAmount <= 0 {
+		validationErrors = append(validationErrors, fmt.Errorf("amount must be greater than 0"))
+	}
+
+	e.UpdatedAt = time.Now()
+	e.Amount = newAmount
+
+	return validationErrors
+}
+
+func (e *Expense) ChangeCategory(newCategory Category) []error {
+	var validationErrors []error
+
+	if newCategory.ID == "" {
+		validationErrors = append(validationErrors, fmt.Errorf("missing new category ID"))
+	}
+
+	e.UpdatedAt = time.Now()
+	e.Category = newCategory
+
+	return validationErrors
+}
+
+func (e *Expense) ChangeNotes(newNotes string) []error {
+	var validationErrors []error
+
+	if len(newNotes) > 200 {
+		validationErrors = append(validationErrors, fmt.Errorf("notes cannot exceed 200 characters"))
+	}
+
+	e.UpdatedAt = time.Now()
+	e.Notes = newNotes
 
 	return validationErrors
 }
