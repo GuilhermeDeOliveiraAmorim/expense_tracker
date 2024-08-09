@@ -17,6 +17,14 @@ type CreateCategoryUseCase struct {
 	CategoryRepository repositories.CategoryRepositoryInterface
 }
 
+func NewCreateCategoryUseCase(
+	CategoryRepository repositories.CategoryRepositoryInterface,
+) *CreateCategoryUseCase {
+	return &CreateCategoryUseCase{
+		CategoryRepository: CategoryRepository,
+	}
+}
+
 func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCategoryOutputDto, []error) {
 	newCategory, err := entities.NewCategory(input.Name)
 	if err != nil {

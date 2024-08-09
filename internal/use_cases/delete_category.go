@@ -16,6 +16,14 @@ type DeleteCategoryUseCase struct {
 	CategoryRepository repositories.CategoryRepositoryInterface
 }
 
+func NewDeleteCategoryUseCase(
+	CategoryRepository repositories.CategoryRepositoryInterface,
+) *DeleteCategoryUseCase {
+	return &DeleteCategoryUseCase{
+		CategoryRepository: CategoryRepository,
+	}
+}
+
 func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCategoryOutputDto, []error) {
 	categoryToDelete, err := c.CategoryRepository.GetCategory(input.CategoryID)
 	if err != nil {

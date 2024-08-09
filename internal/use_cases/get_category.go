@@ -17,6 +17,14 @@ type GetCategoryUseCase struct {
 	CategoryRepository repositories.CategoryRepositoryInterface
 }
 
+func NewGetCategoryUseCase(
+	CategoryRepository repositories.CategoryRepositoryInterface,
+) *GetCategoryUseCase {
+	return &GetCategoryUseCase{
+		CategoryRepository: CategoryRepository,
+	}
+}
+
 func (c *GetCategoryUseCase) Execute(input GetCategoryInputDto) (GetCategoryOutputDto, []error) {
 	searchedCategory, err := c.CategoryRepository.GetCategory(input.CategoryID)
 	if err != nil {

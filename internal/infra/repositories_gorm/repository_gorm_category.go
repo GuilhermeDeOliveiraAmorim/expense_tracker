@@ -17,7 +17,7 @@ func NewCategoryRepository(gorm *gorm.DB) *CategoryRepository {
 	}
 }
 
-func (c *CategoryRepository) CreateCategory(category *entities.Category) error {
+func (c *CategoryRepository) CreateCategory(category entities.Category) []error {
 	if err := c.gorm.Create(&Categories{
 		ID:            category.ID,
 		Active:        category.Active,
@@ -26,29 +26,29 @@ func (c *CategoryRepository) CreateCategory(category *entities.Category) error {
 		DeactivatedAt: category.DeactivatedAt,
 		Name:          category.Name,
 	}).Error; err != nil {
-		return errors.New(err.Error())
+		return []error{err}
 	}
 
 	return nil
 }
 
-func (c *CategoryRepository) DeleteCategory(category *entities.Category) error {
+func (c *CategoryRepository) DeleteCategory(category entities.Category) []error {
 	err := c.gorm.Model(&Categories{}).Where("id = ?", category.ID).Updates(Categories{
 		Active:        category.Active,
 		DeactivatedAt: category.DeactivatedAt,
 	}).Error
 
 	if err != nil {
-		return err
+		return []error{err}
 	}
 
 	return nil
 }
 
-func (c *CategoryRepository) GetCategories() ([]entities.Category, error) {
+func (c *CategoryRepository) GetCategories() ([]entities.Category, []error) {
 	var categoriesModel []Categories
 	if err := c.gorm.Find(&categoriesModel).Error; err != nil {
-		return nil, err
+		return nil, []error{err}
 	}
 
 	var categories []entities.Category
@@ -73,15 +73,15 @@ func (c *CategoryRepository) GetCategories() ([]entities.Category, error) {
 	return categories, nil
 }
 
-func (c *CategoryRepository) GetCategory(categoryID string) (entities.Category, error) {
+func (c *CategoryRepository) GetCategory(categoryID string) (entities.Category, []error) {
 	var categoryModel Categories
 
 	result := c.gorm.Model(&Categories{}).Where("id = ?", categoryID).First(&categoryModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return entities.Category{}, errors.New("category not found")
+			return entities.Category{}, []error{errors.New("category not found")}
 		}
-		return entities.Category{}, errors.New(result.Error.Error())
+		return entities.Category{}, []error{errors.New(result.Error.Error())}
 	}
 
 	category := entities.Category{
@@ -98,14 +98,14 @@ func (c *CategoryRepository) GetCategory(categoryID string) (entities.Category, 
 	return category, nil
 }
 
-func (c *CategoryRepository) UpdateCategory(category *entities.Category) error {
+func (c *CategoryRepository) UpdateCategory(category entities.Category) []error {
 	result := c.gorm.Model(&Categories{}).Where("id", category.ID).Updates(Categories{
 		Name:      category.Name,
 		UpdatedAt: category.UpdatedAt,
 	})
 
 	if result.Error != nil {
-		return errors.New(result.Error.Error())
+		return []error{errors.New(result.Error.Error())}
 	}
 
 	return nil
