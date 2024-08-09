@@ -17,7 +17,7 @@ func NewCategoryRepository(gorm *gorm.DB) *CategoryRepository {
 	}
 }
 
-func (c *CategoryRepository) Create(category *entities.Category) error {
+func (c *CategoryRepository) CreateCategory(category *entities.Category) error {
 	if err := c.gorm.Create(&Categories{
 		ID:            category.ID,
 		Active:        category.Active,
@@ -32,7 +32,7 @@ func (c *CategoryRepository) Create(category *entities.Category) error {
 	return nil
 }
 
-func (c *CategoryRepository) Delete(category *entities.Category) error {
+func (c *CategoryRepository) DeleteCategory(category *entities.Category) error {
 	err := c.gorm.Model(&Categories{}).Where("id = ?", category.ID).Updates(Categories{
 		Active:        category.Active,
 		DeactivatedAt: category.DeactivatedAt,
@@ -45,20 +45,35 @@ func (c *CategoryRepository) Delete(category *entities.Category) error {
 	return nil
 }
 
-func (c *CategoryRepository) Update(category *entities.Category) error {
-	result := c.gorm.Model(&Categories{}).Where("id", category.ID).Updates(Categories{
-		Name:      category.Name,
-		UpdatedAt: category.UpdatedAt,
-	})
-
-	if result.Error != nil {
-		return errors.New(result.Error.Error())
+func (c *CategoryRepository) GetCategories() ([]entities.Category, error) {
+	var categoriesModel []Categories
+	if err := c.gorm.Find(&categoriesModel).Error; err != nil {
+		return nil, err
 	}
 
-	return nil
+	var categories []entities.Category
+
+	if len(categoriesModel) > 0 {
+		for _, categoriesodel := range categoriesModel {
+			category := entities.Category{
+				SharedEntity: entities.SharedEntity{
+					ID:            categoriesodel.ID,
+					Active:        categoriesodel.Active,
+					CreatedAt:     categoriesodel.CreatedAt,
+					UpdatedAt:     categoriesodel.UpdatedAt,
+					DeactivatedAt: categoriesodel.DeactivatedAt,
+				},
+				Name: categoriesodel.Name,
+			}
+
+			categories = append(categories, category)
+		}
+	}
+
+	return categories, nil
 }
 
-func (c *CategoryRepository) GetByID(categoryID string) (entities.Category, error) {
+func (c *CategoryRepository) GetCategory(categoryID string) (entities.Category, error) {
 	var categoryModel Categories
 
 	result := c.gorm.Model(&Categories{}).Where("id = ?", categoryID).First(&categoryModel)
@@ -81,4 +96,17 @@ func (c *CategoryRepository) GetByID(categoryID string) (entities.Category, erro
 	}
 
 	return category, nil
+}
+
+func (c *CategoryRepository) UpdateCategory(category *entities.Category) error {
+	result := c.gorm.Model(&Categories{}).Where("id", category.ID).Updates(Categories{
+		Name:      category.Name,
+		UpdatedAt: category.UpdatedAt,
+	})
+
+	if result.Error != nil {
+		return errors.New(result.Error.Error())
+	}
+
+	return nil
 }
