@@ -31,3 +31,16 @@ func (c *CategoryRepository) Create(category *entities.Category) error {
 
 	return nil
 }
+
+func (cr *CategoryRepository) Delete(category *entities.Category) error {
+	err := cr.gorm.Model(&Categories{}).Where("id = ?", category.ID).Updates(map[string]interface{}{
+		"Active":        category.Active,
+		"DeactivatedAt": category.DeactivatedAt,
+	}).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
