@@ -15,8 +15,8 @@ func NewExpenseRepository(gorm *gorm.DB) *ExpenseRepository {
 	}
 }
 
-func (c *ExpenseRepository) CreateExpense(expense entities.Expense) []error {
-	if err := c.gorm.Create(&Expenses{
+func (e *ExpenseRepository) CreateExpense(expense entities.Expense) []error {
+	if err := e.gorm.Create(&Expenses{
 		ID:            expense.ID,
 		Active:        expense.Active,
 		CreatedAt:     expense.CreatedAt,
@@ -27,6 +27,19 @@ func (c *ExpenseRepository) CreateExpense(expense entities.Expense) []error {
 		CategoryID:    expense.Category.ID,
 		Notes:         expense.Notes,
 	}).Error; err != nil {
+		return []error{err}
+	}
+
+	return nil
+}
+
+func (e *ExpenseRepository) DeleteExpense(category entities.Expense) []error {
+	err := e.gorm.Model(&Expenses{}).Where("id = ?", category.ID).Updates(Expenses{
+		Active:        category.Active,
+		DeactivatedAt: category.DeactivatedAt,
+	}).Error
+
+	if err != nil {
 		return []error{err}
 	}
 
