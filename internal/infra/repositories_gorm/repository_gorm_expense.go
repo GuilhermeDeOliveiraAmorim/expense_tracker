@@ -1,6 +1,8 @@
 package repositoriesgorm
 
 import (
+	"errors"
+
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"gorm.io/gorm"
 )
@@ -44,4 +46,56 @@ func (e *ExpenseRepository) DeleteExpense(category entities.Expense) []error {
 	}
 
 	return nil
+}
+
+func (e *ExpenseRepository) GetCategories() ([]entities.Expense, []error) {
+	var expensesModel []Expenses
+
+	if err := e.gorm.Find(&expensesModel).Error; err != nil {
+		return nil, []error{err}
+	}
+
+	var expenses []entities.Expense
+
+	if len(expensesModel) > 0 {
+		for _, expenseModel := range expensesModel {
+			var categoryModel Categories
+
+			result := e.gorm.Model(&Categories{}).Where("id = ?", expenseModel.CategoryID).First(&categoryModel)
+			if result.Error != nil {
+				if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+					return []entities.Expense{}, []error{errors.New("error searching expense (" + expenseModel.ID + ") category")}
+				}
+				return []entities.Expense{}, []error{errors.New(result.Error.Error())}
+			}
+
+			category := entities.Category{
+				SharedEntity: entities.SharedEntity{
+					ID:            categoryModel.ID,
+					Active:        categoryModel.Active,
+					CreatedAt:     categoryModel.CreatedAt,
+					UpdatedAt:     categoryModel.UpdatedAt,
+					DeactivatedAt: categoryModel.DeactivatedAt,
+				},
+				Name: categoryModel.Name,
+			}
+
+			expense := entities.Expense{
+				SharedEntity: entities.SharedEntity{
+					ID:            expenseModel.ID,
+					Active:        expenseModel.Active,
+					CreatedAt:     expenseModel.CreatedAt,
+					UpdatedAt:     expenseModel.UpdatedAt,
+					DeactivatedAt: expenseModel.DeactivatedAt,
+				},
+				UserID:   expenseModel.UserID,
+				Amount:   expenseModel.Amount,
+				Category: category,
+			}
+
+			expenses = append(expenses, expense)
+		}
+	}
+
+	return expenses, nil
 }
