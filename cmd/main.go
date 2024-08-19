@@ -4,7 +4,10 @@ import (
 	"fmt"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/configs"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	repositoriesgorm "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/repositories_gorm"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/interface/handlers"
+	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -30,4 +33,14 @@ func main() {
 		return
 	}
 	fmt.Println("Migração bem-sucedida!")
+
+	r := gin.Default()
+
+	categoryFactory := factory.NewCategoryFactory(db)
+	categoryHandler := handlers.NewCategoryHandler(categoryFactory)
+
+	r.POST("/categories", categoryHandler.CreateCategory)
+	r.GET("/categories/:category_id/categories", categoryHandler.GetCategory)
+
+	r.Run(":8080")
 }
