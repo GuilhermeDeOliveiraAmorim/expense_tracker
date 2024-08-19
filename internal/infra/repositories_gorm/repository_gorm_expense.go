@@ -146,3 +146,18 @@ func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, []er
 
 	return expense, nil
 }
+
+func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) []error {
+	result := e.gorm.Model(&Expenses{}).Where("id", expense.ID).Updates(Expenses{
+		Amount:     expense.Amount,
+		Notes:      expense.Notes,
+		CategoryID: expense.Category.ID,
+		UpdatedAt:  expense.UpdatedAt,
+	})
+
+	if result.Error != nil {
+		return []error{errors.New(result.Error.Error())}
+	}
+
+	return nil
+}
