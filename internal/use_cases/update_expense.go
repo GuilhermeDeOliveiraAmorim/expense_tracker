@@ -22,6 +22,15 @@ type UpdateExpenseUseCase struct {
 	UserRepository    repositories.UserRepositoryInterface
 }
 
+
+func NewUpdateExpenseUseCase(
+	ExpenseRepository repositories.ExpenseRepositoryInterface,
+) *UpdateExpenseUseCase {
+	return &UpdateExpenseUseCase{
+		ExpenseRepository: ExpenseRepository,
+	}
+}
+
 func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpenseOutputDto, []error) {
 	_, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {

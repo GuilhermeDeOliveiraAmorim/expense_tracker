@@ -16,6 +16,14 @@ type GetExpensesUseCase struct {
 	ExpenseRepository repositories.ExpenseRepositoryInterface
 }
 
+func NewGetExpensesUseCase(
+	ExpenseRepository repositories.ExpenseRepositoryInterface,
+) *GetExpensesUseCase {
+	return &GetExpensesUseCase{
+		ExpenseRepository: ExpenseRepository,
+	}
+}
+
 func (c *GetExpensesUseCase) Execute(input GetExpensesInputDto) (GetExpensesOutputDto, []error) {
 	searchedsExpenses, err := c.ExpenseRepository.GetExpenses()
 	if err != nil {

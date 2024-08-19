@@ -14,6 +14,14 @@ type DeleteExpenseUseCase struct {
 	ExpenseRepository repositories.ExpenseRepositoryInterface
 }
 
+func NewDeleteExpenseUseCase(
+	ExpenseRepository repositories.ExpenseRepositoryInterface,
+) *DeleteExpenseUseCase {
+	return &DeleteExpenseUseCase{
+		ExpenseRepository: ExpenseRepository,
+	}
+}
+
 func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpenseOutputDto, []error) {
 	expenseToDelete, err := c.ExpenseRepository.GetExpense(input.ExpenseID)
 	if err != nil {

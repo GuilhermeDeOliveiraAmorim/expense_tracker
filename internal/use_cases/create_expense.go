@@ -20,6 +20,14 @@ type CreateExpenseUseCase struct {
 	ExpenseRepository repositories.ExpenseRepositoryInterface
 }
 
+func NewCreateExpenseUseCase(
+	ExpenseRepository repositories.ExpenseRepositoryInterface,
+) *CreateExpenseUseCase {
+	return &CreateExpenseUseCase{
+		ExpenseRepository: ExpenseRepository,
+	}
+}
+
 func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpenseOutputDto, []error) {
 	newExpense, err := entities.NewExpense(input.UserID, input.Amount, input.Category, input.Notes)
 	if err != nil {
