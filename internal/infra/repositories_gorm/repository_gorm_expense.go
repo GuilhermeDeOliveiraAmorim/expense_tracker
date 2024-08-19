@@ -48,7 +48,7 @@ func (e *ExpenseRepository) DeleteExpense(category entities.Expense) []error {
 	return nil
 }
 
-func (e *ExpenseRepository) GetCategories() ([]entities.Expense, []error) {
+func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, []error) {
 	var expensesModel []Expenses
 
 	if err := e.gorm.Find(&expensesModel).Error; err != nil {
@@ -98,4 +98,51 @@ func (e *ExpenseRepository) GetCategories() ([]entities.Expense, []error) {
 	}
 
 	return expenses, nil
+}
+
+func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, []error) {
+	var expenseModel Expenses
+	var categoryModel Categories
+
+	result := e.gorm.Model(&Expenses{}).Where("id = ?", expenseID).First(&expenseModel)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return entities.Expense{}, []error{errors.New("expense not found")}
+		}
+		return entities.Expense{}, []error{errors.New(result.Error.Error())}
+	}
+
+	result = e.gorm.Model(&Categories{}).Where("id = ?", expenseModel.CategoryID).First(&categoryModel)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return entities.Expense{}, []error{errors.New("error searching expense (" + expenseModel.ID + ") category")}
+		}
+		return entities.Expense{}, []error{errors.New(result.Error.Error())}
+	}
+
+	category := entities.Category{
+		SharedEntity: entities.SharedEntity{
+			ID:            categoryModel.ID,
+			Active:        categoryModel.Active,
+			CreatedAt:     categoryModel.CreatedAt,
+			UpdatedAt:     categoryModel.UpdatedAt,
+			DeactivatedAt: categoryModel.DeactivatedAt,
+		},
+		Name: categoryModel.Name,
+	}
+
+	expense := entities.Expense{
+		SharedEntity: entities.SharedEntity{
+			ID:            expenseModel.ID,
+			Active:        expenseModel.Active,
+			CreatedAt:     expenseModel.CreatedAt,
+			UpdatedAt:     expenseModel.UpdatedAt,
+			DeactivatedAt: expenseModel.DeactivatedAt,
+		},
+		UserID:   expenseModel.UserID,
+		Amount:   expenseModel.Amount,
+		Category: category,
+	}
+
+	return expense, nil
 }
