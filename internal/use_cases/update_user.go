@@ -19,6 +19,14 @@ type UpdateUserUseCase struct {
 	UserRepository repositories.UserRepositoryInterface
 }
 
+func NewUpdateUserUseCase(
+	UserRepository repositories.UserRepositoryInterface,
+) *UpdateUserUseCase {
+	return &UpdateUserUseCase{
+		UserRepository: UserRepository,
+	}
+}
+
 func (c *UpdateUserUseCase) Execute(input UpdateUserInputDto) (UpdateUserOutputDto, []error) {
 	searchedUser, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {

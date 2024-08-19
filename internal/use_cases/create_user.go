@@ -19,6 +19,14 @@ type CreateUserUseCase struct {
 	UserRepository repositories.UserRepositoryInterface
 }
 
+func NewCreateUserUseCase(
+	UserRepository repositories.UserRepositoryInterface,
+) *CreateUserUseCase {
+	return &CreateUserUseCase{
+		UserRepository: UserRepository,
+	}
+}
+
 func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputDto, []error) {
 	newLogin, err := entities.NewLogin(input.Email, input.Password)
 	if err != nil {

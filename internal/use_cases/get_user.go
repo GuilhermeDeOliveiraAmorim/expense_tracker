@@ -17,6 +17,14 @@ type GetUserUseCase struct {
 	UserRepository repositories.UserRepositoryInterface
 }
 
+func NewGetUserUseCase(
+	UserRepository repositories.UserRepositoryInterface,
+) *GetUserUseCase {
+	return &GetUserUseCase{
+		UserRepository: UserRepository,
+	}
+}
+
 func (c *GetUserUseCase) Execute(input GetUserInputDto) (GetUserOutputDto, []error) {
 	searchedUser, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {

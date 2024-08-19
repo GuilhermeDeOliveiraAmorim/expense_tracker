@@ -14,6 +14,14 @@ type DeleteUserUseCase struct {
 	UserRepository repositories.UserRepositoryInterface
 }
 
+func NewDeleteUserUseCase(
+	UserRepository repositories.UserRepositoryInterface,
+) *DeleteUserUseCase {
+	return &DeleteUserUseCase{
+		UserRepository: UserRepository,
+	}
+}
+
 func (c *DeleteUserUseCase) Execute(input DeleteUserInputDto) (DeleteUserOutputDto, []error) {
 	userToDelete, errs := c.UserRepository.GetUser(input.UserID)
 	if errs != nil {
