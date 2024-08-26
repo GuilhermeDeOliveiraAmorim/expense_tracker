@@ -33,12 +33,7 @@ func (c *CategoryRepository) CreateCategory(category entities.Category) error {
 }
 
 func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
-	err := c.gorm.Model(&Categories{}).Where("id = ?", category.ID).Updates(Categories{
-		Active:        category.Active,
-		DeactivatedAt: category.DeactivatedAt,
-	}).Error
-
-	if err != nil {
+	if err := c.gorm.Model(&Categories{}).Where("id = ?", category.ID).Select("Active", "DeactivatedAt").Updates(map[string]interface{}{"active": category.Active, "updated_at": category.DeactivatedAt}).Error; err != nil {
 		return err
 	}
 

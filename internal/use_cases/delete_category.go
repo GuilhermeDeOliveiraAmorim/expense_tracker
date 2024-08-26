@@ -6,11 +6,11 @@ import (
 )
 
 type DeleteCategoryInputDto struct {
-	CategoryID string `json:"id"`
+	CategoryID string `json:"category_id"`
 }
 
 type DeleteCategoryOutputDto struct {
-	ID string `json:"id"`
+	Message string `json:"message"`
 }
 
 type DeleteCategoryUseCase struct {
@@ -34,7 +34,7 @@ func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCat
 				Title:    "Category not found",
 				Status:   404,
 				Detail:   err.Error(),
-				Instance: util.RFC400,
+				Instance: util.RFC404,
 			},
 		}
 	}
@@ -55,6 +55,6 @@ func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCat
 	}
 
 	return DeleteCategoryOutputDto{
-		ID: categoryToDelete.ID,
+		Message: "Category deleted successfully",
 	}, nil
 }
