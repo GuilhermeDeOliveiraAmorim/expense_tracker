@@ -40,7 +40,10 @@ func main() {
 	categoryHandler := handlers.NewCategoryHandler(categoryFactory)
 
 	r.POST("/categories", categoryHandler.CreateCategory)
-	r.GET("/categories/:category_id/categories", categoryHandler.GetCategory)
+	r.GET("/categories", categoryHandler.GetCategory)
+	r.DELETE("/categories", categoryHandler.DeleteCategory)
+	r.GET("/categories/all", categoryHandler.GetCategories)
+	r.PATCH("/categories", categoryHandler.UpdateCategory)
 
 	r.Run(":8080")
 }

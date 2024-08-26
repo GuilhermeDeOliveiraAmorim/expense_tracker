@@ -36,7 +36,10 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 
 func (h *CategoryHandler) GetCategory(c *gin.Context) {
 	var input usecases.GetCategoryInputDto
-	input.CategoryID = c.Param("id")
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	output, err := h.categoryFactory.GetCategory.Execute(input)
 	if err != nil {
@@ -76,7 +79,10 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	var input usecases.DeleteCategoryInputDto
-	input.CategoryID = c.Param("id")
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	output, err := h.categoryFactory.DeleteCategory.Execute(input)
 	if err != nil {
