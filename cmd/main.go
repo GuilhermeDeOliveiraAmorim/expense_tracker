@@ -39,11 +39,29 @@ func main() {
 	categoryFactory := factory.NewCategoryFactory(db)
 	categoryHandler := handlers.NewCategoryHandler(categoryFactory)
 
+	expenseFactory := factory.NewExpenseFactory(db)
+	expenseHandler := handlers.NewExpenseHandler(expenseFactory)
+
+	userFactory := factory.NewUserFactory(db)
+	userHandler := handlers.NewUserHandler(userFactory)
+
 	r.POST("/categories", categoryHandler.CreateCategory)
 	r.GET("/categories", categoryHandler.GetCategory)
 	r.DELETE("/categories", categoryHandler.DeleteCategory)
 	r.GET("/categories/all", categoryHandler.GetCategories)
 	r.PATCH("/categories", categoryHandler.UpdateCategory)
+
+	r.POST("/expenses", expenseHandler.CreateExpense)
+	r.GET("/expenses/all", expenseHandler.GetExpenses)
+	r.GET("/expenses", expenseHandler.GetExpense)
+	r.DELETE("/expenses", expenseHandler.DeleteExpense)
+	r.PATCH("/expenses", expenseHandler.UpdateExpense)
+
+	r.POST("/users", userHandler.CreateUser)
+	r.GET("/users/all", userHandler.GetUsers)
+	r.GET("/users", userHandler.GetUser)
+	r.DELETE("/users", userHandler.DeleteUser)
+	r.PATCH("/users", userHandler.UpdateUser)
 
 	r.Run(":8080")
 }
