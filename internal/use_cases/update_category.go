@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type UpdateCategoryInputDto struct {
@@ -27,25 +28,47 @@ func NewUpdateCategoryUseCase(
 	}
 }
 
-func (c *UpdateCategoryUseCase) Execute(input UpdateCategoryInputDto) (UpdateCategoryOutputDto, []error) {
+func (c *UpdateCategoryUseCase) Execute(input UpdateCategoryInputDto) (UpdateCategoryOutputDto, []util.ProblemDetails) {
 	searchedCategory, err := c.CategoryRepository.GetCategory(input.CategoryID)
 	if err != nil {
-		return UpdateCategoryOutputDto{}, err
+		return UpdateCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "Category not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC400,
+			},
+		}
 	}
 
 	if input.Name != searchedCategory.Name {
-		err = searchedCategory.ChangeName(input.Name)
+		err := searchedCategory.ChangeName(input.Name)
 		if len(err) > 0 {
 			return UpdateCategoryOutputDto{}, err
 		}
 
-		err = c.CategoryRepository.UpdateCategory(searchedCategory)
+		UpdateCategoryErr := c.CategoryRepository.UpdateCategory(searchedCategory)
 		if err != nil {
-			return UpdateCategoryOutputDto{}, err
+			return UpdateCategoryOutputDto{}, []util.ProblemDetails{
+				{
+					Type:     "Validation Error",
+					Title:    "Bad Request",
+					Status:   500,
+					Detail:   UpdateCategoryErr.Error(),
+					Instance: util.RFC500,
+				},
+			}
 		}
 	} else {
-		return UpdateCategoryOutputDto{}, []error{
-			fmt.Errorf("name cannot be the same as the current one"),
+		return UpdateCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Validation Error",
+				Title:    "Bad Request",
+				Status:   400,
+				Detail:   fmt.Sprintf("Category name is already '%s'", searchedCategory.Name),
+				Instance: util.RFC400,
+			},
 		}
 	}
 

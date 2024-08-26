@@ -3,6 +3,7 @@ package usecases
 import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type GetCategoriesInputDto struct {
@@ -24,10 +25,18 @@ func NewGetCategoriesUseCase(
 	}
 }
 
-func (c *GetCategoriesUseCase) Execute(input GetCategoriesInputDto) (GetCategoriesOutputDto, []error) {
+func (c *GetCategoriesUseCase) Execute(input GetCategoriesInputDto) (GetCategoriesOutputDto, []util.ProblemDetails) {
 	searchedsCategories, err := c.CategoryRepository.GetCategories()
 	if err != nil {
-		return GetCategoriesOutputDto{}, err
+		return GetCategoriesOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Err fetching categories",
+				Status:   500,
+				Detail:   err.Error(),
+				Instance: util.RFC500,
+			},
+		}
 	}
 
 	return GetCategoriesOutputDto{

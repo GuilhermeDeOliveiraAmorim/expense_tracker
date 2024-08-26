@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type DeleteCategoryInputDto struct {
@@ -24,17 +25,33 @@ func NewDeleteCategoryUseCase(
 	}
 }
 
-func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCategoryOutputDto, []error) {
+func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCategoryOutputDto, []util.ProblemDetails) {
 	categoryToDelete, err := c.CategoryRepository.GetCategory(input.CategoryID)
 	if err != nil {
-		return DeleteCategoryOutputDto{}, err
+		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "Category not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC400,
+			},
+		}
 	}
 
 	categoryToDelete.Deactivate()
 
 	err = c.CategoryRepository.DeleteCategory(categoryToDelete)
 	if err != nil {
-		return DeleteCategoryOutputDto{}, err
+		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Err deleting category",
+				Status:   500,
+				Detail:   err.Error(),
+				Instance: util.RFC500,
+			},
+		}
 	}
 
 	return DeleteCategoryOutputDto{

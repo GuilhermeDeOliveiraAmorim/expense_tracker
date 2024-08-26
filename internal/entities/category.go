@@ -1,8 +1,9 @@
 package entities
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type Category struct {
@@ -10,7 +11,7 @@ type Category struct {
 	Name string `json:"name"`
 }
 
-func NewCategory(name string) (*Category, []error) {
+func NewCategory(name string) (*Category, []util.ProblemDetails) {
 	validationErrors := ValidateCategory(name)
 
 	if len(validationErrors) > 0 {
@@ -23,21 +24,33 @@ func NewCategory(name string) (*Category, []error) {
 	}, nil
 }
 
-func ValidateCategory(name string) []error {
-	var validationErrors []error
+func ValidateCategory(name string) []util.ProblemDetails {
+	var validationErrors []util.ProblemDetails
 
 	if name == "" {
-		validationErrors = append(validationErrors, fmt.Errorf("missing category name"))
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Missing category name",
+			Instance: util.RFC400,
+		})
 	}
 
 	if len(name) > 100 {
-		validationErrors = append(validationErrors, fmt.Errorf("category name cannot exceed 100 characters"))
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Category name cannot exceed 100 characters",
+			Instance: util.RFC400,
+		})
 	}
 
 	return validationErrors
 }
 
-func (c *Category) ChangeName(newName string) []error {
+func (c *Category) ChangeName(newName string) []util.ProblemDetails {
 	validationErrors := ValidateCategory(newName)
 
 	if len(validationErrors) > 0 {

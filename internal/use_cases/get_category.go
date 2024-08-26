@@ -3,6 +3,7 @@ package usecases
 import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type GetCategoryInputDto struct {
@@ -25,10 +26,18 @@ func NewGetCategoryUseCase(
 	}
 }
 
-func (c *GetCategoryUseCase) Execute(input GetCategoryInputDto) (GetCategoryOutputDto, []error) {
+func (c *GetCategoryUseCase) Execute(input GetCategoryInputDto) (GetCategoryOutputDto, []util.ProblemDetails) {
 	searchedCategory, err := c.CategoryRepository.GetCategory(input.CategoryID)
 	if err != nil {
-		return GetCategoryOutputDto{}, err
+		return GetCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "Category not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC500,
+			},
+		}
 	}
 
 	return GetCategoryOutputDto{
