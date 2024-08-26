@@ -25,10 +25,18 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	output, err := h.categoryFactory.CreateCategory.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+	output, erros := h.categoryFactory.CreateCategory.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
+
 	}
 
 	c.JSON(http.StatusCreated, output)

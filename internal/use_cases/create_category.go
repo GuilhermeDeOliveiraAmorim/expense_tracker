@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"strings"
+
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
@@ -27,13 +29,38 @@ func NewCreateCategoryUseCase(
 }
 
 func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCategoryOutputDto, []util.ProblemDetails) {
+	existingCategory, GetCategoryByNameErr := c.CategoryRepository.ThisCategoryExists(input.Name)
+	if GetCategoryByNameErr != nil && strings.Compare(GetCategoryByNameErr.Error(), "category not found") > 0 {
+		return CreateCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Error fetching existing category",
+				Status:   500,
+				Detail:   GetCategoryByNameErr.Error(),
+				Instance: util.RFC500,
+			},
+		}
+	}
+
+	if existingCategory {
+		return CreateCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Validation Error",
+				Title:    "Category already exists",
+				Status:   409,
+				Detail:   "A category with this name already exists",
+				Instance: util.RFC409,
+			},
+		}
+	}
+
 	newCategory, err := entities.NewCategory(input.Name)
 	if err != nil {
 		return CreateCategoryOutputDto{}, err
 	}
 
 	CreateCategoryErr := c.CategoryRepository.CreateCategory(*newCategory)
-	if err != nil {
+	if CreateCategoryErr != nil {
 		return CreateCategoryOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Validation Error",

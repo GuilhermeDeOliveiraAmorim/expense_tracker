@@ -7,5 +7,6 @@ type CategoryRepositoryInterface interface {
 	DeleteCategory(category entities.Category) error
 	GetCategories() ([]entities.Category, error)
 	GetCategory(categoryID string) (entities.Category, error)
+	ThisCategoryExists(categoryName string) (bool, error)
 	UpdateCategory(category entities.Category) error
 }

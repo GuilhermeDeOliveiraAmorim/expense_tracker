@@ -110,3 +110,17 @@ func (c *CategoryRepository) UpdateCategory(category entities.Category) error {
 
 	return nil
 }
+
+func (c *CategoryRepository) ThisCategoryExists(categoryName string) (bool, error) {
+	var categoryModel Categories
+
+	result := c.gorm.Model(&Categories{}).Where("name = ?", categoryName).First(&categoryModel)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, errors.New("category not found")
+		}
+		return false, errors.New(result.Error.Error())
+	}
+
+	return true, nil
+}
