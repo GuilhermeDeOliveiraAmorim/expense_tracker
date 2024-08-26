@@ -1,13 +1,16 @@
 package usecases
 
-import "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+import (
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
+)
 
 type DeleteExpenseInputDto struct {
-	ExpenseID string `json:"id"`
+	ExpenseID string `json:"expense_id"`
 }
 
 type DeleteExpenseOutputDto struct {
-	ID string `json:"id"`
+	Message string `json:"message"`
 }
 
 type DeleteExpenseUseCase struct {
@@ -22,20 +25,36 @@ func NewDeleteExpenseUseCase(
 	}
 }
 
-func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpenseOutputDto, []error) {
+func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpenseOutputDto, []util.ProblemDetails) {
 	expenseToDelete, err := c.ExpenseRepository.GetExpense(input.ExpenseID)
 	if err != nil {
-		return DeleteExpenseOutputDto{}, err
+		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "Expense not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC404,
+			},
+		}
 	}
 
 	expenseToDelete.Deactivate()
 
-	err = c.ExpenseRepository.DeleteExpense(expenseToDelete)
+	DeleteExpenseErr := c.ExpenseRepository.DeleteExpense(expenseToDelete)
 	if err != nil {
-		return DeleteExpenseOutputDto{}, err
+		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Err deleting expense",
+				Status:   500,
+				Detail:   DeleteExpenseErr.Error(),
+				Instance: util.RFC500,
+			},
+		}
 	}
 
 	return DeleteExpenseOutputDto{
-		ID: expenseToDelete.ID,
+		Message: "Expense deleted successfully",
 	}, nil
 }

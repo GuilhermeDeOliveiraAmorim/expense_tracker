@@ -1,6 +1,9 @@
 package usecases
 
-import "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+import (
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
+)
 
 type DeleteUserInputDto struct {
 	UserID string `json:"id"`
@@ -22,17 +25,33 @@ func NewDeleteUserUseCase(
 	}
 }
 
-func (c *DeleteUserUseCase) Execute(input DeleteUserInputDto) (DeleteUserOutputDto, []error) {
-	userToDelete, errs := c.UserRepository.GetUser(input.UserID)
-	if errs != nil {
-		return DeleteUserOutputDto{}, errs
+func (c *DeleteUserUseCase) Execute(input DeleteUserInputDto) (DeleteUserOutputDto, []util.ProblemDetails) {
+	userToDelete, err := c.UserRepository.GetUser(input.UserID)
+	if err != nil {
+		return DeleteUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "User not found",
+				Status:   404,
+				Detail:   "User not found",
+				Instance: util.RFC404,
+			},
+		}
 	}
 
 	userToDelete.Deactivate()
 
-	errs = c.UserRepository.DeleteUser(userToDelete)
-	if errs != nil {
-		return DeleteUserOutputDto{}, errs
+	DeleteUserErr := c.UserRepository.DeleteUser(userToDelete)
+	if DeleteUserErr != nil {
+		return DeleteUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Err deleting user",
+				Status:   500,
+				Detail:   DeleteUserErr.Error(),
+				Instance: util.RFC500,
+			},
+		}
 	}
 
 	return DeleteUserOutputDto{

@@ -1,9 +1,8 @@
 package usecases
 
 import (
-	"fmt"
-
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type UpdateUserInputDto struct {
@@ -27,25 +26,39 @@ func NewUpdateUserUseCase(
 	}
 }
 
-func (c *UpdateUserUseCase) Execute(input UpdateUserInputDto) (UpdateUserOutputDto, []error) {
+func (c *UpdateUserUseCase) Execute(input UpdateUserInputDto) (UpdateUserOutputDto, []util.ProblemDetails) {
 	searchedUser, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {
-		return UpdateUserOutputDto{}, err
+		return UpdateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "User not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC404,
+			},
+		}
 	}
 
 	if input.Name != searchedUser.Name {
-		err = searchedUser.ChangeName(input.Name)
+		err := searchedUser.ChangeName(input.Name)
 		if len(err) > 0 {
 			return UpdateUserOutputDto{}, err
 		}
 
-		err = c.UserRepository.UpdateUser(searchedUser)
-		if err != nil {
+		UpdateUserErr := c.UserRepository.UpdateUser(searchedUser)
+		if UpdateUserErr != nil {
 			return UpdateUserOutputDto{}, err
 		}
 	} else {
-		return UpdateUserOutputDto{}, []error{
-			fmt.Errorf("name cannot be the same as the current one"),
+		return UpdateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "No Changes Made",
+				Title:    "No changes detected",
+				Status:   204,
+				Detail:   "No changes were made to the user",
+				Instance: util.RFC204,
+			},
 		}
 	}
 

@@ -17,7 +17,7 @@ func NewExpenseRepository(gorm *gorm.DB) *ExpenseRepository {
 	}
 }
 
-func (e *ExpenseRepository) CreateExpense(expense entities.Expense) []error {
+func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 	if err := e.gorm.Create(&Expenses{
 		ID:            expense.ID,
 		Active:        expense.Active,
@@ -29,30 +29,30 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) []error {
 		CategoryID:    expense.Category.ID,
 		Notes:         expense.Notes,
 	}).Error; err != nil {
-		return []error{err}
+		return err
 	}
 
 	return nil
 }
 
-func (e *ExpenseRepository) DeleteExpense(category entities.Expense) []error {
+func (e *ExpenseRepository) DeleteExpense(category entities.Expense) error {
 	err := e.gorm.Model(&Expenses{}).Where("id = ?", category.ID).Updates(Expenses{
 		Active:        category.Active,
 		DeactivatedAt: category.DeactivatedAt,
 	}).Error
 
 	if err != nil {
-		return []error{err}
+		return err
 	}
 
 	return nil
 }
 
-func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, []error) {
+func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, error) {
 	var expensesModel []Expenses
 
 	if err := e.gorm.Find(&expensesModel).Error; err != nil {
-		return nil, []error{err}
+		return nil, err
 	}
 
 	var expenses []entities.Expense
@@ -64,9 +64,9 @@ func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, []error) {
 			result := e.gorm.Model(&Categories{}).Where("id = ?", expenseModel.CategoryID).First(&categoryModel)
 			if result.Error != nil {
 				if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-					return []entities.Expense{}, []error{errors.New("error searching expense (" + expenseModel.ID + ") category")}
+					return []entities.Expense{}, errors.New("error searching expense (" + expenseModel.ID + ") category")
 				}
-				return []entities.Expense{}, []error{errors.New(result.Error.Error())}
+				return []entities.Expense{}, errors.New(result.Error.Error())
 			}
 
 			category := entities.Category{
@@ -100,24 +100,24 @@ func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, []error) {
 	return expenses, nil
 }
 
-func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, []error) {
+func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, error) {
 	var expenseModel Expenses
 	var categoryModel Categories
 
 	result := e.gorm.Model(&Expenses{}).Where("id = ?", expenseID).First(&expenseModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return entities.Expense{}, []error{errors.New("expense not found")}
+			return entities.Expense{}, errors.New("expense not found")
 		}
-		return entities.Expense{}, []error{errors.New(result.Error.Error())}
+		return entities.Expense{}, errors.New(result.Error.Error())
 	}
 
 	result = e.gorm.Model(&Categories{}).Where("id = ?", expenseModel.CategoryID).First(&categoryModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return entities.Expense{}, []error{errors.New("error searching expense (" + expenseModel.ID + ") category")}
+			return entities.Expense{}, errors.New("error searching expense (" + expenseModel.ID + ") category")
 		}
-		return entities.Expense{}, []error{errors.New(result.Error.Error())}
+		return entities.Expense{}, errors.New(result.Error.Error())
 	}
 
 	category := entities.Category{
@@ -147,7 +147,7 @@ func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, []er
 	return expense, nil
 }
 
-func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) []error {
+func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
 	result := e.gorm.Model(&Expenses{}).Where("id", expense.ID).Updates(Expenses{
 		Amount:     expense.Amount,
 		Notes:      expense.Notes,
@@ -156,7 +156,7 @@ func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) []error {
 	})
 
 	if result.Error != nil {
-		return []error{errors.New(result.Error.Error())}
+		return errors.New(result.Error.Error())
 	}
 
 	return nil

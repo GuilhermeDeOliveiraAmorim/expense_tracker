@@ -63,8 +63,8 @@ func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCat
 	if CreateCategoryErr != nil {
 		return CreateCategoryOutputDto{}, []util.ProblemDetails{
 			{
-				Type:     "Validation Error",
-				Title:    "Bad Request",
+				Type:     "Internal Server Error",
+				Title:    "Error creating new category",
 				Status:   500,
 				Detail:   CreateCategoryErr.Error(),
 				Instance: util.RFC500,

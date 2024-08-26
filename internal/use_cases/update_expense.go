@@ -3,6 +3,7 @@ package usecases
 import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type UpdateExpenseInputDto struct {
@@ -22,7 +23,6 @@ type UpdateExpenseUseCase struct {
 	UserRepository    repositories.UserRepositoryInterface
 }
 
-
 func NewUpdateExpenseUseCase(
 	ExpenseRepository repositories.ExpenseRepositoryInterface,
 ) *UpdateExpenseUseCase {
@@ -31,41 +31,65 @@ func NewUpdateExpenseUseCase(
 	}
 }
 
-func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpenseOutputDto, []error) {
+func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpenseOutputDto, []util.ProblemDetails) {
 	_, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {
-		return UpdateExpenseOutputDto{}, err
+		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "User not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC404,
+			},
+		}
 	}
 
-	searchedExpense, err := c.ExpenseRepository.GetExpense(input.ExpenseID)
+	searchedExpense, GetExpenseErr := c.ExpenseRepository.GetExpense(input.ExpenseID)
 	if err != nil {
-		return UpdateExpenseOutputDto{}, err
+		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "Expense not found",
+				Status:   404,
+				Detail:   GetExpenseErr.Error(),
+				Instance: util.RFC404,
+			},
+		}
 	}
 
 	if input.Amount > 0 {
-		err = searchedExpense.ChangeAmount(input.Amount)
+		err := searchedExpense.ChangeAmount(input.Amount)
 		if len(err) > 0 {
 			return UpdateExpenseOutputDto{}, err
 		}
 	}
 
 	if input.Category.ID != "" {
-		err = searchedExpense.ChangeCategory(input.Category)
+		err := searchedExpense.ChangeCategory(input.Category)
 		if len(err) > 0 {
 			return UpdateExpenseOutputDto{}, err
 		}
 	}
 
 	if input.Notes != "" {
-		err = searchedExpense.ChangeNotes(input.Notes)
+		err := searchedExpense.ChangeNotes(input.Notes)
 		if len(err) > 0 {
 			return UpdateExpenseOutputDto{}, err
 		}
 	}
 
-	err = c.ExpenseRepository.UpdateExpense(searchedExpense)
+	UpdateExpenseErr := c.ExpenseRepository.UpdateExpense(searchedExpense)
 	if err != nil {
-		return UpdateExpenseOutputDto{}, err
+		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "An error occurred while updating expense",
+				Status:   500,
+				Detail:   UpdateExpenseErr.Error(),
+				Instance: util.RFC500,
+			},
+		}
 	}
 
 	return UpdateExpenseOutputDto{

@@ -3,6 +3,7 @@ package usecases
 import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type CreateExpenseInputDto struct {
@@ -28,15 +29,23 @@ func NewCreateExpenseUseCase(
 	}
 }
 
-func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpenseOutputDto, []error) {
+func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpenseOutputDto, []util.ProblemDetails) {
 	newExpense, err := entities.NewExpense(input.UserID, input.Amount, input.Category, input.Notes)
 	if err != nil {
 		return CreateExpenseOutputDto{}, err
 	}
 
-	err = c.ExpenseRepository.CreateExpense(*newExpense)
-	if err != nil {
-		return CreateExpenseOutputDto{}, err
+	CreateExpenseErr := c.ExpenseRepository.CreateExpense(*newExpense)
+	if CreateExpenseErr != nil {
+		return CreateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Error creating new expense",
+				Status:   500,
+				Detail:   CreateExpenseErr.Error(),
+				Instance: util.RFC500,
+			},
+		}
 	}
 
 	return CreateExpenseOutputDto{

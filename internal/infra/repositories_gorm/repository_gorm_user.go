@@ -17,7 +17,7 @@ func NewUserRepository(gorm *gorm.DB) *UserRepository {
 	}
 }
 
-func (u *UserRepository) CreateUser(user entities.User) []error {
+func (u *UserRepository) CreateUser(user entities.User) error {
 	if err := u.gorm.Create(&Users{
 		ID:            user.ID,
 		Active:        user.Active,
@@ -28,29 +28,29 @@ func (u *UserRepository) CreateUser(user entities.User) []error {
 		Email:         user.Login.Email,
 		Password:      user.Login.Password,
 	}).Error; err != nil {
-		return []error{err}
+		return err
 	}
 
 	return nil
 }
 
-func (u *UserRepository) DeleteUser(user entities.User) []error {
+func (u *UserRepository) DeleteUser(user entities.User) error {
 	err := u.gorm.Model(&Users{}).Where("id = ?", user.ID).Updates(Users{
 		Active:        user.Active,
 		DeactivatedAt: user.DeactivatedAt,
 	}).Error
 
 	if err != nil {
-		return []error{err}
+		return err
 	}
 
 	return nil
 }
 
-func (u *UserRepository) GetUsers() ([]entities.User, []error) {
+func (u *UserRepository) GetUsers() ([]entities.User, error) {
 	var usersModel []Users
 	if err := u.gorm.Find(&usersModel).Error; err != nil {
-		return nil, []error{err}
+		return nil, err
 	}
 
 	var users []entities.User
@@ -75,15 +75,15 @@ func (u *UserRepository) GetUsers() ([]entities.User, []error) {
 	return users, nil
 }
 
-func (u *UserRepository) GetUser(userID string) (entities.User, []error) {
+func (u *UserRepository) GetUser(userID string) (entities.User, error) {
 	var userModel Users
 
 	result := u.gorm.Model(&Users{}).Where("id = ?", userID).First(&userModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return entities.User{}, []error{errors.New("user not found")}
+			return entities.User{}, errors.New("user not found")
 		}
-		return entities.User{}, []error{errors.New(result.Error.Error())}
+		return entities.User{}, errors.New(result.Error.Error())
 	}
 
 	user := entities.User{
@@ -100,14 +100,14 @@ func (u *UserRepository) GetUser(userID string) (entities.User, []error) {
 	return user, nil
 }
 
-func (c *UserRepository) UpdateUser(user entities.User) []error {
+func (c *UserRepository) UpdateUser(user entities.User) error {
 	result := c.gorm.Model(&Users{}).Where("id", user.ID).Updates(Users{
 		Name:      user.Name,
 		UpdatedAt: user.UpdatedAt,
 	})
 
 	if result.Error != nil {
-		return []error{errors.New(result.Error.Error())}
+		return errors.New(result.Error.Error())
 	}
 
 	return nil

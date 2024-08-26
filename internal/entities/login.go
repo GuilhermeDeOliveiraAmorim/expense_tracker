@@ -1,10 +1,10 @@
 package entities
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -13,7 +13,7 @@ type Login struct {
 	Password string `json:"password"`
 }
 
-func NewLogin(email, password string) (*Login, []error) {
+func NewLogin(email, password string) (*Login, []util.ProblemDetails) {
 	validationErrors := ValidateLogin(email, password)
 
 	if len(validationErrors) > 0 {
@@ -26,15 +26,27 @@ func NewLogin(email, password string) (*Login, []error) {
 	}, nil
 }
 
-func ValidateLogin(email, password string) []error {
-	var validationErrors []error
+func ValidateLogin(email, password string) []util.ProblemDetails {
+	var validationErrors []util.ProblemDetails
 
 	if !isValidEmail(email) {
-		validationErrors = append(validationErrors, fmt.Errorf("invalid email"))
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Invalid email",
+			Status:   400,
+			Detail:   "Email is invalid",
+			Instance: util.RFC400,
+		})
 	}
 
 	if !isValidPassword(password) {
-		validationErrors = append(validationErrors, fmt.Errorf("invalid password"))
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Invalid password",
+			Status:   400,
+			Detail:   "Password must be at least 6 characters long, contain at least one uppercase letter, one lowercase letter, one digit, and one special character",
+			Instance: util.RFC400,
+		})
 	}
 
 	return validationErrors
@@ -88,20 +100,26 @@ func compareAndDecrypt(hashedData string, data string) bool {
 	return err == nil
 }
 
-func (lo *Login) EncryptEmail() (string, error) {
+func (lo *Login) EncryptEmail() error {
 	hashedEmail, err := hashString(lo.Email)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return hashedEmail, nil
+
+	lo.Email = string(hashedEmail)
+
+	return nil
 }
 
-func (lo *Login) EncryptPassword() (string, error) {
+func (lo *Login) EncryptPassword() error {
 	hashedPassword, err := hashString(lo.Password)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return hashedPassword, nil
+
+	lo.Password = string(hashedPassword)
+
+	return nil
 }
 
 func (lo *Login) DecryptEmail(email string) bool {

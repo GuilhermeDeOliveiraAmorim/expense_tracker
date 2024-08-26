@@ -1,8 +1,9 @@
 package entities
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type User struct {
@@ -11,7 +12,7 @@ type User struct {
 	Login Login  `json:"login"`
 }
 
-func NewUser(name string, login Login) (*User, []error) {
+func NewUser(name string, login Login) (*User, []util.ProblemDetails) {
 	validationErrors := ValidateUser(name)
 
 	if len(validationErrors) > 0 {
@@ -25,21 +26,33 @@ func NewUser(name string, login Login) (*User, []error) {
 	}, nil
 }
 
-func ValidateUser(name string) []error {
-	var validationErrors []error
+func ValidateUser(name string) []util.ProblemDetails {
+	var validationErrors []util.ProblemDetails
 
 	if name == "" {
-		validationErrors = append(validationErrors, fmt.Errorf("missing user name"))
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "User name cannot be empty",
+			Status:   400,
+			Detail:   "User name is required",
+			Instance: util.RFC400,
+		})
 	}
 
 	if len(name) > 100 {
-		validationErrors = append(validationErrors, fmt.Errorf("user name cannot exceed 100 characters"))
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "User name is too long",
+			Status:   400,
+			Detail:   "User name must not exceed 100 characters",
+			Instance: util.RFC400,
+		})
 	}
 
 	return validationErrors
 }
 
-func (u *User) ChangeName(newName string) []error {
+func (u *User) ChangeName(newName string) []util.ProblemDetails {
 	validationErrors := ValidateUser(newName)
 
 	if len(validationErrors) > 0 {
