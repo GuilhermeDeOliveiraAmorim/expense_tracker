@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"strings"
+
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
@@ -29,6 +31,31 @@ func NewCreateUserUseCase(
 }
 
 func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputDto, []util.ProblemDetails) {
+	existingUser, GetUserByNameErr := c.UserRepository.ThisUserExists(input.Name)
+	if GetUserByNameErr != nil && strings.Compare(GetUserByNameErr.Error(), "user not found") > 0 {
+		return CreateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Error fetching existing user",
+				Status:   500,
+				Detail:   GetUserByNameErr.Error(),
+				Instance: util.RFC500,
+			},
+		}
+	}
+
+	if existingUser {
+		return CreateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Validation Error",
+				Title:    "User already exists",
+				Status:   409,
+				Detail:   "A user with this name already exists",
+				Instance: util.RFC409,
+			},
+		}
+	}
+
 	newLogin, err := entities.NewLogin(input.Email, input.Password)
 	if err != nil {
 		return CreateUserOutputDto{}, []util.ProblemDetails{

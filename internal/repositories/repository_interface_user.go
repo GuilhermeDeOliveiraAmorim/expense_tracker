@@ -7,5 +7,6 @@ type UserRepositoryInterface interface {
 	DeleteUser(user entities.User) error
 	GetUsers() ([]entities.User, error)
 	GetUser(userID string) (entities.User, error)
+	ThisUserExists(userName string) (bool, error)
 	UpdateUser(user entities.User) error
 }

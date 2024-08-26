@@ -112,3 +112,17 @@ func (c *UserRepository) UpdateUser(user entities.User) error {
 
 	return nil
 }
+
+func (c *UserRepository) ThisUserExists(userName string) (bool, error) {
+	var userModel Users
+
+	result := c.gorm.Model(&Users{}).Where("name = ?", userName).First(&userModel)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, errors.New("user not found")
+		}
+		return false, errors.New(result.Error.Error())
+	}
+
+	return true, nil
+}
