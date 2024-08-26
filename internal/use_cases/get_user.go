@@ -6,12 +6,17 @@ import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
+type UserOutput struct {
+	entities.SharedEntity
+	Name string `json:"name"`
+}
+
 type GetUserInputDto struct {
 	UserID string `json:"user_id"`
 }
 
 type GetUserOutputDto struct {
-	User entities.User `json:"user"`
+	User UserOutput `json:"user"`
 }
 
 type GetUserUseCase struct {
@@ -41,6 +46,9 @@ func (c *GetUserUseCase) Execute(input GetUserInputDto) (GetUserOutputDto, []uti
 	}
 
 	return GetUserOutputDto{
-		User: searchedUser,
+		User: UserOutput{
+			SharedEntity: searchedUser.SharedEntity,
+			Name:         searchedUser.Name,
+		},
 	}, nil
 }

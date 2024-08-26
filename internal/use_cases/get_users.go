@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
@@ -10,7 +9,7 @@ type GetUsersInputDto struct {
 }
 
 type GetUsersOutputDto struct {
-	Users []entities.User `json:"users"`
+	Users []UserOutput `json:"users"`
 }
 
 type GetUsersUseCase struct {
@@ -39,7 +38,16 @@ func (c *GetUsersUseCase) Execute(input GetUsersInputDto) (GetUsersOutputDto, []
 		}
 	}
 
+	output := []UserOutput{}
+
+	for _, user := range searchedsUsers {
+		output = append(output, UserOutput{
+			SharedEntity: user.SharedEntity,
+			Name:         user.Name,
+		})
+	}
+
 	return GetUsersOutputDto{
-		Users: searchedsUsers,
+		Users: output,
 	}, nil
 }
