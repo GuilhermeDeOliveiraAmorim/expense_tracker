@@ -1,17 +1,19 @@
 package usecases
 
 import (
+	"strings"
+
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type UpdateUserInputDto struct {
-	UserID string `json:"id"`
+	UserID string `json:"user_id"`
 	Name   string `json:"name"`
 }
 
 type UpdateUserOutputDto struct {
-	ID string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 type UpdateUserUseCase struct {
@@ -27,6 +29,31 @@ func NewUpdateUserUseCase(
 }
 
 func (c *UpdateUserUseCase) Execute(input UpdateUserInputDto) (UpdateUserOutputDto, []util.ProblemDetails) {
+	existingUser, GetUserByNameErr := c.UserRepository.ThisUserExists(input.Name)
+	if GetUserByNameErr != nil && strings.Compare(GetUserByNameErr.Error(), "user not found") > 0 {
+		return UpdateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Error fetching existing user",
+				Status:   500,
+				Detail:   GetUserByNameErr.Error(),
+				Instance: util.RFC500,
+			},
+		}
+	}
+
+	if existingUser {
+		return UpdateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Validation Error",
+				Title:    "User already exists",
+				Status:   409,
+				Detail:   "A user with this name already exists",
+				Instance: util.RFC409,
+			},
+		}
+	}
+
 	searchedUser, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {
 		return UpdateUserOutputDto{}, []util.ProblemDetails{
@@ -63,6 +90,6 @@ func (c *UpdateUserUseCase) Execute(input UpdateUserInputDto) (UpdateUserOutputD
 	}
 
 	return UpdateUserOutputDto{
-		ID: searchedUser.ID,
+		UserID: searchedUser.ID,
 	}, nil
 }

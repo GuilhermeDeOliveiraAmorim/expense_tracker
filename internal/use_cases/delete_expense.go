@@ -42,7 +42,7 @@ func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpen
 	expenseToDelete.Deactivate()
 
 	DeleteExpenseErr := c.ExpenseRepository.DeleteExpense(expenseToDelete)
-	if err != nil {
+	if DeleteExpenseErr != nil {
 		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",

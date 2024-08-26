@@ -6,11 +6,11 @@ import (
 )
 
 type DeleteUserInputDto struct {
-	UserID string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 type DeleteUserOutputDto struct {
-	ID string `json:"id"`
+	Message string `json:"message"`
 }
 
 type DeleteUserUseCase struct {
@@ -55,6 +55,6 @@ func (c *DeleteUserUseCase) Execute(input DeleteUserInputDto) (DeleteUserOutputD
 	}
 
 	return DeleteUserOutputDto{
-		ID: userToDelete.ID,
+		Message: "User deleted successfully",
 	}, nil
 }

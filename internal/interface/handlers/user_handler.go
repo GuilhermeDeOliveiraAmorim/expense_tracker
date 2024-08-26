@@ -36,7 +36,6 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 				return
 			}
 		}
-
 	}
 
 	c.JSON(http.StatusCreated, output)
@@ -76,10 +75,17 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	output, err := h.userFactory.UpdateUser.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+	output, erros := h.userFactory.UpdateUser.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, output)

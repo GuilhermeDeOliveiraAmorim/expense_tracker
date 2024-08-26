@@ -46,7 +46,7 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 	}
 
 	searchedExpense, GetExpenseErr := c.ExpenseRepository.GetExpense(input.ExpenseID)
-	if err != nil {
+	if GetExpenseErr != nil {
 		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
@@ -80,7 +80,7 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 	}
 
 	UpdateExpenseErr := c.ExpenseRepository.UpdateExpense(searchedExpense)
-	if err != nil {
+	if UpdateExpenseErr != nil {
 		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
