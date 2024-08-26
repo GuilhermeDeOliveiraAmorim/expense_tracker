@@ -76,10 +76,18 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	output, err := h.categoryFactory.UpdateCategory.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+	output, errs := h.categoryFactory.UpdateCategory.Execute(input)
+	if len(errs) > 0 {
+		for _, err := range errs {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
+
 	}
 
 	c.JSON(http.StatusOK, output)
