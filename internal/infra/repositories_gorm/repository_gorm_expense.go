@@ -120,9 +120,11 @@ func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, erro
 			UpdatedAt:     expenseModel.UpdatedAt,
 			DeactivatedAt: expenseModel.DeactivatedAt,
 		},
-		UserID:     expenseModel.UserID,
-		Amount:     expenseModel.Amount,
-		CategoryID: categoryModel.ID,
+		UserID:      expenseModel.UserID,
+		Amount:      expenseModel.Amount,
+		ExpenseDate: expenseModel.ExpanseDate,
+		Notes:       expenseModel.Notes,
+		CategoryID:  categoryModel.ID,
 	}
 
 	return expense, nil
