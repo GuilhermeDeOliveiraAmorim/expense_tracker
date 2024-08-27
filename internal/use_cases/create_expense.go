@@ -60,7 +60,7 @@ func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpen
 	}
 
 	newExpense, NewExpenseErr := entities.NewExpense(input.UserID, input.Amount, newExpenseDate, input.CategoryID, input.Notes)
-	if err != nil {
+	if NewExpenseErr != nil {
 		return CreateExpenseOutputDto{}, NewExpenseErr
 	}
 
