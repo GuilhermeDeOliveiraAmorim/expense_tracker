@@ -70,17 +70,6 @@ func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, error) {
 				return []entities.Expense{}, errors.New(result.Error.Error())
 			}
 
-			category := entities.Category{
-				SharedEntity: entities.SharedEntity{
-					ID:            categoryModel.ID,
-					Active:        categoryModel.Active,
-					CreatedAt:     categoryModel.CreatedAt,
-					UpdatedAt:     categoryModel.UpdatedAt,
-					DeactivatedAt: categoryModel.DeactivatedAt,
-				},
-				Name: categoryModel.Name,
-			}
-
 			expense := entities.Expense{
 				SharedEntity: entities.SharedEntity{
 					ID:            expenseModel.ID,
@@ -89,9 +78,11 @@ func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, error) {
 					UpdatedAt:     expenseModel.UpdatedAt,
 					DeactivatedAt: expenseModel.DeactivatedAt,
 				},
-				UserID:     expenseModel.UserID,
-				Amount:     expenseModel.Amount,
-				CategoryID: category.ID,
+				UserID:      expenseModel.UserID,
+				Amount:      expenseModel.Amount,
+				CategoryID:  categoryModel.ID,
+				Notes:       expenseModel.Notes,
+				ExpenseDate: expenseModel.ExpanseDate,
 			}
 
 			expenses = append(expenses, expense)
@@ -121,17 +112,6 @@ func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, erro
 		return entities.Expense{}, errors.New(result.Error.Error())
 	}
 
-	category := entities.Category{
-		SharedEntity: entities.SharedEntity{
-			ID:            categoryModel.ID,
-			Active:        categoryModel.Active,
-			CreatedAt:     categoryModel.CreatedAt,
-			UpdatedAt:     categoryModel.UpdatedAt,
-			DeactivatedAt: categoryModel.DeactivatedAt,
-		},
-		Name: categoryModel.Name,
-	}
-
 	expense := entities.Expense{
 		SharedEntity: entities.SharedEntity{
 			ID:            expenseModel.ID,
@@ -142,7 +122,7 @@ func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, erro
 		},
 		UserID:     expenseModel.UserID,
 		Amount:     expenseModel.Amount,
-		CategoryID: category.ID,
+		CategoryID: categoryModel.ID,
 	}
 
 	return expense, nil
