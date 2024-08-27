@@ -7,8 +7,8 @@ import (
 
 type UpdateExpenseInputDto struct {
 	UserID      string  `json:"user_id"`
-	ExpenseID   string  `json:"id"`
-	Amount      float64 `json:"amount"`
+	ExpenseID   string  `json:"expense_id"`
+	Amount      float64 `json:"amount,string"`
 	ExpenseDate string  `json:"expense_date"`
 	CategoryID  string  `json:"category_id"`
 	Notes       string  `json:"notes"`
