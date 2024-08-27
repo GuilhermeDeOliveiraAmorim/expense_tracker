@@ -1,20 +1,23 @@
 package usecases
 
 import (
+	"time"
+
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type CreateExpenseInputDto struct {
-	UserID   string            `json:"user_id"`
-	Amount   float64           `json:"amount"`
-	Category entities.Category `json:"category"`
-	Notes    string            `json:"notes"`
+	UserID      string  `json:"user_id"`
+	Amount      float64 `json:"amount,string"`
+	ExpenseDate string  `json:"expense_date"`
+	CategoryID  string  `json:"category_id"`
+	Notes       string  `json:"notes"`
 }
 
 type CreateExpenseOutputDto struct {
-	ID string `json:"id"`
+	ExpenseID string `json:"expense_id"`
 }
 
 type CreateExpenseUseCase struct {
@@ -30,9 +33,22 @@ func NewCreateExpenseUseCase(
 }
 
 func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpenseOutputDto, []util.ProblemDetails) {
-	newExpense, err := entities.NewExpense(input.UserID, input.Amount, input.Category, input.Notes)
+	newExpenseDate, err := time.Parse("02012006", input.ExpenseDate)
 	if err != nil {
-		return CreateExpenseOutputDto{}, err
+		return CreateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Validation Error",
+				Title:    "Bad Request",
+				Status:   400,
+				Detail:   "Invalid expense date format",
+				Instance: util.RFC400,
+			},
+		}
+	}
+
+	newExpense, NewExpenseErr := entities.NewExpense(input.UserID, input.Amount, newExpenseDate, input.CategoryID, input.Notes)
+	if err != nil {
+		return CreateExpenseOutputDto{}, NewExpenseErr
 	}
 
 	CreateExpenseErr := c.ExpenseRepository.CreateExpense(*newExpense)
@@ -49,6 +65,6 @@ func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpen
 	}
 
 	return CreateExpenseOutputDto{
-		ID: newExpense.ID,
+		ExpenseID: newExpense.ID,
 	}, nil
 }

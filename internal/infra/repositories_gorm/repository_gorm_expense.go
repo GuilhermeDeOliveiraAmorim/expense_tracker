@@ -26,7 +26,8 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 		DeactivatedAt: expense.DeactivatedAt,
 		UserID:        expense.UserID,
 		Amount:        expense.Amount,
-		CategoryID:    expense.Category.ID,
+		ExpanseDate:   expense.ExpenseDate,
+		CategoryID:    expense.CategoryID,
 		Notes:         expense.Notes,
 	}).Error; err != nil {
 		return err
@@ -88,9 +89,9 @@ func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, error) {
 					UpdatedAt:     expenseModel.UpdatedAt,
 					DeactivatedAt: expenseModel.DeactivatedAt,
 				},
-				UserID:   expenseModel.UserID,
-				Amount:   expenseModel.Amount,
-				Category: category,
+				UserID:     expenseModel.UserID,
+				Amount:     expenseModel.Amount,
+				CategoryID: category.ID,
 			}
 
 			expenses = append(expenses, expense)
@@ -139,9 +140,9 @@ func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, erro
 			UpdatedAt:     expenseModel.UpdatedAt,
 			DeactivatedAt: expenseModel.DeactivatedAt,
 		},
-		UserID:   expenseModel.UserID,
-		Amount:   expenseModel.Amount,
-		Category: category,
+		UserID:     expenseModel.UserID,
+		Amount:     expenseModel.Amount,
+		CategoryID: category.ID,
 	}
 
 	return expense, nil
@@ -151,7 +152,7 @@ func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
 	result := e.gorm.Model(&Expenses{}).Where("id", expense.ID).Updates(Expenses{
 		Amount:     expense.Amount,
 		Notes:      expense.Notes,
-		CategoryID: expense.Category.ID,
+		CategoryID: expense.CategoryID,
 		UpdatedAt:  expense.UpdatedAt,
 	})
 

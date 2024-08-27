@@ -21,6 +21,7 @@ type Expenses struct {
 	DeactivatedAt time.Time  `gorm:"not null"`
 	UserID        string     `gorm:"not null"`
 	Amount        float64    `gorm:"not null"`
+	ExpanseDate   time.Time  `gorm:"not null"`
 	CategoryID    string     `gorm:"not null"`
 	Notes         string     `gorm:"null"`
 	Category      Categories `gorm:"foreignKey:CategoryID"`

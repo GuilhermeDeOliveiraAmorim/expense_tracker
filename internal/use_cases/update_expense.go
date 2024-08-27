@@ -1,21 +1,21 @@
 package usecases
 
 import (
-	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type UpdateExpenseInputDto struct {
-	UserID    string            `json:"user_id"`
-	ExpenseID string            `json:"id"`
-	Amount    float64           `json:"amount"`
-	Category  entities.Category `json:"category"`
-	Notes     string            `json:"notes"`
+	UserID      string  `json:"user_id"`
+	ExpenseID   string  `json:"id"`
+	Amount      float64 `json:"amount"`
+	ExpenseDate string  `json:"expense_date"`
+	CategoryID  string  `json:"category_id"`
+	Notes       string  `json:"notes"`
 }
 
 type UpdateExpenseOutputDto struct {
-	ID string `json:"id"`
+	ExpenseID string `json:"expense_id"`
 }
 
 type UpdateExpenseUseCase struct {
@@ -65,8 +65,15 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 		}
 	}
 
-	if input.Category.ID != "" {
-		err := searchedExpense.ChangeCategory(input.Category)
+	if input.ExpenseDate != "" {
+		err := searchedExpense.ChangeExpenseDate(input.ExpenseDate)
+		if len(err) > 0 {
+			return UpdateExpenseOutputDto{}, err
+		}
+	}
+
+	if input.CategoryID != "" {
+		err := searchedExpense.ChangeCategory(input.CategoryID)
 		if len(err) > 0 {
 			return UpdateExpenseOutputDto{}, err
 		}
@@ -93,6 +100,6 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 	}
 
 	return UpdateExpenseOutputDto{
-		ID: searchedExpense.ID,
+		ExpenseID: input.ExpenseID,
 	}, nil
 }

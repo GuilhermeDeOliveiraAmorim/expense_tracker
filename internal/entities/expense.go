@@ -8,14 +8,15 @@ import (
 
 type Expense struct {
 	SharedEntity
-	UserID   string   `json:"user_id"`
-	Amount   float64  `json:"amount"`
-	Category Category `json:"category"`
-	Notes    string   `json:"notes"`
+	UserID      string    `json:"user_id"`
+	Amount      float64   `json:"amount,string,omitempty"`
+	ExpenseDate time.Time `json:"expense_date"`
+	CategoryID  string    `json:"category_id"`
+	Notes       string    `json:"notes"`
 }
 
-func NewExpense(userID string, amount float64, category Category, notes string) (*Expense, []util.ProblemDetails) {
-	validationErrors := ValidateExpense(userID, amount, category, notes)
+func NewExpense(userID string, amount float64, expenseDate time.Time, categoryID string, notes string) (*Expense, []util.ProblemDetails) {
+	validationErrors := ValidateExpense(userID, amount, categoryID, notes)
 
 	if len(validationErrors) > 0 {
 		return nil, validationErrors
@@ -25,12 +26,13 @@ func NewExpense(userID string, amount float64, category Category, notes string) 
 		SharedEntity: *NewSharedEntity(),
 		UserID:       userID,
 		Amount:       amount,
-		Category:     category,
+		ExpenseDate:  expenseDate,
+		CategoryID:   categoryID,
 		Notes:        notes,
 	}, nil
 }
 
-func ValidateExpense(userID string, amount float64, category Category, notes string) []util.ProblemDetails {
+func ValidateExpense(userID string, amount float64, categoryID string, notes string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
 
 	if userID == "" {
@@ -53,7 +55,7 @@ func ValidateExpense(userID string, amount float64, category Category, notes str
 		})
 	}
 
-	if category.ID == "" {
+	if categoryID == "" {
 		validationErrors = append(validationErrors, util.ProblemDetails{
 			Type:     "Validation Error",
 			Title:    "Bad Request",
@@ -89,16 +91,44 @@ func (e *Expense) ChangeAmount(newAmount float64) []util.ProblemDetails {
 		})
 	}
 
-	e.UpdatedAt = time.Now()
-	e.Amount = newAmount
+	if len(validationErrors) > 0 {
+		return validationErrors
+	} else {
+		e.UpdatedAt = time.Now()
+		e.Amount = newAmount
 
-	return validationErrors
+		return validationErrors
+	}
 }
 
-func (e *Expense) ChangeCategory(newCategory Category) []util.ProblemDetails {
+func (e *Expense) ChangeExpenseDate(expenseDate string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
 
-	if newCategory.ID == "" {
+	newExpenseDate, err := time.Parse("02012006", expenseDate)
+	if err != nil {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Invalid expense date format",
+			Instance: util.RFC400,
+		})
+	}
+
+	if len(validationErrors) > 0 {
+		return validationErrors
+	} else {
+		e.UpdatedAt = time.Now()
+		e.ExpenseDate = newExpenseDate
+
+		return validationErrors
+	}
+}
+
+func (e *Expense) ChangeCategory(newCategoryID string) []util.ProblemDetails {
+	var validationErrors []util.ProblemDetails
+
+	if newCategoryID == "" {
 		validationErrors = append(validationErrors, util.ProblemDetails{
 			Type:     "Validation Error",
 			Title:    "Bad Request",
@@ -108,10 +138,14 @@ func (e *Expense) ChangeCategory(newCategory Category) []util.ProblemDetails {
 		})
 	}
 
-	e.UpdatedAt = time.Now()
-	e.Category = newCategory
+	if len(validationErrors) > 0 {
+		return validationErrors
+	} else {
+		e.UpdatedAt = time.Now()
+		e.CategoryID = newCategoryID
 
-	return validationErrors
+		return validationErrors
+	}
 }
 
 func (e *Expense) ChangeNotes(newNotes string) []util.ProblemDetails {
@@ -127,8 +161,12 @@ func (e *Expense) ChangeNotes(newNotes string) []util.ProblemDetails {
 		})
 	}
 
-	e.UpdatedAt = time.Now()
-	e.Notes = newNotes
+	if len(validationErrors) > 0 {
+		return validationErrors
+	} else {
+		e.UpdatedAt = time.Now()
+		e.Notes = newNotes
 
-	return validationErrors
+		return validationErrors
+	}
 }
