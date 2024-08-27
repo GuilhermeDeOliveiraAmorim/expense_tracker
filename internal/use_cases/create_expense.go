@@ -33,7 +33,20 @@ func NewCreateExpenseUseCase(
 }
 
 func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpenseOutputDto, []util.ProblemDetails) {
-	newExpenseDate, err := time.Parse("02012006", input.ExpenseDate)
+	location, err := time.LoadLocation(util.TIMEZONE)
+	if err != nil {
+		return CreateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Validation Error",
+				Title:    "Bad Request",
+				Status:   400,
+				Detail:   "Invalid timezone",
+				Instance: util.RFC400,
+			},
+		}
+	}
+
+	newExpenseDate, err := time.ParseInLocation(util.DATEFORMAT, input.ExpenseDate, location)
 	if err != nil {
 		return CreateExpenseOutputDto{}, []util.ProblemDetails{
 			{
