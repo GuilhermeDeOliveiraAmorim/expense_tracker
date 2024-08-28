@@ -21,7 +21,7 @@ func main() {
 	dsn := "host=" + configs.PostgresServer + " user=" + configs.PostgresUser + " password=" + configs.PostgresPassword + " dbname=" + configs.PostgresDb + " port=" + configs.PostgresPort + " sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		panic("Failed to connect database")
 	}
 
 	if err := db.AutoMigrate(
@@ -29,10 +29,10 @@ func main() {
 		repositoriesgorm.Expenses{},
 		repositoriesgorm.Users{},
 	); err != nil {
-		fmt.Println("Erro durante a migração:", err)
+		fmt.Println("Error during migration:", err)
 		return
 	}
-	fmt.Println("Migração bem-sucedida!")
+	fmt.Println("Successful migration")
 
 	r := gin.Default()
 
@@ -44,6 +44,9 @@ func main() {
 
 	userFactory := factory.NewUserFactory(db)
 	userHandler := handlers.NewUserHandler(userFactory)
+
+	presentersFactory := factory.NewPresentersFactory(db)
+	presentersHandler := handlers.NewPresentersHandler(presentersFactory)
 
 	r.POST("/categories", categoryHandler.CreateCategory)
 	r.GET("/categories", categoryHandler.GetCategory)
@@ -62,6 +65,8 @@ func main() {
 	r.GET("/users", userHandler.GetUser)
 	r.DELETE("/users", userHandler.DeleteUser)
 	r.PATCH("/users", userHandler.UpdateUser)
+
+	r.GET("/users/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
 
 	r.Run(":8080")
 }
