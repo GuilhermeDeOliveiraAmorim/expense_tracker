@@ -16,4 +16,11 @@ type PresentersRepositoryInterface interface {
 		CategoryColor string
 		TotalAmount   float64
 	}, error)
+	ShowExpenseSimpleTablePeriod(userID string, periodStart time.Time, periodEnd time.Time, limit int, offset int) ([]struct {
+		ExpenseID     string
+		Amount        float64
+		ExpenseDate   string
+		CategoryName  string
+		CategoryColor string
+	}, error)
 }

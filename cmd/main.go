@@ -66,8 +66,9 @@ func main() {
 	r.DELETE("/users", userHandler.DeleteUser)
 	r.PATCH("/users", userHandler.UpdateUser)
 
-	r.GET("/users/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
-	r.GET("/users/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
+	r.GET("/expenses/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
+	r.GET("/categories/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
+	r.GET("/expenses/expense-simple-table-period", presentersHandler.ShowExpenseSimpleTablePeriod)
 
 	r.Run(":8080")
 }
