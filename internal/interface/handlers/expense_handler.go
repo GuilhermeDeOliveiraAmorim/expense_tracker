@@ -36,7 +36,6 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 				return
 			}
 		}
-
 	}
 
 	c.JSON(http.StatusCreated, output)
@@ -49,10 +48,17 @@ func (h *ExpenseHandler) GetExpense(c *gin.Context) {
 		return
 	}
 
-	output, err := h.expenseFactory.GetExpense.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+	output, erros := h.expenseFactory.GetExpense.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, output)
@@ -60,10 +66,18 @@ func (h *ExpenseHandler) GetExpense(c *gin.Context) {
 
 func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
 	var input usecases.GetExpensesInputDto
-	output, err := h.expenseFactory.GetExpenses.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+
+	output, erros := h.expenseFactory.GetExpenses.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, output)
@@ -76,10 +90,17 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 		return
 	}
 
-	output, err := h.expenseFactory.UpdateExpense.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+	output, erros := h.expenseFactory.UpdateExpense.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, output)
@@ -92,10 +113,17 @@ func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 		return
 	}
 
-	output, err := h.expenseFactory.DeleteExpense.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+	output, erros := h.expenseFactory.DeleteExpense.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, output)
