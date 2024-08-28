@@ -7,5 +7,6 @@ type ExpenseRepositoryInterface interface {
 	DeleteExpense(expense entities.Expense) error
 	GetExpenses() ([]entities.Expense, error)
 	GetExpense(expenseID string) (entities.Expense, error)
+	GetExpenseByExpenseIDAndUserID(expenseID string, userID string) (entities.Expense, error)
 	UpdateExpense(expense entities.Expense) error
 }

@@ -57,7 +57,7 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 		}
 	}
 
-	searchedExpense, GetExpenseErr := c.ExpenseRepository.GetExpense(input.ExpenseID)
+	searchedExpense, GetExpenseErr := c.ExpenseRepository.GetExpenseByExpenseIDAndUserID(input.ExpenseID, input.UserID)
 	if GetExpenseErr != nil {
 		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
 			{
