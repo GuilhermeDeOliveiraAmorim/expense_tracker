@@ -16,12 +16,13 @@ type ExpenseFactory struct {
 
 func NewExpenseFactory(db *gorm.DB) *ExpenseFactory {
 	expenseRepository := repositoriesgorm.NewExpenseRepository(db)
+	userRepository := repositoriesgorm.NewUserRepository(db)
 
 	createExpense := usecases.NewCreateExpenseUseCase(expenseRepository)
 	deleteExpense := usecases.NewDeleteExpenseUseCase(expenseRepository)
 	getExpenses := usecases.NewGetExpensesUseCase(expenseRepository)
 	getExpense := usecases.NewGetExpenseUseCase(expenseRepository)
-	updateExpense := usecases.NewUpdateExpenseUseCase(expenseRepository)
+	updateExpense := usecases.NewUpdateExpenseUseCase(expenseRepository, userRepository)
 
 	return &ExpenseFactory{
 		CreateExpense: createExpense,

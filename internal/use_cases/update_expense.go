@@ -25,14 +25,16 @@ type UpdateExpenseUseCase struct {
 
 func NewUpdateExpenseUseCase(
 	ExpenseRepository repositories.ExpenseRepositoryInterface,
+	UserRepository repositories.UserRepositoryInterface,
 ) *UpdateExpenseUseCase {
 	return &UpdateExpenseUseCase{
 		ExpenseRepository: ExpenseRepository,
+		UserRepository:    UserRepository,
 	}
 }
 
 func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpenseOutputDto, []util.ProblemDetails) {
-	_, err := c.UserRepository.GetUser(input.UserID)
+	user, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {
 		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
 			{
@@ -41,6 +43,16 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 				Status:   404,
 				Detail:   err.Error(),
 				Instance: util.RFC404,
+			},
+		}
+	} else if !user.Active {
+		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Forbidden",
+				Title:    "User is not active",
+				Status:   403,
+				Detail:   "User is not active",
+				Instance: util.RFC403,
 			},
 		}
 	}
