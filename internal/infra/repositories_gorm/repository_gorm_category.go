@@ -25,6 +25,7 @@ func (c *CategoryRepository) CreateCategory(category entities.Category) error {
 		UpdatedAt:     category.UpdatedAt,
 		DeactivatedAt: category.DeactivatedAt,
 		Name:          category.Name,
+		Color:         category.Color,
 	}).Error; err != nil {
 		return err
 	}
@@ -58,7 +59,8 @@ func (c *CategoryRepository) GetCategories() ([]entities.Category, error) {
 					UpdatedAt:     categoriesodel.UpdatedAt,
 					DeactivatedAt: categoriesodel.DeactivatedAt,
 				},
-				Name: categoriesodel.Name,
+				Name:  categoriesodel.Name,
+				Color: categoriesodel.Color,
 			}
 
 			categories = append(categories, category)
@@ -87,7 +89,8 @@ func (c *CategoryRepository) GetCategory(categoryID string) (entities.Category, 
 			UpdatedAt:     categoryModel.UpdatedAt,
 			DeactivatedAt: categoryModel.DeactivatedAt,
 		},
-		Name: categoryModel.Name,
+		Name:  categoryModel.Name,
+		Color: categoryModel.Color,
 	}
 
 	return category, nil
@@ -96,6 +99,7 @@ func (c *CategoryRepository) GetCategory(categoryID string) (entities.Category, 
 func (c *CategoryRepository) UpdateCategory(category entities.Category) error {
 	result := c.gorm.Model(&Categories{}).Where("id", category.ID).Updates(Categories{
 		Name:      category.Name,
+		Color:     category.Color,
 		UpdatedAt: category.UpdatedAt,
 	})
 

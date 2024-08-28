@@ -9,11 +9,12 @@ import (
 )
 
 type CreateCategoryInputDto struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
 }
 
 type CreateCategoryOutputDto struct {
-	ID string `json:"id"`
+	CategoryID string `json:"category_id"`
 }
 
 type CreateCategoryUseCase struct {
@@ -54,7 +55,7 @@ func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCat
 		}
 	}
 
-	newCategory, err := entities.NewCategory(input.Name)
+	newCategory, err := entities.NewCategory(input.Name, input.Color)
 	if err != nil {
 		return CreateCategoryOutputDto{}, err
 	}
@@ -73,6 +74,6 @@ func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCat
 	}
 
 	return CreateCategoryOutputDto{
-		ID: newCategory.ID,
+		CategoryID: newCategory.ID,
 	}, nil
 }

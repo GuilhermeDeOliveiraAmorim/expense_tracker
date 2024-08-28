@@ -11,6 +11,7 @@ type Categories struct {
 	UpdatedAt     time.Time `gorm:"not null"`
 	DeactivatedAt time.Time `gorm:"not null"`
 	Name          string    `gorm:"not null"`
+	Color         string    `gorm:"not null"`
 }
 
 type Expenses struct {
