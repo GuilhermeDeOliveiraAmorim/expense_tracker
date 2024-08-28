@@ -8,9 +8,10 @@ import (
 )
 
 type TotalExpensesCategoryPeriod struct {
-	CategoryID   string  `json:"category_id"`
-	CategoryName string  `json:"category_name"`
-	TotalAmount  float64 `json:"total_amount"`
+	CategoryID    string  `json:"category_id"`
+	CategoryName  string  `json:"category_name"`
+	CategoryColor string  `json:"category_color"`
+	TotalAmount   float64 `json:"total_amount"`
 }
 
 type ShowTotalExpensesCategoryPeriodInputDto struct {
@@ -130,9 +131,10 @@ func (p *ShowTotalExpensesCategoryPeriodPresenters) Execute(input ShowTotalExpen
 
 	for _, expense := range totalExpensesByCategory {
 		expensesByCategory = append(expensesByCategory, TotalExpensesCategoryPeriod{
-			CategoryID:   expense.CategoryID,
-			CategoryName: expense.CategoryName,
-			TotalAmount:  expense.TotalAmount,
+			CategoryID:    expense.CategoryID,
+			CategoryName:  expense.CategoryName,
+			CategoryColor: expense.CategoryColor,
+			TotalAmount:   expense.TotalAmount,
 		})
 	}
 

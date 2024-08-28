@@ -17,21 +17,23 @@ func NewPresentersRepository(gorm *gorm.DB) *PresentersRepository {
 }
 
 func (p *PresentersRepository) ShowTotalExpensesCategoryPeriod(userID string, periodStart time.Time, periodEnd time.Time) ([]struct {
-	CategoryID   string
-	CategoryName string
-	TotalAmount  float64
+	CategoryID    string
+	CategoryName  string
+	CategoryColor string
+	TotalAmount   float64
 }, error) {
 	var result []struct {
-		CategoryID   string
-		CategoryName string
-		TotalAmount  float64
+		CategoryID    string
+		CategoryName  string
+		CategoryColor string
+		TotalAmount   float64
 	}
 
 	err := p.gorm.Table("expenses").
-		Select("categories.name as category_name, SUM(expenses.amount) as total_amount").
+		Select("categories.id as category_id, categories.name as category_name, categories.color as category_color, SUM(expenses.amount) as total_amount").
 		Joins("JOIN categories ON categories.id = expenses.category_id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ?", userID, periodStart, periodEnd).
-		Group("categories.name").
+		Group("categories.id, categories.name, categories.color").
 		Scan(&result).Error
 
 	if err != nil {
