@@ -8,17 +8,13 @@ import (
 )
 
 type NameAmount struct {
-	CategoryName string  `json:"category_name"`
-	TotalAmount  float64 `json:"total_amount"`
-}
-
-type CategoryColor struct {
-	CategoryColor string `json:"category_color"`
+	CategoryName string  `json:"x"`
+	TotalAmount  float64 `json:"y"`
 }
 
 type CategoryTreemapAmountPeriod struct {
-	NameAmount []NameAmount    `json:"data"`
-	Colors     []CategoryColor `json:"colors"`
+	NameAmount []NameAmount `json:"data"`
+	Colors     []string     `json:"colors"`
 }
 
 type ShowCategoryTreemapAmountPeriodInputDto struct {
@@ -135,16 +131,14 @@ func (p *ShowCategoryTreemapAmountPeriodPresenters) Execute(input ShowCategoryTr
 	}
 
 	var nameAmounts []NameAmount
-	var colors []CategoryColor
+	var colors []string
 
 	for _, expense := range totalExpensesByCategory {
 		nameAmounts = append(nameAmounts, NameAmount{
 			CategoryName: expense.CategoryName,
 			TotalAmount:  expense.TotalAmount,
 		})
-		colors = append(colors, CategoryColor{
-			CategoryColor: expense.CategoryColor,
-		})
+		colors = append(colors, expense.CategoryColor)
 	}
 
 	return ShowCategoryTreemapAmountPeriodOutputDto{
