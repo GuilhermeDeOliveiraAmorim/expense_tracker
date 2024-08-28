@@ -67,6 +67,7 @@ func main() {
 	r.PATCH("/users", userHandler.UpdateUser)
 
 	r.GET("/users/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
+	r.GET("/users/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
 
 	r.Run(":8080")
 }

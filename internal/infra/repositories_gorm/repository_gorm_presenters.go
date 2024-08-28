@@ -42,3 +42,28 @@ func (p *PresentersRepository) ShowTotalExpensesCategoryPeriod(userID string, pe
 
 	return result, nil
 }
+
+func (p *PresentersRepository) ShowCategoryTreemapAmountPeriod(userID string, periodStart time.Time, periodEnd time.Time) ([]struct {
+	CategoryName  string
+	CategoryColor string
+	TotalAmount   float64
+}, error) {
+	var result []struct {
+		CategoryName  string
+		CategoryColor string
+		TotalAmount   float64
+	}
+
+	err := p.gorm.Table("expenses").
+		Select("categories.name as category_name, categories.color as category_color, SUM(expenses.amount) as total_amount").
+		Joins("JOIN categories ON categories.id = expenses.category_id").
+		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ?", userID, periodStart, periodEnd).
+		Group("categories.name, categories.color").
+		Scan(&result).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

@@ -8,6 +8,7 @@ import (
 
 type PresentersFactory struct {
 	ShowTotalExpensesCategoryPeriod *presenters.ShowTotalExpensesCategoryPeriodPresenters
+	ShowCategoryTreemapAmountPeriod *presenters.ShowCategoryTreemapAmountPeriodPresenters
 }
 
 func NewPresentersFactory(db *gorm.DB) *PresentersFactory {
@@ -15,8 +16,10 @@ func NewPresentersFactory(db *gorm.DB) *PresentersFactory {
 	presentersRepository := repositoriesgorm.NewPresentersRepository(db)
 
 	showTotalExpensesCategoryPeriod := presenters.NewShowTotalExpensesCategoryPeriodPresenters(presentersRepository, userRepository)
+	showCategoryTreemapAmountPeriod := presenters.NewCategoryTreemapAmountPeriodPresenters(presentersRepository, userRepository)
 
 	return &PresentersFactory{
 		ShowTotalExpensesCategoryPeriod: showTotalExpensesCategoryPeriod,
+		ShowCategoryTreemapAmountPeriod: showCategoryTreemapAmountPeriod,
 	}
 }
