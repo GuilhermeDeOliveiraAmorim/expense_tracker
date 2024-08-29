@@ -9,4 +9,5 @@ type UserRepositoryInterface interface {
 	GetUser(userID string) (entities.User, error)
 	ThisUserExists(userName string) (bool, error)
 	UpdateUser(user entities.User) error
+	GetUserByEmail(email string) (entities.User, error)
 }
