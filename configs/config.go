@@ -8,6 +8,7 @@ type conf struct {
 	PostgresServer   string `mapstructure:"POSTGRES_SERVER"`
 	PostgresPort     string `mapstructure:"POSTGRES_PORT"`
 	PostgresDb       string `mapstructure:"POSTGRES_DB"`
+	JwtSecret        string `mapstructure:"JWTSECRET"`
 }
 
 func LoadConfig(path string) (*conf, error) {
