@@ -53,22 +53,22 @@ func main() {
 	r.DELETE("/categories", categoryHandler.DeleteCategory)
 	r.GET("/categories/all", categoryHandler.GetCategories)
 	r.PATCH("/categories", categoryHandler.UpdateCategory)
+	r.GET("/categories/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
 
 	r.POST("/expenses", expenseHandler.CreateExpense)
 	r.GET("/expenses/all", expenseHandler.GetExpenses)
 	r.GET("/expenses", expenseHandler.GetExpense)
 	r.DELETE("/expenses", expenseHandler.DeleteExpense)
 	r.PATCH("/expenses", expenseHandler.UpdateExpense)
+	r.GET("/expenses/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
+	r.GET("/expenses/expense-simple-table-period", presentersHandler.ShowExpenseSimpleTablePeriod)
 
 	r.POST("/users", userHandler.CreateUser)
 	r.GET("/users/all", userHandler.GetUsers)
 	r.GET("/users", userHandler.GetUser)
 	r.DELETE("/users", userHandler.DeleteUser)
 	r.PATCH("/users", userHandler.UpdateUser)
-
-	r.GET("/expenses/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
-	r.GET("/categories/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
-	r.GET("/expenses/expense-simple-table-period", presentersHandler.ShowExpenseSimpleTablePeriod)
+	r.POST("/login", userHandler.Login)
 
 	r.Run(":8080")
 }
