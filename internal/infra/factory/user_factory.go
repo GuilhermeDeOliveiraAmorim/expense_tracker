@@ -12,16 +12,18 @@ type UserFactory struct {
 	GetUsers   *usecases.GetUsersUseCase
 	GetUser    *usecases.GetUserUseCase
 	UpdateUser *usecases.UpdateUserUseCase
+	Login      *usecases.LoginUseCase
 }
 
 func NewUserFactory(db *gorm.DB) *UserFactory {
-	expenseRepository := repositoriesgorm.NewUserRepository(db)
+	userRepository := repositoriesgorm.NewUserRepository(db)
 
-	createUser := usecases.NewCreateUserUseCase(expenseRepository)
-	deleteUser := usecases.NewDeleteUserUseCase(expenseRepository)
-	getUsers := usecases.NewGetUsersUseCase(expenseRepository)
-	getUser := usecases.NewGetUserUseCase(expenseRepository)
-	updateUser := usecases.NewUpdateUserUseCase(expenseRepository)
+	createUser := usecases.NewCreateUserUseCase(userRepository)
+	deleteUser := usecases.NewDeleteUserUseCase(userRepository)
+	getUsers := usecases.NewGetUsersUseCase(userRepository)
+	getUser := usecases.NewGetUserUseCase(userRepository)
+	updateUser := usecases.NewUpdateUserUseCase(userRepository)
+	login := usecases.NewLoginUseCase(userRepository)
 
 	return &UserFactory{
 		CreateUser: createUser,
@@ -29,5 +31,6 @@ func NewUserFactory(db *gorm.DB) *UserFactory {
 		GetUsers:   getUsers,
 		GetUser:    getUser,
 		UpdateUser: updateUser,
+		Login:      login,
 	}
 }
