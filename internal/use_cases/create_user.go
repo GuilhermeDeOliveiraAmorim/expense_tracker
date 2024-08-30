@@ -15,7 +15,7 @@ type CreateUserInputDto struct {
 }
 
 type CreateUserOutputDto struct {
-	ID string `json:"id"`
+	UserID string `json:"user_id"`
 }
 
 type CreateUserUseCase struct {
@@ -140,6 +140,6 @@ func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputD
 	}
 
 	return CreateUserOutputDto{
-		ID: newUser.ID,
+		UserID: newUser.ID,
 	}, nil
 }
