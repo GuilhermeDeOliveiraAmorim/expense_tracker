@@ -98,10 +98,40 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	output, err := h.userFactory.DeleteUser.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+	output, erros := h.userFactory.DeleteUser.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, output)
+}
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var input usecases.LoginInputDto
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+
+	output, erros := h.userFactory.Login.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, output)
