@@ -121,3 +121,60 @@ func (c *UserRepository) ThisUserExists(userName string) (bool, error) {
 
 	return true, nil
 }
+
+func (c *UserRepository) GetUserByEmail(userEmail string) (entities.User, error) {
+	var userModel Users
+
+	result := c.gorm.Model(&Users{}).Where("email = ?", userEmail).First(&userModel)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return entities.User{}, errors.New("user not found")
+		}
+		return entities.User{}, errors.New(result.Error.Error())
+	}
+
+	user := entities.User{
+		SharedEntity: entities.SharedEntity{
+			ID:            userModel.ID,
+			Active:        userModel.Active,
+			CreatedAt:     userModel.CreatedAt,
+			UpdatedAt:     userModel.UpdatedAt,
+			DeactivatedAt: userModel.DeactivatedAt,
+		},
+		Name: userModel.Name,
+		Login: entities.Login{
+			Email:    userModel.Email,
+			Password: userModel.Password,
+		},
+	}
+
+	return user, nil
+}
+
+func (c *UserRepository) ThisUserEmailExists(userEmail string) (bool, error) {
+	var userModel Users
+
+	result := c.gorm.Model(&Users{}).Where("email = ?", userEmail).First(&userModel)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, errors.New("not found")
+		}
+		return false, errors.New(result.Error.Error())
+	}
+
+	return true, nil
+}
+
+func (c *UserRepository) ThisUserNameExists(userName string) (bool, error) {
+	var userModel Users
+
+	result := c.gorm.Model(&Users{}).Where("name = ?", userName).First(&userModel)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, errors.New("not found")
+		}
+		return false, errors.New(result.Error.Error())
+	}
+
+	return true, nil
+}
