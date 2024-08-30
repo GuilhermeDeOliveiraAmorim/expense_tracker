@@ -31,27 +31,53 @@ func NewCreateUserUseCase(
 }
 
 func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputDto, []util.ProblemDetails) {
-	existingUser, GetUserByNameErr := c.UserRepository.ThisUserExists(input.Name)
-	if GetUserByNameErr != nil && strings.Compare(GetUserByNameErr.Error(), "user not found") > 0 {
+	email, hashEmailWithHMACErr := util.HashEmailWithHMAC(input.Email)
+	if hashEmailWithHMACErr != nil {
+		return CreateUserOutputDto{}, hashEmailWithHMACErr
+	}
+
+	userEmailExists, userEmailExistsErr := c.UserRepository.ThisUserEmailExists(email)
+	if userEmailExists {
+		return CreateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Conflict",
+				Title:    "Email already exists",
+				Status:   409,
+				Detail:   "Email already exists",
+				Instance: util.RFC409,
+			},
+		}
+	} else if strings.Compare(userEmailExistsErr.Error(), "not found") != 0 {
 		return CreateUserOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
-				Title:    "Error fetching existing user",
+				Title:    "Error checking user email existence",
 				Status:   500,
-				Detail:   GetUserByNameErr.Error(),
+				Detail:   userEmailExistsErr.Error(),
 				Instance: util.RFC500,
 			},
 		}
 	}
 
-	if existingUser {
+	userNameExists, userNameExistsErr := c.UserRepository.ThisUserNameExists(input.Name)
+	if userNameExists {
 		return CreateUserOutputDto{}, []util.ProblemDetails{
 			{
-				Type:     "Validation Error",
-				Title:    "User already exists",
+				Type:     "Conflict",
+				Title:    "Username already exists",
 				Status:   409,
-				Detail:   "A user with this name already exists",
+				Detail:   "Username already exists",
 				Instance: util.RFC409,
+			},
+		}
+	} else if strings.Compare(userNameExistsErr.Error(), "not found") != 0 {
+		return CreateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Error checking user name existence",
+				Status:   500,
+				Detail:   userEmailExistsErr.Error(),
+				Instance: util.RFC500,
 			},
 		}
 	}
