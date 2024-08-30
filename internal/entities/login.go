@@ -1,6 +1,9 @@
 package entities
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"regexp"
 	"strings"
 
@@ -100,13 +103,11 @@ func (lo *Login) CompareAndDecrypt(hashedData string, data string) bool {
 	return err == nil
 }
 
-func (lo *Login) EncryptEmail() error {
-	hashedEmail, err := hashString(lo.Email)
-	if err != nil {
-		return err
-	}
-
-	lo.Email = string(hashedEmail)
+func (lo *Login) EncryptEmail(secretKey string) error {
+	key := []byte(secretKey)
+	h := hmac.New(sha256.New, key)
+	h.Write([]byte(lo.Email))
+	lo.Email = hex.EncodeToString(h.Sum(nil))
 
 	return nil
 }
