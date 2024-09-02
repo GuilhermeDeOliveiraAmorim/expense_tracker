@@ -15,6 +15,7 @@ type CreateCategoryInputDto struct {
 
 type CreateCategoryOutputDto struct {
 	CategoryID string `json:"category_id"`
+	Message    string `json:"message"`
 }
 
 type CreateCategoryUseCase struct {
@@ -75,5 +76,6 @@ func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCat
 
 	return CreateCategoryOutputDto{
 		CategoryID: newCategory.ID,
+		Message:    "Category created successfully",
 	}, nil
 }
