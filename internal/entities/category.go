@@ -2,7 +2,6 @@ package entities
 
 import (
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
@@ -65,7 +64,27 @@ func ValidateCategory(name string, color string) []util.ProblemDetails {
 }
 
 func (c *Category) ChangeName(newName string) []util.ProblemDetails {
-	validationErrors := ValidateCategory(newName, c.Color)
+	var validationErrors []util.ProblemDetails
+
+	if newName == "" {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Missing category name",
+			Instance: util.RFC400,
+		})
+	}
+
+	if len(newName) > 100 {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Category name cannot exceed 100 characters",
+			Instance: util.RFC400,
+		})
+	}
 
 	if len(validationErrors) > 0 {
 		return validationErrors
@@ -78,7 +97,17 @@ func (c *Category) ChangeName(newName string) []util.ProblemDetails {
 }
 
 func (c *Category) ChangeColor(newColor string) []util.ProblemDetails {
-	validationErrors := ValidateCategory(c.Name, newColor)
+	var validationErrors []util.ProblemDetails
+
+	if !isValidHexColor(newColor) {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Invalid color format. Use hexadecimal code (e.g., #FFFFFF or #FF0000)",
+			Instance: util.RFC400,
+		})
+	}
 
 	if len(validationErrors) > 0 {
 		return validationErrors
@@ -91,9 +120,6 @@ func (c *Category) ChangeColor(newColor string) []util.ProblemDetails {
 }
 
 func isValidHexColor(hexColor string) bool {
-	hexColor = strings.TrimPrefix(hexColor, "#")
-
-	hexRegex := regexp.MustCompile(`^[0-9a-fA-F]{6}$|^[0-9a-fA-F]{8}$`)
-
-	return hexRegex.MatchString(hexColor)
+	regex := regexp.MustCompile(`^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$`)
+	return regex.MatchString(hexColor)
 }
