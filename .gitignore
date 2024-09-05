@@ -24,3 +24,6 @@ go.work
 # Variables Keys
 .env
 .env.prod
+
+# DB path
+/postgres-data
