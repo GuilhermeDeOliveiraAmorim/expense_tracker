@@ -72,6 +72,7 @@ func (p *PresentersRepository) ShowExpenseSimpleTablePeriod(userID string, perio
 	ExpenseID     string
 	Amount        float64
 	ExpenseDate   string
+	Notes         string
 	CategoryName  string
 	CategoryColor string
 }, error) {
@@ -79,12 +80,13 @@ func (p *PresentersRepository) ShowExpenseSimpleTablePeriod(userID string, perio
 		ExpenseID     string
 		Amount        float64
 		ExpenseDate   string
+		Notes         string
 		CategoryName  string
 		CategoryColor string
 	}
 
 	err := p.gorm.Table("expenses").
-		Select("expenses.id as expense_id, expenses.amount, expenses.expanse_date as expense_date, categories.name as category_name, categories.color as category_color").
+		Select("expenses.id as expense_id, expenses.amount, expenses.expanse_date as expense_date, expenses.notes, categories.name as category_name, categories.color as category_color").
 		Joins("JOIN categories ON categories.id = expenses.category_id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ?", userID, periodStart, periodEnd).
 		Order("expenses.expanse_date DESC").

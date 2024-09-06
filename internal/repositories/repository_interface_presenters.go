@@ -20,6 +20,7 @@ type PresentersRepositoryInterface interface {
 		ExpenseID     string
 		Amount        float64
 		ExpenseDate   string
+		Notes         string
 		CategoryName  string
 		CategoryColor string
 	}, error)

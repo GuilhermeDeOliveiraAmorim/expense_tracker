@@ -11,6 +11,7 @@ type Row struct {
 	ExpenseID     string  `json:"expense_id"`
 	Amount        float64 `json:"amount"`
 	ExpenseDate   string  `json:"expense_date"`
+	Notes         string  `json:"notes"`
 	CategoryName  string  `json:"category_name"`
 	CategoryColor string  `json:"category_color"`
 }
@@ -142,6 +143,7 @@ func (p *ShowExpenseSimpleTablePeriodPresenters) Execute(input ShowExpenseSimple
 			ExpenseID:     row.ExpenseID,
 			Amount:        row.Amount,
 			ExpenseDate:   row.ExpenseDate,
+			Notes:         row.Notes,
 			CategoryName:  row.CategoryName,
 			CategoryColor: row.CategoryColor,
 		})
