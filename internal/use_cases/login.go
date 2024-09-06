@@ -15,8 +15,9 @@ type LoginInputDto struct {
 }
 
 type LoginOutputDto struct {
-	AccessToken string `json:"access_token"`
+	Name        string `json:"name"`
 	UserID      string `json:"user_id"`
+	AccessToken string `json:"access_token"`
 	Message     string `json:"message"`
 }
 
@@ -100,6 +101,7 @@ func (c *LoginUseCase) Execute(input LoginInputDto) (LoginOutputDto, []util.Prob
 	}
 
 	return LoginOutputDto{
+		Name:        user.Name,
 		AccessToken: tokenString,
 		UserID:      user.ID,
 		Message:     "Logged in successfully",
