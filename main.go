@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/configs"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/config"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	repositoriesgorm "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/repositories_gorm"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/interface/handlers"
@@ -15,16 +15,12 @@ import (
 )
 
 func main() {
-	configs, err := configs.LoadConfig(".")
-	if err != nil {
-		panic(err)
-	}
-
-	dsn := "host=" + configs.PostgresServer + " user=" + configs.PostgresUser + " password=" + configs.PostgresPassword + " dbname=" + configs.PostgresDb + " port=" + configs.PostgresPort + " sslmode=disable"
+	dsn := "host=" + config.DB_LOCAL.DB_HOST + " user=" + config.DB_LOCAL.DB_USER + " password=" + config.DB_LOCAL.DB_PASSWORD + " dbname=" + config.DB_LOCAL.DB_NAME + " port=" + config.DB_LOCAL.DB_PORT + " sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("Failed to connect database")
 	}
+	fmt.Println("Successful connection")
 
 	if err := db.AutoMigrate(
 		repositoriesgorm.Categories{},

@@ -3,7 +3,7 @@ package usecases
 import (
 	"time"
 
-	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/configs"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/config"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"github.com/dgrijalva/jwt-go"
@@ -72,20 +72,7 @@ func (c *LoginUseCase) Execute(input LoginInputDto) (LoginOutputDto, []util.Prob
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	configs, err := configs.LoadConfig(".")
-	if err != nil {
-		return LoginOutputDto{}, []util.ProblemDetails{
-			{
-				Type:     "Internal Server Error",
-				Title:    "Error loading configuration",
-				Status:   500,
-				Detail:   "Error loading configuration for encryption",
-				Instance: util.RFC500,
-			},
-		}
-	}
-
-	jwtSecret := []byte(configs.JwtSecret)
+	jwtSecret := []byte(config.SECRETS_LOCAL.JWT_SECRET)
 
 	tokenString, err := token.SignedString(jwtSecret)
 	if err != nil {

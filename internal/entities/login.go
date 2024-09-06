@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/configs"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/config"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -105,12 +105,7 @@ func (lo *Login) CompareAndDecrypt(hashedData string, data string) bool {
 }
 
 func (lo *Login) EncryptEmail() error {
-	configs, LoadConfigErr := configs.LoadConfig(".")
-	if LoadConfigErr != nil {
-		return LoadConfigErr
-	}
-
-	key := []byte(configs.JwtSecret)
+	key := []byte(config.SECRETS_LOCAL.JWT_SECRET)
 	h := hmac.New(sha256.New, key)
 	h.Write([]byte(lo.Email))
 	lo.Email = hex.EncodeToString(h.Sum(nil))

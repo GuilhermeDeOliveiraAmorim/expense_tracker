@@ -5,24 +5,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 
-	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/configs"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/config"
 )
 
 func HashEmailWithHMAC(email string) (string, []ProblemDetails) {
-	configs, LoadConfigErr := configs.LoadConfig(".")
-	if LoadConfigErr != nil {
-		return "", []ProblemDetails{
-			{
-				Type:     "Internal Server Error",
-				Title:    "Error loading configuration",
-				Status:   500,
-				Detail:   LoadConfigErr.Error(),
-				Instance: RFC500,
-			},
-		}
-	}
-
-	key := []byte(configs.JwtSecret)
+	key := []byte(config.SECRETS_LOCAL.JWT_SECRET)
 	h := hmac.New(sha256.New, key)
 	h.Write([]byte(email))
 
