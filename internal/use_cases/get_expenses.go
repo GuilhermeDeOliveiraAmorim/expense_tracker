@@ -7,6 +7,7 @@ import (
 )
 
 type GetExpensesInputDto struct {
+	UserID string `json:"user_id"`
 }
 
 type GetExpensesOutputDto struct {
@@ -15,18 +16,44 @@ type GetExpensesOutputDto struct {
 
 type GetExpensesUseCase struct {
 	ExpenseRepository repositories.ExpenseRepositoryInterface
+	UserRepository    repositories.UserRepositoryInterface
 }
 
 func NewGetExpensesUseCase(
 	ExpenseRepository repositories.ExpenseRepositoryInterface,
+	UserRepository repositories.UserRepositoryInterface,
 ) *GetExpensesUseCase {
 	return &GetExpensesUseCase{
 		ExpenseRepository: ExpenseRepository,
+		UserRepository:    UserRepository,
 	}
 }
 
 func (c *GetExpensesUseCase) Execute(input GetExpensesInputDto) (GetExpensesOutputDto, []util.ProblemDetails) {
-	searchedsExpenses, err := c.ExpenseRepository.GetExpenses()
+	user, err := c.UserRepository.GetUser(input.UserID)
+	if err != nil {
+		return GetExpensesOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "User not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC404,
+			},
+		}
+	} else if !user.Active {
+		return GetExpensesOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Forbidden",
+				Title:    "User is not active",
+				Status:   403,
+				Detail:   "User is not active",
+				Instance: util.RFC403,
+			},
+		}
+	}
+
+	searchedsExpenses, err := c.ExpenseRepository.GetExpenses(input.UserID)
 	if err != nil {
 		return GetExpensesOutputDto{}, []util.ProblemDetails{
 			{

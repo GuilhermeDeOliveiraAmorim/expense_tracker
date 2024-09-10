@@ -35,15 +35,25 @@ func NewCreateCategoryUseCase(
 }
 
 func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCategoryOutputDto, []util.ProblemDetails) {
-	searchedUser, getUserErr := c.UserRepository.GetUser(input.UserID)
-	if getUserErr != nil {
+	user, err := c.UserRepository.GetUser(input.UserID)
+	if err != nil {
 		return CreateCategoryOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "User not found",
 				Status:   404,
-				Detail:   "User not found",
+				Detail:   err.Error(),
 				Instance: util.RFC404,
+			},
+		}
+	} else if !user.Active {
+		return CreateCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Forbidden",
+				Title:    "User is not active",
+				Status:   403,
+				Detail:   "User is not active",
+				Instance: util.RFC403,
 			},
 		}
 	}
@@ -73,7 +83,7 @@ func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCat
 		}
 	}
 
-	newCategory, newCategoryErr := entities.NewCategory(searchedUser.ID, input.Name, input.Color)
+	newCategory, newCategoryErr := entities.NewCategory(user.ID, input.Name, input.Color)
 	if newCategoryErr != nil {
 		return CreateCategoryOutputDto{}, newCategoryErr
 	}

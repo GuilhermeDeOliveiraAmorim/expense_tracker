@@ -16,17 +16,43 @@ type DeleteCategoryOutputDto struct {
 
 type DeleteCategoryUseCase struct {
 	CategoryRepository repositories.CategoryRepositoryInterface
+	UserRepository     repositories.UserRepositoryInterface
 }
 
 func NewDeleteCategoryUseCase(
 	CategoryRepository repositories.CategoryRepositoryInterface,
+	UserRepository repositories.UserRepositoryInterface,
 ) *DeleteCategoryUseCase {
 	return &DeleteCategoryUseCase{
 		CategoryRepository: CategoryRepository,
+		UserRepository:     UserRepository,
 	}
 }
 
 func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCategoryOutputDto, []util.ProblemDetails) {
+	user, err := c.UserRepository.GetUser(input.UserID)
+	if err != nil {
+		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "User not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC404,
+			},
+		}
+	} else if !user.Active {
+		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Forbidden",
+				Title:    "User is not active",
+				Status:   403,
+				Detail:   "User is not active",
+				Instance: util.RFC403,
+			},
+		}
+	}
+
 	categoryToDelete, err := c.CategoryRepository.GetCategory(input.UserID, input.CategoryID)
 	if err != nil {
 		return DeleteCategoryOutputDto{}, []util.ProblemDetails{

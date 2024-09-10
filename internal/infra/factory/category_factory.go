@@ -19,10 +19,10 @@ func NewCategoryFactory(db *gorm.DB) *CategoryFactory {
 	userRepository := repositoriesgorm.NewUserRepository(db)
 
 	createCategory := usecases.NewCreateCategoryUseCase(categoryRepository, userRepository)
-	deleteCategory := usecases.NewDeleteCategoryUseCase(categoryRepository)
-	getCategories := usecases.NewGetCategoriesUseCase(categoryRepository)
-	getCategory := usecases.NewGetCategoryUseCase(categoryRepository)
-	updateCategory := usecases.NewUpdateCategoryUseCase(categoryRepository)
+	deleteCategory := usecases.NewDeleteCategoryUseCase(categoryRepository, userRepository)
+	getCategories := usecases.NewGetCategoriesUseCase(categoryRepository, userRepository)
+	getCategory := usecases.NewGetCategoryUseCase(categoryRepository, userRepository)
+	updateCategory := usecases.NewUpdateCategoryUseCase(categoryRepository, userRepository)
 
 	return &CategoryFactory{
 		CreateCategory: createCategory,

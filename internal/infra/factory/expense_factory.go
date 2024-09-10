@@ -18,10 +18,10 @@ func NewExpenseFactory(db *gorm.DB) *ExpenseFactory {
 	expenseRepository := repositoriesgorm.NewExpenseRepository(db)
 	userRepository := repositoriesgorm.NewUserRepository(db)
 
-	createExpense := usecases.NewCreateExpenseUseCase(expenseRepository)
-	deleteExpense := usecases.NewDeleteExpenseUseCase(expenseRepository)
-	getExpenses := usecases.NewGetExpensesUseCase(expenseRepository)
-	getExpense := usecases.NewGetExpenseUseCase(expenseRepository)
+	createExpense := usecases.NewCreateExpenseUseCase(expenseRepository, userRepository)
+	deleteExpense := usecases.NewDeleteExpenseUseCase(expenseRepository, userRepository)
+	getExpenses := usecases.NewGetExpensesUseCase(expenseRepository, userRepository)
+	getExpense := usecases.NewGetExpenseUseCase(expenseRepository, userRepository)
 	updateExpense := usecases.NewUpdateExpenseUseCase(expenseRepository, userRepository)
 
 	return &ExpenseFactory{

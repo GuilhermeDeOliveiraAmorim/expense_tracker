@@ -57,12 +57,12 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 		}
 	}
 
-	searchedExpense, GetExpenseErr := c.ExpenseRepository.GetExpenseByExpenseIDAndUserID(input.ExpenseID, input.UserID)
+	searchedExpense, GetExpenseErr := c.ExpenseRepository.GetExpense(input.UserID, input.ExpenseID)
 	if GetExpenseErr != nil {
 		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
-				Title:    "Expense not found",
+				Title:    "Expense or not found",
 				Status:   404,
 				Detail:   GetExpenseErr.Error(),
 				Instance: util.RFC404,

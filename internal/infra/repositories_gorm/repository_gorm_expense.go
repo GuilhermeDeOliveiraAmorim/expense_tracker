@@ -37,17 +37,17 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 }
 
 func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
-	if err := e.gorm.Model(&Expenses{}).Where("id = ?", expense.ID).Select("Active", "DeactivatedAt").Updates(map[string]interface{}{"active": expense.Active, "updated_at": expense.DeactivatedAt}).Error; err != nil {
+	if err := e.gorm.Model(&Expenses{}).Where("id = ? AND user_id = ?", expense.ID, expense.UserID).Select("Active", "DeactivatedAt").Updates(map[string]interface{}{"active": expense.Active, "updated_at": expense.DeactivatedAt}).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, error) {
+func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, error) {
 	var expensesModel []Expenses
 
-	if err := e.gorm.Find(&expensesModel).Error; err != nil {
+	if err := e.gorm.Where("user_id = ?", userID).Find(&expensesModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -87,11 +87,11 @@ func (e *ExpenseRepository) GetExpenses() ([]entities.Expense, error) {
 	return expenses, nil
 }
 
-func (e *ExpenseRepository) GetExpense(expenseID string) (entities.Expense, error) {
+func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entities.Expense, error) {
 	var expenseModel Expenses
 	var categoryModel Categories
 
-	result := e.gorm.Model(&Expenses{}).Where("id = ?", expenseID).First(&expenseModel)
+	result := e.gorm.Model(&Expenses{}).Where("id = ? AND user_id = ?", expenseID, userID).First(&expenseModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Expense{}, errors.New("expense not found")
@@ -138,42 +138,4 @@ func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
 	}
 
 	return nil
-}
-
-func (e *ExpenseRepository) GetExpenseByExpenseIDAndUserID(expenseID string, userID string) (entities.Expense, error) {
-	var expenseModel Expenses
-	var categoryModel Categories
-
-	result := e.gorm.Model(&Expenses{}).Where("id = ?", expenseID).Where("user_id = ?", userID).First(&expenseModel)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return entities.Expense{}, errors.New("expense not found")
-		}
-		return entities.Expense{}, errors.New(result.Error.Error())
-	}
-
-	result = e.gorm.Model(&Categories{}).Where("id = ?", expenseModel.CategoryID).First(&categoryModel)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return entities.Expense{}, errors.New("error searching expense (" + expenseModel.ID + ") category")
-		}
-		return entities.Expense{}, errors.New(result.Error.Error())
-	}
-
-	expense := entities.Expense{
-		SharedEntity: entities.SharedEntity{
-			ID:            expenseModel.ID,
-			Active:        expenseModel.Active,
-			CreatedAt:     expenseModel.CreatedAt,
-			UpdatedAt:     expenseModel.UpdatedAt,
-			DeactivatedAt: expenseModel.DeactivatedAt,
-		},
-		UserID:      expenseModel.UserID,
-		Amount:      expenseModel.Amount,
-		ExpenseDate: expenseModel.ExpanseDate,
-		Notes:       expenseModel.Notes,
-		CategoryID:  categoryModel.ID,
-	}
-
-	return expense, nil
 }

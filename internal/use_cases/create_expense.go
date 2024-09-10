@@ -22,17 +22,43 @@ type CreateExpenseOutputDto struct {
 
 type CreateExpenseUseCase struct {
 	ExpenseRepository repositories.ExpenseRepositoryInterface
+	UserRepository    repositories.UserRepositoryInterface
 }
 
 func NewCreateExpenseUseCase(
 	ExpenseRepository repositories.ExpenseRepositoryInterface,
+	UserRepository repositories.UserRepositoryInterface,
 ) *CreateExpenseUseCase {
 	return &CreateExpenseUseCase{
 		ExpenseRepository: ExpenseRepository,
+		UserRepository:    UserRepository,
 	}
 }
 
 func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpenseOutputDto, []util.ProblemDetails) {
+	user, err := c.UserRepository.GetUser(input.UserID)
+	if err != nil {
+		return CreateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "User not found",
+				Status:   404,
+				Detail:   err.Error(),
+				Instance: util.RFC404,
+			},
+		}
+	} else if !user.Active {
+		return CreateExpenseOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Forbidden",
+				Title:    "User is not active",
+				Status:   403,
+				Detail:   "User is not active",
+				Instance: util.RFC403,
+			},
+		}
+	}
+
 	location, err := time.LoadLocation(util.TIMEZONE)
 	if err != nil {
 		return CreateExpenseOutputDto{}, []util.ProblemDetails{

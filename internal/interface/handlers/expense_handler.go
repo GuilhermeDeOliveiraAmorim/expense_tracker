@@ -66,6 +66,10 @@ func (h *ExpenseHandler) GetExpense(c *gin.Context) {
 
 func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
 	var input usecases.GetExpensesInputDto
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	output, erros := h.expenseFactory.GetExpenses.Execute(input)
 	if len(erros) > 0 {

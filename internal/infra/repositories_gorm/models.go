@@ -13,6 +13,7 @@ type Categories struct {
 	UserID        string    `gorm:"not null"`
 	Name          string    `gorm:"not null"`
 	Color         string    `gorm:"not null"`
+	User          Users     `gorm:"foreignKey:UserID"`
 }
 
 type Expenses struct {
