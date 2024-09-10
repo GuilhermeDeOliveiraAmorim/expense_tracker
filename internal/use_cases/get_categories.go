@@ -7,6 +7,7 @@ import (
 )
 
 type GetCategoriesInputDto struct {
+	UserID string `json:"user_id"`
 }
 
 type GetCategoriesOutputDto struct {
@@ -26,7 +27,7 @@ func NewGetCategoriesUseCase(
 }
 
 func (c *GetCategoriesUseCase) Execute(input GetCategoriesInputDto) (GetCategoriesOutputDto, []util.ProblemDetails) {
-	searchedsCategories, err := c.CategoryRepository.GetCategories()
+	searchedsCategories, err := c.CategoryRepository.GetCategories(input.UserID)
 	if err != nil {
 		return GetCategoriesOutputDto{}, []util.ProblemDetails{
 			{

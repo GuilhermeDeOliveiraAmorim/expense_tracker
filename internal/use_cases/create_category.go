@@ -9,8 +9,9 @@ import (
 )
 
 type CreateCategoryInputDto struct {
-	Name  string `json:"name"`
-	Color string `json:"color"`
+	UserID string `json:"user_id"`
+	Name   string `json:"name"`
+	Color  string `json:"color"`
 }
 
 type CreateCategoryOutputDto struct {
@@ -20,18 +21,34 @@ type CreateCategoryOutputDto struct {
 
 type CreateCategoryUseCase struct {
 	CategoryRepository repositories.CategoryRepositoryInterface
+	UserRepository     repositories.UserRepositoryInterface
 }
 
 func NewCreateCategoryUseCase(
 	CategoryRepository repositories.CategoryRepositoryInterface,
+	UserRepository repositories.UserRepositoryInterface,
 ) *CreateCategoryUseCase {
 	return &CreateCategoryUseCase{
 		CategoryRepository: CategoryRepository,
+		UserRepository:     UserRepository,
 	}
 }
 
 func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCategoryOutputDto, []util.ProblemDetails) {
-	existingCategory, GetCategoryByNameErr := c.CategoryRepository.ThisCategoryExists(input.Name)
+	searchedUser, getUserErr := c.UserRepository.GetUser(input.UserID)
+	if getUserErr != nil {
+		return CreateCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "User not found",
+				Status:   404,
+				Detail:   "User not found",
+				Instance: util.RFC404,
+			},
+		}
+	}
+
+	existingCategory, GetCategoryByNameErr := c.CategoryRepository.ThisCategoryExists(input.UserID, input.Name)
 	if GetCategoryByNameErr != nil && strings.Compare(GetCategoryByNameErr.Error(), "category not found") > 0 {
 		return CreateCategoryOutputDto{}, []util.ProblemDetails{
 			{
@@ -56,9 +73,9 @@ func (c *CreateCategoryUseCase) Execute(input CreateCategoryInputDto) (CreateCat
 		}
 	}
 
-	newCategory, err := entities.NewCategory(input.Name, input.Color)
-	if err != nil {
-		return CreateCategoryOutputDto{}, err
+	newCategory, newCategoryErr := entities.NewCategory(searchedUser.ID, input.Name, input.Color)
+	if newCategoryErr != nil {
+		return CreateCategoryOutputDto{}, newCategoryErr
 	}
 
 	CreateCategoryErr := c.CategoryRepository.CreateCategory(*newCategory)

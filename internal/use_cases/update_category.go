@@ -6,6 +6,7 @@ import (
 )
 
 type UpdateCategoryInputDto struct {
+	UserID     string `json:"user_id"`
 	CategoryID string `json:"category_id"`
 	Name       string `json:"name"`
 	Color      string `json:"color"`
@@ -28,7 +29,7 @@ func NewUpdateCategoryUseCase(
 }
 
 func (c *UpdateCategoryUseCase) Execute(input UpdateCategoryInputDto) (UpdateCategoryOutputDto, []util.ProblemDetails) {
-	searchedCategory, getCategoryErr := c.CategoryRepository.GetCategory(input.CategoryID)
+	searchedCategory, getCategoryErr := c.CategoryRepository.GetCategory(input.UserID, input.CategoryID)
 	if getCategoryErr != nil {
 		return UpdateCategoryOutputDto{}, []util.ProblemDetails{
 			{

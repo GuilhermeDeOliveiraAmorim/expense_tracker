@@ -16,8 +16,9 @@ type CategoryFactory struct {
 
 func NewCategoryFactory(db *gorm.DB) *CategoryFactory {
 	categoryRepository := repositoriesgorm.NewCategoryRepository(db)
+	userRepository := repositoriesgorm.NewUserRepository(db)
 
-	createCategory := usecases.NewCreateCategoryUseCase(categoryRepository)
+	createCategory := usecases.NewCreateCategoryUseCase(categoryRepository, userRepository)
 	deleteCategory := usecases.NewDeleteCategoryUseCase(categoryRepository)
 	getCategories := usecases.NewGetCategoriesUseCase(categoryRepository)
 	getCategory := usecases.NewGetCategoryUseCase(categoryRepository)

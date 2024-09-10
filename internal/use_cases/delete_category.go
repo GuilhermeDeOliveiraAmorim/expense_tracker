@@ -6,6 +6,7 @@ import (
 )
 
 type DeleteCategoryInputDto struct {
+	UserID     string `json:"user_id"`
 	CategoryID string `json:"category_id"`
 }
 
@@ -26,7 +27,7 @@ func NewDeleteCategoryUseCase(
 }
 
 func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCategoryOutputDto, []util.ProblemDetails) {
-	categoryToDelete, err := c.CategoryRepository.GetCategory(input.CategoryID)
+	categoryToDelete, err := c.CategoryRepository.GetCategory(input.UserID, input.CategoryID)
 	if err != nil {
 		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
 			{

@@ -9,12 +9,13 @@ import (
 
 type Category struct {
 	SharedEntity
-	Name  string `json:"name"`
-	Color string `json:"color"`
+	UserID string `josn:"user_id""`
+	Name   string `json:"name"`
+	Color  string `json:"color"`
 }
 
-func NewCategory(name string, color string) (*Category, []util.ProblemDetails) {
-	validationErrors := ValidateCategory(name, color)
+func NewCategory(userID string, name string, color string) (*Category, []util.ProblemDetails) {
+	validationErrors := ValidateCategory(userID, name, color)
 
 	if len(validationErrors) > 0 {
 		return nil, validationErrors
@@ -22,13 +23,24 @@ func NewCategory(name string, color string) (*Category, []util.ProblemDetails) {
 
 	return &Category{
 		SharedEntity: *NewSharedEntity(),
+		UserID:       userID,
 		Name:         name,
 		Color:        color,
 	}, nil
 }
 
-func ValidateCategory(name string, color string) []util.ProblemDetails {
+func ValidateCategory(userID string, name string, color string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
+
+	if userID == "" {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Missing user id",
+			Instance: util.RFC400,
+		})
+	}
 
 	if name == "" {
 		validationErrors = append(validationErrors, util.ProblemDetails{

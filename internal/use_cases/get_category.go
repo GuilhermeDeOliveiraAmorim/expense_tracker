@@ -7,6 +7,7 @@ import (
 )
 
 type GetCategoryInputDto struct {
+	UserID     string `json:"user_id"`
 	CategoryID string `json:"category_id"`
 }
 
@@ -27,7 +28,7 @@ func NewGetCategoryUseCase(
 }
 
 func (c *GetCategoryUseCase) Execute(input GetCategoryInputDto) (GetCategoryOutputDto, []util.ProblemDetails) {
-	searchedCategory, err := c.CategoryRepository.GetCategory(input.CategoryID)
+	searchedCategory, err := c.CategoryRepository.GetCategory(input.UserID, input.CategoryID)
 	if err != nil {
 		return GetCategoryOutputDto{}, []util.ProblemDetails{
 			{

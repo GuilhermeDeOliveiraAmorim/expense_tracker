@@ -10,6 +10,7 @@ type Categories struct {
 	CreatedAt     time.Time `gorm:"not null"`
 	UpdatedAt     time.Time `gorm:"not null"`
 	DeactivatedAt time.Time `gorm:"not null"`
+	UserID        string    `gorm:"not null"`
 	Name          string    `gorm:"not null"`
 	Color         string    `gorm:"not null"`
 }

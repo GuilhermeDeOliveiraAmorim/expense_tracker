@@ -6,6 +6,9 @@ services:
       - "5432:5432"
     restart: always
     container_name: postgres_reading
+    hostname: postgres_reading
+    env_file:
+      - .env
     volumes:
       - postgres_volume:/var/lib/postgresql/data/
     networks:
