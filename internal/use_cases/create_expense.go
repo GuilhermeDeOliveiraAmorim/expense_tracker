@@ -18,6 +18,7 @@ type CreateExpenseInputDto struct {
 
 type CreateExpenseOutputDto struct {
 	ExpenseID string `json:"expense_id"`
+	Message   string `json:"message"`
 }
 
 type CreateExpenseUseCase struct {
@@ -105,5 +106,6 @@ func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpen
 
 	return CreateExpenseOutputDto{
 		ExpenseID: newExpense.ID,
+		Message:   "Expense created successfully",
 	}, nil
 }

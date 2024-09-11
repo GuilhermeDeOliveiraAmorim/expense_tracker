@@ -42,10 +42,21 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 }
 
 func (h *ExpenseHandler) GetExpense(c *gin.Context) {
-	var input usecases.GetExpenseInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID := c.Query("user_id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
+	}
+
+	expenseID := c.Query("expense_id")
+	if expenseID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "expense_id is required"})
+		return
+	}
+
+	input := usecases.GetExpenseInputDto{
+		UserID:    userID,
+		ExpenseID: expenseID,
 	}
 
 	output, erros := h.expenseFactory.GetExpense.Execute(input)
@@ -65,10 +76,14 @@ func (h *ExpenseHandler) GetExpense(c *gin.Context) {
 }
 
 func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
-	var input usecases.GetExpensesInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID := c.Query("user_id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
+	}
+
+	input := usecases.GetExpensesInputDto{
+		UserID: userID,
 	}
 
 	output, erros := h.expenseFactory.GetExpenses.Execute(input)

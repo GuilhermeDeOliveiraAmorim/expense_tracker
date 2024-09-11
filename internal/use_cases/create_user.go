@@ -84,8 +84,8 @@ func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputD
 		}
 	}
 
-	newLogin, err := entities.NewLogin(input.Email, input.Password)
-	if err != nil {
+	newLogin, newLoginErr := entities.NewLogin(input.Email, input.Password)
+	if newLoginErr != nil {
 		return CreateUserOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Validation Error",
@@ -97,45 +97,45 @@ func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputD
 		}
 	}
 
-	EncryptEmailErr := newLogin.EncryptEmail()
-	if EncryptEmailErr != nil {
+	encryptEmailErr := newLogin.EncryptEmail()
+	if encryptEmailErr != nil {
 		return CreateUserOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Error encrypting email",
 				Status:   500,
-				Detail:   EncryptEmailErr.Error(),
+				Detail:   encryptEmailErr.Error(),
 				Instance: util.RFC500,
 			},
 		}
 	}
 
-	EncryptPasswordErr := newLogin.EncryptPassword()
-	if EncryptPasswordErr != nil {
+	encryptPasswordErr := newLogin.EncryptPassword()
+	if encryptPasswordErr != nil {
 		return CreateUserOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Error encrypting password",
 				Status:   500,
-				Detail:   EncryptPasswordErr.Error(),
+				Detail:   encryptPasswordErr.Error(),
 				Instance: util.RFC500,
 			},
 		}
 	}
 
-	newUser, err := entities.NewUser(input.Name, *newLogin)
-	if err != nil {
-		return CreateUserOutputDto{}, err
+	newUser, newUserErr := entities.NewUser(input.Name, *newLogin)
+	if newUserErr != nil {
+		return CreateUserOutputDto{}, newUserErr
 	}
 
-	CreateUserErr := c.UserRepository.CreateUser(*newUser)
-	if CreateUserErr != nil {
+	createUserErr := c.UserRepository.CreateUser(*newUser)
+	if createUserErr != nil {
 		return CreateUserOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Error creating new user",
 				Status:   500,
-				Detail:   CreateUserErr.Error(),
+				Detail:   createUserErr.Error(),
 				Instance: util.RFC500,
 			},
 		}

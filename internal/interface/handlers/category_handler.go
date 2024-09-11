@@ -43,10 +43,21 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 }
 
 func (h *CategoryHandler) GetCategory(c *gin.Context) {
-	var input usecases.GetCategoryInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID := c.Query("user_id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
+	}
+
+	categoryID := c.Query("category_id")
+	if categoryID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "category_id is required"})
+		return
+	}
+
+	input := usecases.GetCategoryInputDto{
+		UserID:     userID,
+		CategoryID: categoryID,
 	}
 
 	output, err := h.categoryFactory.GetCategory.Execute(input)
@@ -59,16 +70,28 @@ func (h *CategoryHandler) GetCategory(c *gin.Context) {
 }
 
 func (h *CategoryHandler) GetCategories(c *gin.Context) {
-	var input usecases.GetCategoriesInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID := c.Query("user_id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
 	}
 
-	output, err := h.categoryFactory.GetCategories.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+	input := usecases.GetCategoriesInputDto{
+		UserID: userID,
+	}
+
+	output, errs := h.categoryFactory.GetCategories.Execute(input)
+	if len(errs) > 0 {
+		for _, err := range errs {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
+
 	}
 
 	c.JSON(http.StatusOK, output)
