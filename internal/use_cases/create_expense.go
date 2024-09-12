@@ -9,11 +9,12 @@ import (
 )
 
 type CreateExpenseInputDto struct {
-	UserID      string  `json:"user_id"`
-	Amount      float64 `json:"amount,string"`
-	ExpenseDate string  `json:"expense_date"`
-	CategoryID  string  `json:"category_id"`
-	Notes       string  `json:"notes"`
+	UserID      string   `json:"user_id"`
+	Amount      float64  `json:"amount,string"`
+	ExpenseDate string   `json:"expense_date"`
+	CategoryID  string   `json:"category_id"`
+	Tags        []string `json:"tags"`
+	Notes       string   `json:"notes"`
 }
 
 type CreateExpenseOutputDto struct {
@@ -86,19 +87,28 @@ func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpen
 		}
 	}
 
-	newExpense, NewExpenseErr := entities.NewExpense(input.UserID, input.Amount, newExpenseDate, input.CategoryID, input.Notes)
-	if NewExpenseErr != nil {
-		return CreateExpenseOutputDto{}, NewExpenseErr
+	newExpense, newExpenseErr := entities.NewExpense(input.UserID, input.Amount, newExpenseDate, input.CategoryID, input.Notes)
+	if len(newExpenseErr) > 0 {
+		return CreateExpenseOutputDto{}, newExpenseErr
 	}
 
-	CreateExpenseErr := c.ExpenseRepository.CreateExpense(*newExpense)
-	if CreateExpenseErr != nil {
+	if len(input.Tags) > 0 {
+		for _, tag := range input.Tags {
+			addTagErr := newExpense.AddTagByID(tag)
+			if len(addTagErr) > 0 {
+				return CreateExpenseOutputDto{}, addTagErr
+			}
+		}
+	}
+
+	createExpenseErr := c.ExpenseRepository.CreateExpense(*newExpense)
+	if createExpenseErr != nil {
 		return CreateExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Error creating new expense",
 				Status:   500,
-				Detail:   CreateExpenseErr.Error(),
+				Detail:   createExpenseErr.Error(),
 				Instance: util.RFC500,
 			},
 		}

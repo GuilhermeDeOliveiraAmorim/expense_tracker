@@ -12,6 +12,7 @@ type Expense struct {
 	Amount      float64   `json:"amount,string,omitempty"`
 	ExpenseDate time.Time `json:"expense_date"`
 	CategoryID  string    `json:"category_id"`
+	TagIDs      []string  `json:"tag_ids"`
 	Notes       string    `json:"notes"`
 }
 
@@ -99,6 +100,25 @@ func (e *Expense) ChangeAmount(newAmount float64) []util.ProblemDetails {
 
 		return validationErrors
 	}
+}
+
+func (e *Expense) AddTagByID(tagID string) []util.ProblemDetails {
+	var validationErrors []util.ProblemDetails
+
+	if tagID == "" {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Invalid Tag ID",
+			Status:   400,
+			Detail:   "Tag ID cannot be empty",
+			Instance: util.RFC400,
+		})
+		return validationErrors
+	}
+
+	e.TagIDs = append(e.TagIDs, tagID)
+
+	return validationErrors
 }
 
 func (e *Expense) ChangeExpenseDate(expenseDate string) []util.ProblemDetails {

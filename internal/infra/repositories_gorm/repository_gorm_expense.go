@@ -18,7 +18,9 @@ func NewExpenseRepository(gorm *gorm.DB) *ExpenseRepository {
 }
 
 func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
-	if err := e.gorm.Create(&Expenses{
+	tx := e.gorm.Begin()
+
+	if err := tx.Create(&Expenses{
 		ID:            expense.ID,
 		Active:        expense.Active,
 		CreatedAt:     expense.CreatedAt,
@@ -30,10 +32,18 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 		CategoryID:    expense.CategoryID,
 		Notes:         expense.Notes,
 	}).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	return nil
+	for _, tagID := range expense.TagIDs {
+		if err := tx.Exec("INSERT INTO expense_tags (expenses_id, tags_id) VALUES (?, ?)", expense.ID, tagID).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit().Error
 }
 
 func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
