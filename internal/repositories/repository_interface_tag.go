@@ -7,4 +7,5 @@ type TagRepositoryInterface interface {
 	DeleteTag(tag entities.Tag) error
 	GetCategories(userID string) ([]entities.Tag, error)
 	GetTag(userID string, tagID string) (entities.Tag, error)
+	ThisTagExists(userID string, tagName string) (bool, error)
 }
