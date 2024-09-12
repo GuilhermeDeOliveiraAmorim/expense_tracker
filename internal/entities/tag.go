@@ -6,21 +6,21 @@ import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
-type Category struct {
+type Tag struct {
 	SharedEntity
 	UserID string `josn:"user_id"`
 	Name   string `json:"name"`
 	Color  string `json:"color"`
 }
 
-func NewCategory(userID string, name string, color string) (*Category, []util.ProblemDetails) {
-	validationErrors := ValidateCategory(userID, name, color)
+func NewTag(userID string, name string, color string) (*Tag, []util.ProblemDetails) {
+	validationErrors := ValidateTag(userID, name, color)
 
 	if len(validationErrors) > 0 {
 		return nil, validationErrors
 	}
 
-	return &Category{
+	return &Tag{
 		SharedEntity: *NewSharedEntity(),
 		UserID:       userID,
 		Name:         name,
@@ -28,7 +28,7 @@ func NewCategory(userID string, name string, color string) (*Category, []util.Pr
 	}, nil
 }
 
-func ValidateCategory(userID string, name string, color string) []util.ProblemDetails {
+func ValidateTag(userID string, name string, color string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
 
 	if userID == "" {
@@ -46,7 +46,7 @@ func ValidateCategory(userID string, name string, color string) []util.ProblemDe
 			Type:     "Validation Error",
 			Title:    "Bad Request",
 			Status:   400,
-			Detail:   "Missing category name",
+			Detail:   "Missing tag name",
 			Instance: util.RFC400,
 		})
 	}
@@ -56,7 +56,7 @@ func ValidateCategory(userID string, name string, color string) []util.ProblemDe
 			Type:     "Validation Error",
 			Title:    "Bad Request",
 			Status:   400,
-			Detail:   "Category name cannot exceed 100 characters",
+			Detail:   "Tag name cannot exceed 100 characters",
 			Instance: util.RFC400,
 		})
 	}
@@ -74,7 +74,7 @@ func ValidateCategory(userID string, name string, color string) []util.ProblemDe
 	return validationErrors
 }
 
-func (c *Category) ChangeName(newName string) []util.ProblemDetails {
+func (c *Tag) ChangeName(newName string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
 
 	if newName == "" {
@@ -82,7 +82,7 @@ func (c *Category) ChangeName(newName string) []util.ProblemDetails {
 			Type:     "Validation Error",
 			Title:    "Bad Request",
 			Status:   400,
-			Detail:   "Missing category name",
+			Detail:   "Missing tag name",
 			Instance: util.RFC400,
 		})
 	}
@@ -92,7 +92,7 @@ func (c *Category) ChangeName(newName string) []util.ProblemDetails {
 			Type:     "Validation Error",
 			Title:    "Bad Request",
 			Status:   400,
-			Detail:   "Category name cannot exceed 100 characters",
+			Detail:   "Tag name cannot exceed 100 characters",
 			Instance: util.RFC400,
 		})
 	}
@@ -107,7 +107,7 @@ func (c *Category) ChangeName(newName string) []util.ProblemDetails {
 	return validationErrors
 }
 
-func (c *Category) ChangeColor(newColor string) []util.ProblemDetails {
+func (c *Tag) ChangeColor(newColor string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
 
 	if !util.IsValidHexColor(newColor) {
