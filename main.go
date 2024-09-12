@@ -46,6 +46,9 @@ func main() {
 	categoryFactory := factory.NewCategoryFactory(db)
 	categoryHandler := handlers.NewCategoryHandler(categoryFactory)
 
+	tagFactory := factory.NewTagFactory(db)
+	tagHandler := handlers.NewTagHandler(tagFactory)
+
 	expenseFactory := factory.NewExpenseFactory(db)
 	expenseHandler := handlers.NewExpenseHandler(expenseFactory)
 
@@ -61,6 +64,11 @@ func main() {
 	r.GET("/categories/all", categoryHandler.GetCategories)
 	r.PATCH("/categories", categoryHandler.UpdateCategory)
 	r.GET("/categories/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
+
+	r.POST("/tags", tagHandler.CreateTag)
+	r.GET("/tags", tagHandler.GetTag)
+	r.DELETE("/tags", tagHandler.DeleteTag)
+	r.GET("/tags/all", tagHandler.GetTags)
 
 	r.POST("/expenses", expenseHandler.CreateExpense)
 	r.GET("/expenses/all", expenseHandler.GetExpenses)
