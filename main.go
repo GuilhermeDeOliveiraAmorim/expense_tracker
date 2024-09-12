@@ -24,6 +24,7 @@ func main() {
 
 	if err := db.AutoMigrate(
 		repositoriesgorm.Categories{},
+		repositoriesgorm.Tags{},
 		repositoriesgorm.Expenses{},
 		repositoriesgorm.Users{},
 	); err != nil {
@@ -35,7 +36,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"}, // Permitir seu frontend acessar
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
