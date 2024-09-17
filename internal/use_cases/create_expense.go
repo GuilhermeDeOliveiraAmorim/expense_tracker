@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
@@ -18,8 +19,9 @@ type CreateExpenseInputDto struct {
 }
 
 type CreateExpenseOutputDto struct {
-	ExpenseID string `json:"expense_id"`
-	Message   string `json:"message"`
+	ExpenseID      string `json:"expense_id"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type CreateExpenseUseCase struct {
@@ -115,7 +117,8 @@ func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpen
 	}
 
 	return CreateExpenseOutputDto{
-		ExpenseID: newExpense.ID,
-		Message:   "Expense created successfully",
+		ExpenseID:      newExpense.ID,
+		SuccessMessage: "Expense created successfully",
+		ContentMessage: fmt.Sprintf("Expense of %.2f added for %s", input.Amount, time.Time(newExpense.ExpenseDate).Format("02/01/2006")),
 	}, nil
 }

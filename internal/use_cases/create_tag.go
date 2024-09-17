@@ -15,8 +15,9 @@ type CreateTagInputDto struct {
 }
 
 type CreateTagOutputDto struct {
-	TagID   string `json:"tag_id"`
-	Message string `json:"message"`
+	TagID          string `json:"tag_id"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type CreateTagUseCase struct {
@@ -102,7 +103,8 @@ func (c *CreateTagUseCase) Execute(input CreateTagInputDto) (CreateTagOutputDto,
 	}
 
 	return CreateTagOutputDto{
-		TagID:   newTag.ID,
-		Message: "Tag created successfully",
+		TagID:          newTag.ID,
+		SuccessMessage: "Tag created successfully",
+		ContentMessage: "The " + newTag.Name + " tag was created",
 	}, nil
 }
