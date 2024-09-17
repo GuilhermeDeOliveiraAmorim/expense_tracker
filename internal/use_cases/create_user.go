@@ -87,15 +87,7 @@ func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputD
 
 	newLogin, newLoginErr := entities.NewLogin(input.Email, input.Password)
 	if newLoginErr != nil {
-		return CreateUserOutputDto{}, []util.ProblemDetails{
-			{
-				Type:     "Validation Error",
-				Title:    "Invalid email or password",
-				Status:   400,
-				Detail:   "Email or password is invalid",
-				Instance: util.RFC400,
-			},
-		}
+		return CreateUserOutputDto{}, newLoginErr
 	}
 
 	encryptEmailErr := newLogin.EncryptEmail()
