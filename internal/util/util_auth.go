@@ -15,14 +15,26 @@ func AuthMiddleware() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
+				Type:     "https://tools.ietf.org/html/rfc7235#section-3.1",
+				Title:    "Unauthorized",
+				Status:   http.StatusUnauthorized,
+				Detail:   "Missing or invalid Authorization header",
+				Instance: c.Request.URL.String(),
+			}})
 			c.Abort()
 			return
 		}
 
 		tokenString := strings.Split(authHeader, "Bearer ")
 		if len(tokenString) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
+				Type:     "https://tools.ietf.org/html/rfc7235#section-3.1",
+				Title:    "Unauthorized",
+				Status:   http.StatusUnauthorized,
+				Detail:   "Invalid Authorization header format",
+				Instance: c.Request.URL.String(),
+			}})
 			c.Abort()
 			return
 		}
@@ -36,14 +48,26 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		if err != nil {
 			fmt.Println("JWT Parse Error:", err)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
+				Type:     "https://tools.ietf.org/html/rfc7235#section-3.1",
+				Title:    "Unauthorized",
+				Status:   http.StatusUnauthorized,
+				Detail:   "Invalid token",
+				Instance: c.Request.URL.String(),
+			}})
 			c.Abort()
 			return
 		}
 
 		if !token.Valid {
 			fmt.Println("Invalid Token")
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
+				Type:     "https://tools.ietf.org/html/rfc7235#section-3.1",
+				Title:    "Unauthorized",
+				Status:   http.StatusUnauthorized,
+				Detail:   "Token is not valid",
+				Instance: c.Request.URL.String(),
+			}})
 			c.Abort()
 			return
 		}
