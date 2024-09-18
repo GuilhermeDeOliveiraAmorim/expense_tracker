@@ -8,6 +8,7 @@ import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	repositoriesgorm "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/repositories_gorm"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/interface/handlers"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
@@ -59,32 +60,39 @@ func main() {
 	presentersFactory := factory.NewPresentersFactory(db)
 	presentersHandler := handlers.NewPresentersHandler(presentersFactory)
 
-	r.POST("/categories", categoryHandler.CreateCategory)
-	r.GET("/categories", categoryHandler.GetCategory)
-	r.DELETE("/categories", categoryHandler.DeleteCategory)
-	r.GET("/categories/all", categoryHandler.GetCategories)
-	r.PATCH("/categories", categoryHandler.UpdateCategory)
-	r.GET("/categories/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
+	public := r.Group("/")
+	{
+		public.POST("/users", userHandler.CreateUser)
+		public.POST("/login", userHandler.Login)
+	}
 
-	r.POST("/tags", tagHandler.CreateTag)
-	r.GET("/tags", tagHandler.GetTag)
-	r.DELETE("/tags", tagHandler.DeleteTag)
-	r.GET("/tags/all", tagHandler.GetTags)
+	protected := r.Group("/").Use(util.AuthMiddleware())
+	{
+		protected.POST("/categories", categoryHandler.CreateCategory)
+		protected.GET("/categories", categoryHandler.GetCategory)
+		protected.DELETE("/categories", categoryHandler.DeleteCategory)
+		protected.GET("/categories/all", categoryHandler.GetCategories)
+		protected.PATCH("/categories", categoryHandler.UpdateCategory)
+		protected.GET("/categories/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
 
-	r.POST("/expenses", expenseHandler.CreateExpense)
-	r.GET("/expenses/all", expenseHandler.GetExpenses)
-	r.GET("/expenses", expenseHandler.GetExpense)
-	r.DELETE("/expenses", expenseHandler.DeleteExpense)
-	r.PATCH("/expenses", expenseHandler.UpdateExpense)
-	r.GET("/expenses/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
-	r.GET("/expenses/expense-simple-table-period", presentersHandler.ShowExpenseSimpleTablePeriod)
+		protected.POST("/tags", tagHandler.CreateTag)
+		protected.GET("/tags", tagHandler.GetTag)
+		protected.DELETE("/tags", tagHandler.DeleteTag)
+		protected.GET("/tags/all", tagHandler.GetTags)
 
-	r.POST("/users", userHandler.CreateUser)
-	r.GET("/users/all", userHandler.GetUsers)
-	r.GET("/users", userHandler.GetUser)
-	r.DELETE("/users", userHandler.DeleteUser)
-	r.PATCH("/users", userHandler.UpdateUser)
-	r.POST("/login", userHandler.Login)
+		protected.POST("/expenses", expenseHandler.CreateExpense)
+		protected.GET("/expenses/all", expenseHandler.GetExpenses)
+		protected.GET("/expenses", expenseHandler.GetExpense)
+		protected.DELETE("/expenses", expenseHandler.DeleteExpense)
+		protected.PATCH("/expenses", expenseHandler.UpdateExpense)
+		protected.GET("/expenses/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
+		protected.GET("/expenses/expense-simple-table-period", presentersHandler.ShowExpenseSimpleTablePeriod)
+
+		protected.GET("/users/all", userHandler.GetUsers)
+		protected.GET("/users", userHandler.GetUser)
+		protected.DELETE("/users", userHandler.DeleteUser)
+		protected.PATCH("/users", userHandler.UpdateUser)
+	}
 
 	r.Run(":8080")
 }
