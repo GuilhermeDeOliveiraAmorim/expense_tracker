@@ -11,7 +11,8 @@ type DeleteExpenseInputDto struct {
 }
 
 type DeleteExpenseOutputDto struct {
-	Message string `json:"message"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type DeleteExpenseUseCase struct {
@@ -82,6 +83,7 @@ func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpen
 	}
 
 	return DeleteExpenseOutputDto{
-		Message: "Expense deleted successfully",
+		SuccessMessage: "Expense deleted successfully",
+		ContentMessage: "Expense ID: " + input.ExpenseID,
 	}, nil
 }

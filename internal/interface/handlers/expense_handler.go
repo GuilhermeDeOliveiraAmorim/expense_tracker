@@ -126,10 +126,21 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 }
 
 func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
-	var input usecases.DeleteExpenseInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID := c.Query("user_id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
+	}
+
+	expenseID := c.Query("expense_id")
+	if expenseID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "expense_id is required"})
+		return
+	}
+
+	input := usecases.DeleteExpenseInputDto{
+		UserID:    userID,
+		ExpenseID: expenseID,
 	}
 
 	output, erros := h.expenseFactory.DeleteExpense.Execute(input)
