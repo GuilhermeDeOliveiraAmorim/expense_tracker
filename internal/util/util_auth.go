@@ -15,27 +15,25 @@ func AuthMiddleware() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
-				Type:     "https://tools.ietf.org/html/rfc7235#section-3.1",
-				Title:    "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
+				Type:     "Unauthorized",
+				Title:    "Missing Authorization Header",
 				Status:   http.StatusUnauthorized,
-				Detail:   "Missing or invalid Authorization header",
-				Instance: c.Request.URL.String(),
+				Detail:   "Authorization header is required",
+				Instance: RFC401,
 			}})
-			c.Abort()
 			return
 		}
 
 		tokenString := strings.Split(authHeader, "Bearer ")
 		if len(tokenString) != 2 {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
-				Type:     "https://tools.ietf.org/html/rfc7235#section-3.1",
-				Title:    "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
+				Type:     "Unauthorized",
+				Title:    "Invalid Authorization Format",
 				Status:   http.StatusUnauthorized,
-				Detail:   "Invalid Authorization header format",
-				Instance: c.Request.URL.String(),
+				Detail:   "Authorization header must be in the format 'Bearer <token>'",
+				Instance: RFC401,
 			}})
-			c.Abort()
 			return
 		}
 
@@ -47,32 +45,31 @@ func AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil {
-			fmt.Println("JWT Parse Error:", err)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
-				Type:     "https://tools.ietf.org/html/rfc7235#section-3.1",
-				Title:    "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
+				Type:     "Unauthorized",
+				Title:    "Invalid Token",
 				Status:   http.StatusUnauthorized,
-				Detail:   "Invalid token",
-				Instance: c.Request.URL.String(),
+				Detail:   "Token could not be parsed or is invalid",
+				Instance: RFC401,
 			}})
-			c.Abort()
 			return
 		}
 
 		if !token.Valid {
-			fmt.Println("Invalid Token")
-			c.JSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
-				Type:     "https://tools.ietf.org/html/rfc7235#section-3.1",
-				Title:    "Unauthorized",
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": ProblemDetails{
+				Type:     "Unauthorized",
+				Title:    "Invalid Token",
 				Status:   http.StatusUnauthorized,
 				Detail:   "Token is not valid",
-				Instance: c.Request.URL.String(),
+				Instance: RFC401,
 			}})
-			c.Abort()
 			return
 		}
 
-		c.Set("user", token.Claims.(jwt.MapClaims))
+		claims := token.Claims.(jwt.MapClaims)
+		userID := claims["user_id"].(string)
+		c.Set("userID", userID)
+		fmt.Println(userID)
 		c.Next()
 	}
 }
