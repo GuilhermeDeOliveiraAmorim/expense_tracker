@@ -98,16 +98,34 @@ func (h *TagHandler) GetTags(c *gin.Context) {
 }
 
 func (h *TagHandler) DeleteTag(c *gin.Context) {
-	var input usecases.DeleteTagInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID := c.Query("user_id")
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
 		return
 	}
 
-	output, err := h.tagFactory.DeleteTag.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+	tagID := c.Query("tag_id")
+	if tagID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "tag_id is required"})
 		return
+	}
+
+	input := usecases.DeleteTagInputDto{
+		UserID: userID,
+		TagID:  tagID,
+	}
+
+	output, erros := h.tagFactory.DeleteTag.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.JSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, output)
