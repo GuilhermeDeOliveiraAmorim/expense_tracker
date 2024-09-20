@@ -5,6 +5,7 @@ import (
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	usecases "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/use_cases"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +22,13 @@ func NewCategoryHandler(factory *factory.CategoryFactory) *CategoryHandler {
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	var input usecases.CreateCategoryInputDto
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
@@ -29,10 +36,10 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	if len(erros) > 0 {
 		for _, err := range erros {
 			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 				return
 			} else {
-				c.JSON(err.Status, gin.H{"error": err})
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 				return
 			}
 		}
@@ -43,15 +50,22 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 }
 
 func (h *CategoryHandler) GetCategory(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if len(err) > 0 {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
 	categoryID := c.Query("category_id")
 	if categoryID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "category_id is required"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing Category ID",
+			Status:   http.StatusBadRequest,
+			Detail:   "Category id is required",
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
@@ -60,19 +74,26 @@ func (h *CategoryHandler) GetCategory(c *gin.Context) {
 		CategoryID: categoryID,
 	}
 
-	output, err := h.categoryFactory.GetCategory.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
-		return
+	output, erros := h.categoryFactory.GetCategory.Execute(input)
+	if len(erros) > 0 {
+		for _, err := range erros {
+			if err.Status == 500 {
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+				return
+			} else {
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+				return
+			}
+		}
 	}
 
 	c.JSON(http.StatusOK, output)
 }
 
 func (h *CategoryHandler) GetCategories(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if len(err) > 0 {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
@@ -84,10 +105,10 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 	if len(errs) > 0 {
 		for _, err := range errs {
 			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 				return
 			} else {
-				c.JSON(err.Status, gin.H{"error": err})
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 				return
 			}
 		}
@@ -98,9 +119,32 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 }
 
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
+	userID, err := getUserID(c)
+	if len(err) > 0 {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
 	var input usecases.UpdateCategoryInputDto
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	if userID != input.UserID {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": util.ProblemDetails{
+			Type:     "Unauthorized",
+			Title:    "User ID mismatch",
+			Status:   http.StatusUnauthorized,
+			Detail:   "User without permission",
+			Instance: util.RFC401,
+		}})
 		return
 	}
 
@@ -108,10 +152,10 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	if len(errs) > 0 {
 		for _, err := range errs {
 			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 				return
 			} else {
-				c.JSON(err.Status, gin.H{"error": err})
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 				return
 			}
 		}
@@ -122,15 +166,22 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 }
 
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if len(err) > 0 {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
 
 	categoryID := c.Query("category_id")
 	if categoryID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "category_id is required"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing Category ID",
+			Status:   http.StatusBadRequest,
+			Detail:   "Category id is required",
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
@@ -143,10 +194,10 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	if len(erros) > 0 {
 		for _, err := range erros {
 			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 				return
 			} else {
-				c.JSON(err.Status, gin.H{"error": err})
+				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 				return
 			}
 		}
