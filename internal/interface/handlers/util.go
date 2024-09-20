@@ -34,3 +34,14 @@ func getUserID(c *gin.Context) (string, []util.ProblemDetails) {
 
 	return userIDStr, problemsDetails
 }
+
+type UpdateCategoryRequest struct {
+	CategoryID string `json:"category_id"`
+	Name       string `json:"name"`
+	Color      string `json:"color"`
+}
+
+type CreateCategoryRequest struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}

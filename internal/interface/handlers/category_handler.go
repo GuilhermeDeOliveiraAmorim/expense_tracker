@@ -20,8 +20,14 @@ func NewCategoryHandler(factory *factory.CategoryFactory) *CategoryHandler {
 }
 
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
-	var input usecases.CreateCategoryInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
+	userID, err := getUserID(c)
+	if len(err) > 0 {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+		return
+	}
+
+	var request CreateCategoryRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
 			Title:    "Did not bind JSON",
@@ -30,6 +36,12 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 			Instance: util.RFC400,
 		}})
 		return
+	}
+
+	input := usecases.CreateCategoryInputDto{
+		UserID: userID,
+		Name:   request.Name,
+		Color:  request.Color,
 	}
 
 	output, erros := h.categoryFactory.CreateCategory.Execute(input)
@@ -125,8 +137,8 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	var input usecases.UpdateCategoryInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
+	var request UpdateCategoryRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
 			Title:    "Did not bind JSON",
@@ -137,15 +149,11 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	if userID != input.UserID {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": util.ProblemDetails{
-			Type:     "Unauthorized",
-			Title:    "User ID mismatch",
-			Status:   http.StatusUnauthorized,
-			Detail:   "User without permission",
-			Instance: util.RFC401,
-		}})
-		return
+	input := usecases.UpdateCategoryInputDto{
+		UserID:     userID,
+		CategoryID: request.CategoryID,
+		Name:       request.Name,
+		Color:      request.Color,
 	}
 
 	output, errs := h.categoryFactory.UpdateCategory.Execute(input)
