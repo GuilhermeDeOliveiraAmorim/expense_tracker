@@ -8,7 +8,7 @@ import (
 
 type Category struct {
 	SharedEntity
-	UserID string `josn:"user_id"`
+	UserID string `json:"user_id"`
 	Name   string `json:"name"`
 	Color  string `json:"color"`
 }
