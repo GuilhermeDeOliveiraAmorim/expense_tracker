@@ -29,6 +29,29 @@ func NewUpdateUserUseCase(
 }
 
 func (c *UpdateUserUseCase) Execute(input UpdateUserInputDto) (UpdateUserOutputDto, []util.ProblemDetails) {
+	user, getUserErr := c.UserRepository.GetUser(input.UserID)
+	if getUserErr != nil {
+		return UpdateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Not Found",
+				Title:    "User not found",
+				Status:   404,
+				Detail:   getUserErr.Error(),
+				Instance: util.RFC404,
+			},
+		}
+	} else if !user.Active {
+		return UpdateUserOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Forbidden",
+				Title:    "User is not active",
+				Status:   403,
+				Detail:   "User is not active",
+				Instance: util.RFC403,
+			},
+		}
+	}
+
 	existingUser, GetUserByNameErr := c.UserRepository.ThisUserExists(input.Name)
 	if GetUserByNameErr != nil && strings.Compare(GetUserByNameErr.Error(), "user not found") > 0 {
 		return UpdateUserOutputDto{}, []util.ProblemDetails{
