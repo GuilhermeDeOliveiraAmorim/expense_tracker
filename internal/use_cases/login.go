@@ -40,8 +40,8 @@ func (c *LoginUseCase) Execute(input LoginInputDto) (LoginOutputDto, []util.Prob
 		return LoginOutputDto{}, hashEmailWithHMACErr
 	}
 
-	user, err := c.UserRepository.GetUserByEmail(email)
-	if err != nil {
+	user, getUserByEmailErr := c.UserRepository.GetUserByEmail(email)
+	if getUserByEmailErr != nil {
 		return LoginOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
@@ -49,6 +49,16 @@ func (c *LoginUseCase) Execute(input LoginInputDto) (LoginOutputDto, []util.Prob
 				Status:   500,
 				Detail:   "Error getting user by email",
 				Instance: util.RFC500,
+			},
+		}
+	} else if !user.Active {
+		return LoginOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Forbidden",
+				Title:    "User is not active",
+				Status:   403,
+				Detail:   "User is not active",
+				Instance: util.RFC403,
 			},
 		}
 	}
@@ -67,8 +77,8 @@ func (c *LoginUseCase) Execute(input LoginInputDto) (LoginOutputDto, []util.Prob
 
 	claims := jwt.MapClaims{
 		"user_id": user.ID,
-		"email":   user.Login.Email,
 		"exp":     time.Now().Add(time.Hour * 72).Unix(),
+		"iat":     time.Now().Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -80,7 +90,7 @@ func (c *LoginUseCase) Execute(input LoginInputDto) (LoginOutputDto, []util.Prob
 		return LoginOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
-				Title:    "Error creating JWT token",
+				Title:    "JWT token Error",
 				Status:   500,
 				Detail:   "Error creating JWT token",
 				Instance: util.RFC500,
