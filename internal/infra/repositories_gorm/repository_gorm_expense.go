@@ -47,8 +47,14 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 }
 
 func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
-	if err := e.gorm.Model(&Expenses{}).Where("id = ? AND user_id = ?", expense.ID, expense.UserID).Select("Active", "DeactivatedAt").Updates(map[string]interface{}{"active": expense.Active, "updated_at": expense.DeactivatedAt}).Error; err != nil {
-		return err
+	result := e.gorm.Model(&Categories{}).Where("id = ? AND user_id = ?", expense.ID, expense.UserID).Updates(Categories{
+		Active:        expense.Active,
+		DeactivatedAt: expense.DeactivatedAt,
+		UpdatedAt:     expense.UpdatedAt,
+	})
+
+	if result.Error != nil {
+		return errors.New(result.Error.Error())
 	}
 
 	return nil

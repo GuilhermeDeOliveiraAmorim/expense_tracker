@@ -35,8 +35,14 @@ func (c *CategoryRepository) CreateCategory(category entities.Category) error {
 }
 
 func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
-	if err := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ?", category.ID, category.UserID).Select("Active", "DeactivatedAt").Updates(map[string]interface{}{"active": category.Active, "updated_at": category.DeactivatedAt}).Error; err != nil {
-		return err
+	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ?", category.ID, category.UserID).Updates(Categories{
+		Active:        category.Active,
+		DeactivatedAt: category.DeactivatedAt,
+		UpdatedAt:     category.UpdatedAt,
+	})
+
+	if result.Error != nil {
+		return errors.New(result.Error.Error())
 	}
 
 	return nil
