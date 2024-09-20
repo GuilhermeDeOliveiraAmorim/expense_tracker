@@ -35,7 +35,8 @@ func (c *TagRepository) CreateTag(tag entities.Tag) error {
 }
 
 func (c *TagRepository) DeleteTag(tag entities.Tag) error {
-	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ?", tag.ID, tag.UserID).Updates(Categories{
+	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ?", tag.ID, tag.UserID).
+		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Tags{
 		Active:        tag.Active,
 		DeactivatedAt: tag.DeactivatedAt,
 		UpdatedAt:     tag.UpdatedAt,

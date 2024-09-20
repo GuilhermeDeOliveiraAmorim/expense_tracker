@@ -31,14 +31,14 @@ func NewDeleteExpenseUseCase(
 }
 
 func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpenseOutputDto, []util.ProblemDetails) {
-	user, GetUserErr := c.UserRepository.GetUser(input.UserID)
-	if GetUserErr != nil {
+	user, getUserErr := c.UserRepository.GetUser(input.UserID)
+	if getUserErr != nil {
 		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "User not found",
 				Status:   404,
-				Detail:   GetUserErr.Error(),
+				Detail:   getUserErr.Error(),
 				Instance: util.RFC404,
 			},
 		}
@@ -54,14 +54,14 @@ func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpen
 		}
 	}
 
-	expenseToDelete, GetExpenseErr := c.ExpenseRepository.GetExpense(input.UserID, input.ExpenseID)
-	if GetExpenseErr != nil {
+	expenseToDelete, getExpenseErr := c.ExpenseRepository.GetExpense(input.UserID, input.ExpenseID)
+	if getExpenseErr != nil {
 		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "Expense not found",
 				Status:   404,
-				Detail:   GetExpenseErr.Error(),
+				Detail:   getExpenseErr.Error(),
 				Instance: util.RFC404,
 			},
 		}
@@ -69,14 +69,14 @@ func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpen
 
 	expenseToDelete.Deactivate()
 
-	DeleteExpenseErr := c.ExpenseRepository.DeleteExpense(expenseToDelete)
-	if DeleteExpenseErr != nil {
+	deleteExpenseErr := c.ExpenseRepository.DeleteExpense(expenseToDelete)
+	if deleteExpenseErr != nil {
 		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Err deleting expense",
 				Status:   500,
-				Detail:   DeleteExpenseErr.Error(),
+				Detail:   deleteExpenseErr.Error(),
 				Instance: util.RFC500,
 			},
 		}

@@ -35,7 +35,8 @@ func (c *CategoryRepository) CreateCategory(category entities.Category) error {
 }
 
 func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
-	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ?", category.ID, category.UserID).Updates(Categories{
+	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ?", category.ID, category.UserID).
+		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Categories{
 		Active:        category.Active,
 		DeactivatedAt: category.DeactivatedAt,
 		UpdatedAt:     category.UpdatedAt,
@@ -57,18 +58,18 @@ func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, 
 	var categories []entities.Category
 
 	if len(categoriesModel) > 0 {
-		for _, categoriesodel := range categoriesModel {
+		for _, categoryModel := range categoriesModel {
 			category := entities.Category{
 				SharedEntity: entities.SharedEntity{
-					ID:            categoriesodel.ID,
-					Active:        categoriesodel.Active,
-					CreatedAt:     categoriesodel.CreatedAt,
-					UpdatedAt:     categoriesodel.UpdatedAt,
-					DeactivatedAt: categoriesodel.DeactivatedAt,
+					ID:            categoryModel.ID,
+					Active:        categoryModel.Active,
+					CreatedAt:     categoryModel.CreatedAt,
+					UpdatedAt:     categoryModel.UpdatedAt,
+					DeactivatedAt: categoryModel.DeactivatedAt,
 				},
-				UserID: categoriesodel.UserID,
-				Name:   categoriesodel.Name,
-				Color:  categoriesodel.Color,
+				UserID: categoryModel.UserID,
+				Name:   categoryModel.Name,
+				Color:  categoryModel.Color,
 			}
 
 			categories = append(categories, category)

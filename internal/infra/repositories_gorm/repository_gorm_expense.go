@@ -47,7 +47,8 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 }
 
 func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
-	result := e.gorm.Model(&Categories{}).Where("id = ? AND user_id = ?", expense.ID, expense.UserID).Updates(Categories{
+	result := e.gorm.Model(&Expenses{}).Where("id = ? AND user_id = ?", expense.ID, expense.UserID).
+		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Expenses{
 		Active:        expense.Active,
 		DeactivatedAt: expense.DeactivatedAt,
 		UpdatedAt:     expense.UpdatedAt,
@@ -63,7 +64,7 @@ func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
 func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, error) {
 	var expensesModel []Expenses
 
-	if err := e.gorm.Where("user_id = ?", userID).Find(&expensesModel).Error; err != nil {
+	if err := e.gorm.Preload("Tags").Preload("Category").Where("user_id = ?", userID).Find(&expensesModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -71,14 +72,9 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 
 	if len(expensesModel) > 0 {
 		for _, expenseModel := range expensesModel {
-			var categoryModel Categories
-
-			result := e.gorm.Model(&Categories{}).Where("id = ?", expenseModel.CategoryID).First(&categoryModel)
-			if result.Error != nil {
-				if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-					return []entities.Expense{}, errors.New("error searching expense (" + expenseModel.ID + ") category")
-				}
-				return []entities.Expense{}, errors.New(result.Error.Error())
+			var tagIDs []string
+			for _, tag := range expenseModel.Tags {
+				tagIDs = append(tagIDs, tag.ID)
 			}
 
 			expense := entities.Expense{
@@ -91,9 +87,10 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 				},
 				UserID:      expenseModel.UserID,
 				Amount:      expenseModel.Amount,
-				CategoryID:  categoryModel.ID,
-				Notes:       expenseModel.Notes,
 				ExpenseDate: expenseModel.ExpanseDate,
+				Notes:       expenseModel.Notes,
+				CategoryID:  expenseModel.Category.ID,
+				TagIDs:      tagIDs,
 			}
 
 			expenses = append(expenses, expense)
@@ -105,9 +102,8 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 
 func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entities.Expense, error) {
 	var expenseModel Expenses
-	var categoryModel Categories
 
-	result := e.gorm.Model(&Expenses{}).Where("id = ? AND user_id = ?", expenseID, userID).First(&expenseModel)
+	result := e.gorm.Preload("Tags").Preload("Category").Where("id = ? AND user_id = ?", expenseID, userID).First(&expenseModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Expense{}, errors.New("expense not found")
@@ -115,12 +111,10 @@ func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entitie
 		return entities.Expense{}, errors.New(result.Error.Error())
 	}
 
-	result = e.gorm.Model(&Categories{}).Where("id = ?", expenseModel.CategoryID).First(&categoryModel)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return entities.Expense{}, errors.New("error searching expense (" + expenseModel.ID + ") category")
-		}
-		return entities.Expense{}, errors.New(result.Error.Error())
+	var tagIDs []string
+
+	for _, tag := range expenseModel.Tags {
+		tagIDs = append(tagIDs, tag.ID)
 	}
 
 	expense := entities.Expense{
@@ -135,7 +129,8 @@ func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entitie
 		Amount:      expenseModel.Amount,
 		ExpenseDate: expenseModel.ExpanseDate,
 		Notes:       expenseModel.Notes,
-		CategoryID:  categoryModel.ID,
+		CategoryID:  expenseModel.Category.ID,
+		TagIDs:      tagIDs,
 	}
 
 	return expense, nil
