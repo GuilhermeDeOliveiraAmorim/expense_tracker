@@ -5,6 +5,7 @@ import (
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	usecases "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/use_cases"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,36 +22,45 @@ func NewUserHandler(factory *factory.UserFactory) *UserHandler {
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var input usecases.CreateUserInputDto
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
-	output, erros := h.userFactory.CreateUser.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.userFactory.CreateUser.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusCreated, output)
 }
 
 func (h *UserHandler) GetUser(c *gin.Context) {
-	var input usecases.GetUserInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID := c.Param("user_id")
+	if userID == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing User ID",
+			Status:   http.StatusBadRequest,
+			Detail:   "User id is required",
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
-	output, err := h.userFactory.GetUser.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+	input := usecases.GetUserInputDto{
+		UserID: userID,
+	}
+
+	output, errs := h.userFactory.GetUser.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
 		return
 	}
 
@@ -59,9 +69,9 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	var input usecases.GetUsersInputDto
-	output, err := h.userFactory.GetUsers.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+	output, errs := h.userFactory.GetUsers.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
 		return
 	}
 
@@ -71,44 +81,46 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 func (h *UserHandler) UpdateUser(c *gin.Context) {
 	var input usecases.UpdateUserInputDto
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
-	output, erros := h.userFactory.UpdateUser.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.userFactory.UpdateUser.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
 }
 
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	var input usecases.DeleteUserInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID := c.Param("user_id")
+	if userID == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing User ID",
+			Status:   http.StatusBadRequest,
+			Detail:   "User id is required",
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
-	output, erros := h.userFactory.DeleteUser.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	input := usecases.DeleteUserInputDto{
+		UserID: userID,
+	}
+
+	output, errs := h.userFactory.DeleteUser.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
@@ -117,21 +129,20 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 func (h *UserHandler) Login(c *gin.Context) {
 	var input usecases.LoginInputDto
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
-	output, erros := h.userFactory.Login.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.userFactory.Login.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)

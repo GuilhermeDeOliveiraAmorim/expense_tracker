@@ -5,6 +5,7 @@ import (
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	usecases "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/use_cases"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,38 +20,58 @@ func NewExpenseHandler(factory *factory.ExpenseFactory) *ExpenseHandler {
 }
 
 func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
-	var input usecases.CreateExpenseInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
-	output, erros := h.expenseFactory.CreateExpense.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	var request CreateExpenseRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	input := usecases.CreateExpenseInputDto{
+		UserID:      userID,
+		CategoryID:  request.CategoryID,
+		Amount:      request.Amount,
+		Tags:        request.Tags,
+		ExpenseDate: request.ExpenseDate,
+		Notes:       request.Notes,
+	}
+
+	output, errs := h.expenseFactory.CreateExpense.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusCreated, output)
 }
 
 func (h *ExpenseHandler) GetExpense(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
-	expenseID := c.Query("expense_id")
+	expenseID := c.Param("expense_id")
 	if expenseID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "expense_id is required"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing Expense ID",
+			Status:   http.StatusBadRequest,
+			Detail:   "Expense id is required",
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
@@ -59,26 +80,19 @@ func (h *ExpenseHandler) GetExpense(c *gin.Context) {
 		ExpenseID: expenseID,
 	}
 
-	output, erros := h.expenseFactory.GetExpense.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.expenseFactory.GetExpense.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
 }
 
 func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
@@ -86,55 +100,68 @@ func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
 		UserID: userID,
 	}
 
-	output, erros := h.expenseFactory.GetExpenses.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.expenseFactory.GetExpenses.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
 }
 
 func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
-	var input usecases.UpdateExpenseInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
+	}
+
+	var request UpdateExpenseRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	input := usecases.UpdateExpenseInputDto{
+		UserID:      userID,
+		ExpenseID:   request.ExpenseID,
+		Amount:      request.Amount,
+		ExpenseDate: request.ExpenseDate,
+		CategoryID:  request.CategoryID,
+		Notes:       request.Notes,
 	}
 
 	output, erros := h.expenseFactory.UpdateExpense.Execute(input)
 	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+		handleErrors(c, erros)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
 }
 
 func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
-	expenseID := c.Query("expense_id")
+	expenseID := c.Param("expense_id")
 	if expenseID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "expense_id is required"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing Expense ID",
+			Status:   http.StatusBadRequest,
+			Detail:   "Expense id is required",
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
@@ -143,17 +170,10 @@ func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 		ExpenseID: expenseID,
 	}
 
-	output, erros := h.expenseFactory.DeleteExpense.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.expenseFactory.DeleteExpense.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)

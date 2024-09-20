@@ -21,8 +21,8 @@ func NewCategoryHandler(factory *factory.CategoryFactory) *CategoryHandler {
 
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	userID, err := getUserID(c)
-	if len(err) > 0 {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
@@ -44,18 +44,10 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		Color:  request.Color,
 	}
 
-	output, erros := h.categoryFactory.CreateCategory.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
-
+	output, errs := h.categoryFactory.CreateCategory.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusCreated, output)
@@ -63,14 +55,13 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 
 func (h *CategoryHandler) GetCategory(c *gin.Context) {
 	userID, err := getUserID(c)
-	if len(err) > 0 {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
-	categoryID := c.Query("category_id")
+	categoryID := c.Param("category_id")
 	if categoryID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "category_id is required"})
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
 			Title:    "Missing Category ID",
@@ -86,17 +77,10 @@ func (h *CategoryHandler) GetCategory(c *gin.Context) {
 		CategoryID: categoryID,
 	}
 
-	output, erros := h.categoryFactory.GetCategory.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.categoryFactory.GetCategory.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
@@ -104,8 +88,8 @@ func (h *CategoryHandler) GetCategory(c *gin.Context) {
 
 func (h *CategoryHandler) GetCategories(c *gin.Context) {
 	userID, err := getUserID(c)
-	if len(err) > 0 {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
@@ -115,16 +99,8 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 
 	output, errs := h.categoryFactory.GetCategories.Execute(input)
 	if len(errs) > 0 {
-		for _, err := range errs {
-			if err.Status == 500 {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
-
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
@@ -132,8 +108,8 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	userID, err := getUserID(c)
-	if len(err) > 0 {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
@@ -158,16 +134,8 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	output, errs := h.categoryFactory.UpdateCategory.Execute(input)
 	if len(errs) > 0 {
-		for _, err := range errs {
-			if err.Status == 500 {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
-
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
@@ -175,14 +143,13 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	userID, err := getUserID(c)
-	if len(err) > 0 {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err})
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
-	categoryID := c.Query("category_id")
+	categoryID := c.Param("category_id")
 	if categoryID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "category_id is required"})
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
 			Title:    "Missing Category ID",
@@ -198,17 +165,10 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 		CategoryID: categoryID,
 	}
 
-	output, erros := h.categoryFactory.DeleteCategory.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.categoryFactory.DeleteCategory.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)

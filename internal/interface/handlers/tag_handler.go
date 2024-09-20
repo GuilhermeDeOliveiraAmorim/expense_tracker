@@ -5,6 +5,7 @@ import (
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	usecases "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/use_cases"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,39 +20,55 @@ func NewTagHandler(factory *factory.TagFactory) *TagHandler {
 }
 
 func (h *TagHandler) CreateTag(c *gin.Context) {
-	var input usecases.CreateTagInputDto
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
-	output, erros := h.tagFactory.CreateTag.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	var request CreateTagRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
+		return
+	}
 
+	input := usecases.CreateTagInputDto{
+		UserID: userID,
+		Name:   request.Name,
+		Color:  request.Color,
+	}
+
+	output, errs := h.tagFactory.CreateTag.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusCreated, output)
 }
 
 func (h *TagHandler) GetTag(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
-	tagID := c.Query("tag_id")
+	tagID := c.Param("tag_id")
 	if tagID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "tag_id is required"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing Tag ID",
+			Status:   http.StatusBadRequest,
+			Detail:   "Tag id is required",
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
@@ -60,9 +77,9 @@ func (h *TagHandler) GetTag(c *gin.Context) {
 		TagID:  tagID,
 	}
 
-	output, err := h.tagFactory.GetTag.Execute(input)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
+	output, errs := h.tagFactory.GetTag.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
 		return
 	}
 
@@ -70,9 +87,9 @@ func (h *TagHandler) GetTag(c *gin.Context) {
 }
 
 func (h *TagHandler) GetTags(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
@@ -82,31 +99,29 @@ func (h *TagHandler) GetTags(c *gin.Context) {
 
 	output, errs := h.tagFactory.GetTags.Execute(input)
 	if len(errs) > 0 {
-		for _, err := range errs {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
-
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
 }
 
 func (h *TagHandler) DeleteTag(c *gin.Context) {
-	userID := c.Query("user_id")
-	if userID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id is required"})
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
 		return
 	}
 
-	tagID := c.Query("tag_id")
+	tagID := c.Param("tag_id")
 	if tagID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "tag_id is required"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing Tag ID",
+			Status:   http.StatusBadRequest,
+			Detail:   "Tag id is required",
+			Instance: util.RFC400,
+		}})
 		return
 	}
 
@@ -115,17 +130,10 @@ func (h *TagHandler) DeleteTag(c *gin.Context) {
 		TagID:  tagID,
 	}
 
-	output, erros := h.tagFactory.DeleteTag.Execute(input)
-	if len(erros) > 0 {
-		for _, err := range erros {
-			if err.Status == 500 {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			} else {
-				c.JSON(err.Status, gin.H{"error": err})
-				return
-			}
-		}
+	output, errs := h.tagFactory.DeleteTag.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
 	}
 
 	c.JSON(http.StatusOK, output)
