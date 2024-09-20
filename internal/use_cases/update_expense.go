@@ -15,7 +15,9 @@ type UpdateExpenseInputDto struct {
 }
 
 type UpdateExpenseOutputDto struct {
-	ExpenseID string `json:"expense_id"`
+	ExpenseID      string `json:"expense_id"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type UpdateExpenseUseCase struct {
@@ -112,6 +114,8 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 	}
 
 	return UpdateExpenseOutputDto{
-		ExpenseID: input.ExpenseID,
+		ExpenseID:      input.ExpenseID,
+		SuccessMessage: "Expense updated successfully",
+		ContentMessage: "Expense ID: " + input.ExpenseID,
 	}, nil
 }

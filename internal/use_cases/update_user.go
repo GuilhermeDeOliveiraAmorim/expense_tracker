@@ -13,7 +13,9 @@ type UpdateUserInputDto struct {
 }
 
 type UpdateUserOutputDto struct {
-	UserID string `json:"user_id"`
+	UserID         string `json:"user_id"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type UpdateUserUseCase struct {
@@ -113,6 +115,8 @@ func (c *UpdateUserUseCase) Execute(input UpdateUserInputDto) (UpdateUserOutputD
 	}
 
 	return UpdateUserOutputDto{
-		UserID: searchedUser.ID,
+		UserID:         searchedUser.ID,
+		SuccessMessage: "User updated successfully",
+		ContentMessage: "Your new name is " + searchedUser.Name + "!",
 	}, nil
 }

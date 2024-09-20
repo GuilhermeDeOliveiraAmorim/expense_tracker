@@ -13,7 +13,9 @@ type UpdateCategoryInputDto struct {
 }
 
 type UpdateCategoryOutputDto struct {
-	CategoryID string `json:"category_id"`
+	CategoryID     string `json:"category_id"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type UpdateCategoryUseCase struct {
@@ -92,6 +94,8 @@ func (c *UpdateCategoryUseCase) Execute(input UpdateCategoryInputDto) (UpdateCat
 	}
 
 	return UpdateCategoryOutputDto{
-		CategoryID: searchedCategory.ID,
+		CategoryID:     searchedCategory.ID,
+		SuccessMessage: "Category updated successfully",
+		ContentMessage: "Category ID: " + searchedCategory.ID,
 	}, nil
 }

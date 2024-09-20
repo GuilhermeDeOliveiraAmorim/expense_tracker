@@ -10,7 +10,8 @@ type DeleteUserInputDto struct {
 }
 
 type DeleteUserOutputDto struct {
-	Message string `json:"message"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type DeleteUserUseCase struct {
@@ -55,6 +56,7 @@ func (c *DeleteUserUseCase) Execute(input DeleteUserInputDto) (DeleteUserOutputD
 	}
 
 	return DeleteUserOutputDto{
-		Message: "User deleted successfully",
+		SuccessMessage: "User deleted successfully",
+		ContentMessage: "User ID: " + input.UserID,
 	}, nil
 }
