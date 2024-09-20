@@ -11,7 +11,8 @@ type DeleteCategoryInputDto struct {
 }
 
 type DeleteCategoryOutputDto struct {
-	Message string `json:"message"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type DeleteCategoryUseCase struct {
@@ -30,14 +31,14 @@ func NewDeleteCategoryUseCase(
 }
 
 func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCategoryOutputDto, []util.ProblemDetails) {
-	user, err := c.UserRepository.GetUser(input.UserID)
-	if err != nil {
+	user, GetUserErr := c.UserRepository.GetUser(input.UserID)
+	if GetUserErr != nil {
 		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "User not found",
 				Status:   404,
-				Detail:   err.Error(),
+				Detail:   GetUserErr.Error(),
 				Instance: util.RFC404,
 			},
 		}
@@ -53,14 +54,14 @@ func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCat
 		}
 	}
 
-	categoryToDelete, err := c.CategoryRepository.GetCategory(input.UserID, input.CategoryID)
-	if err != nil {
+	categoryToDelete, GetCategoryErr := c.CategoryRepository.GetCategory(input.UserID, input.CategoryID)
+	if GetCategoryErr != nil {
 		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "Category not found",
 				Status:   404,
-				Detail:   err.Error(),
+				Detail:   GetCategoryErr.Error(),
 				Instance: util.RFC404,
 			},
 		}
@@ -68,20 +69,21 @@ func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCat
 
 	categoryToDelete.Deactivate()
 
-	err = c.CategoryRepository.DeleteCategory(categoryToDelete)
-	if err != nil {
+	DeleteCategoryErr := c.CategoryRepository.DeleteCategory(categoryToDelete)
+	if DeleteCategoryErr != nil {
 		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Err deleting category",
 				Status:   500,
-				Detail:   err.Error(),
+				Detail:   DeleteCategoryErr.Error(),
 				Instance: util.RFC500,
 			},
 		}
 	}
 
 	return DeleteCategoryOutputDto{
-		Message: "Category deleted successfully",
+		SuccessMessage: "Category deleted successfully",
+		ContentMessage: "Category ID: " + input.CategoryID,
 	}, nil
 }

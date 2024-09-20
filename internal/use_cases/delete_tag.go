@@ -11,7 +11,8 @@ type DeleteTagInputDto struct {
 }
 
 type DeleteTagOutputDto struct {
-	Message string `json:"message"`
+	SuccessMessage string `json:"success_message"`
+	ContentMessage string `json:"content_message"`
 }
 
 type DeleteTagUseCase struct {
@@ -30,14 +31,14 @@ func NewDeleteTagUseCase(
 }
 
 func (c *DeleteTagUseCase) Execute(input DeleteTagInputDto) (DeleteTagOutputDto, []util.ProblemDetails) {
-	user, err := c.UserRepository.GetUser(input.UserID)
-	if err != nil {
+	user, GetUserErr := c.UserRepository.GetUser(input.UserID)
+	if GetUserErr != nil {
 		return DeleteTagOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "User not found",
 				Status:   404,
-				Detail:   err.Error(),
+				Detail:   GetUserErr.Error(),
 				Instance: util.RFC404,
 			},
 		}
@@ -53,14 +54,14 @@ func (c *DeleteTagUseCase) Execute(input DeleteTagInputDto) (DeleteTagOutputDto,
 		}
 	}
 
-	tagToDelete, err := c.TagRepository.GetTag(input.UserID, input.TagID)
-	if err != nil {
+	tagToDelete, GetTagErr := c.TagRepository.GetTag(input.UserID, input.TagID)
+	if GetTagErr != nil {
 		return DeleteTagOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "Tag not found",
 				Status:   404,
-				Detail:   err.Error(),
+				Detail:   GetTagErr.Error(),
 				Instance: util.RFC404,
 			},
 		}
@@ -68,20 +69,21 @@ func (c *DeleteTagUseCase) Execute(input DeleteTagInputDto) (DeleteTagOutputDto,
 
 	tagToDelete.Deactivate()
 
-	err = c.TagRepository.DeleteTag(tagToDelete)
-	if err != nil {
+	DeleteTagErr := c.TagRepository.DeleteTag(tagToDelete)
+	if DeleteTagErr != nil {
 		return DeleteTagOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Err deleting tag",
 				Status:   500,
-				Detail:   err.Error(),
+				Detail:   DeleteTagErr.Error(),
 				Instance: util.RFC500,
 			},
 		}
 	}
 
 	return DeleteTagOutputDto{
-		Message: "Tag deleted successfully",
+		SuccessMessage: "Tag deleted successfully",
+		ContentMessage: "Tag ID: " + input.TagID,
 	}, nil
 }

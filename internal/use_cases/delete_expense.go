@@ -31,14 +31,14 @@ func NewDeleteExpenseUseCase(
 }
 
 func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpenseOutputDto, []util.ProblemDetails) {
-	user, err := c.UserRepository.GetUser(input.UserID)
-	if err != nil {
+	user, GetUserErr := c.UserRepository.GetUser(input.UserID)
+	if GetUserErr != nil {
 		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "User not found",
 				Status:   404,
-				Detail:   err.Error(),
+				Detail:   GetUserErr.Error(),
 				Instance: util.RFC404,
 			},
 		}
@@ -54,14 +54,14 @@ func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpen
 		}
 	}
 
-	expenseToDelete, err := c.ExpenseRepository.GetExpense(input.UserID, input.ExpenseID)
-	if err != nil {
+	expenseToDelete, GetExpenseErr := c.ExpenseRepository.GetExpense(input.UserID, input.ExpenseID)
+	if GetExpenseErr != nil {
 		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "Expense not found",
 				Status:   404,
-				Detail:   err.Error(),
+				Detail:   GetExpenseErr.Error(),
 				Instance: util.RFC404,
 			},
 		}
