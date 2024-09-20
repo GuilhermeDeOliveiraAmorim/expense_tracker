@@ -60,7 +60,7 @@ func (h *CategoryHandler) GetCategory(c *gin.Context) {
 		return
 	}
 
-	categoryID := c.Param("category_id")
+	categoryID := c.Query("category_id")
 	if categoryID == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
@@ -148,7 +148,7 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	categoryID := c.Param("category_id")
+	categoryID := c.Query("category_id")
 	if categoryID == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",

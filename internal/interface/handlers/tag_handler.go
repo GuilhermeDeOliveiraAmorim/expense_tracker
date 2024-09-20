@@ -60,7 +60,7 @@ func (h *TagHandler) GetTag(c *gin.Context) {
 		return
 	}
 
-	tagID := c.Param("tag_id")
+	tagID := c.Query("tag_id")
 	if tagID == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
@@ -113,7 +113,7 @@ func (h *TagHandler) DeleteTag(c *gin.Context) {
 		return
 	}
 
-	tagID := c.Param("tag_id")
+	tagID := c.Query("tag_id")
 	if tagID == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",

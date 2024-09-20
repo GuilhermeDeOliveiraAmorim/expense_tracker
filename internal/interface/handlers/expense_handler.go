@@ -63,7 +63,7 @@ func (h *ExpenseHandler) GetExpense(c *gin.Context) {
 		return
 	}
 
-	expenseID := c.Param("expense_id")
+	expenseID := c.Query("expense_id")
 	if expenseID == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
@@ -153,7 +153,7 @@ func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 		return
 	}
 
-	expenseID := c.Param("expense_id")
+	expenseID := c.Query("expense_id")
 	if expenseID == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
