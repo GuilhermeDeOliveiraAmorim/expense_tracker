@@ -35,7 +35,7 @@ func (u *UserRepository) CreateUser(user entities.User) error {
 }
 
 func (u *UserRepository) DeleteUser(user entities.User) error {
-	result := u.gorm.Model(&Users{}).Where("id = ?", user.ID).
+	result := u.gorm.Model(&Users{}).Where("id = ? AND active = true", user.ID).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Users{
 		Active:        user.Active,
 		DeactivatedAt: user.DeactivatedAt,
@@ -115,20 +115,6 @@ func (c *UserRepository) UpdateUser(user entities.User) error {
 	return nil
 }
 
-func (c *UserRepository) ThisUserExists(userName string) (bool, error) {
-	var userModel Users
-
-	result := c.gorm.Model(&Users{}).Where("name = ?", userName).First(&userModel)
-	if result.Error != nil {
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return false, errors.New("user not found")
-		}
-		return false, errors.New(result.Error.Error())
-	}
-
-	return true, nil
-}
-
 func (c *UserRepository) GetUserByEmail(userEmail string) (entities.User, error) {
 	var userModel Users
 
@@ -156,6 +142,20 @@ func (c *UserRepository) GetUserByEmail(userEmail string) (entities.User, error)
 	}
 
 	return user, nil
+}
+
+func (c *UserRepository) ThisUserExists(userName string) (bool, error) {
+	var userModel Users
+
+	result := c.gorm.Model(&Users{}).Where("name = ?", userName).First(&userModel)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return false, errors.New("user not found")
+		}
+		return false, errors.New(result.Error.Error())
+	}
+
+	return true, nil
 }
 
 func (c *UserRepository) ThisUserEmailExists(userEmail string) (bool, error) {

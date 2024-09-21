@@ -47,7 +47,7 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 }
 
 func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
-	result := e.gorm.Model(&Expenses{}).Where("id = ? AND user_id = ?", expense.ID, expense.UserID).
+	result := e.gorm.Model(&Expenses{}).Where("id = ? AND user_id = ? AND active = true", expense.ID, expense.UserID).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Expenses{
 		Active:        expense.Active,
 		DeactivatedAt: expense.DeactivatedAt,
@@ -64,7 +64,7 @@ func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
 func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, error) {
 	var expensesModel []Expenses
 
-	if err := e.gorm.Preload("Tags").Preload("Category").Where("user_id = ?", userID).Find(&expensesModel).Error; err != nil {
+	if err := e.gorm.Preload("Tags").Preload("Category").Where("user_id = ? AND active = true", userID).Find(&expensesModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -103,7 +103,7 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entities.Expense, error) {
 	var expenseModel Expenses
 
-	result := e.gorm.Preload("Tags").Preload("Category").Where("id = ? AND user_id = ?", expenseID, userID).First(&expenseModel)
+	result := e.gorm.Preload("Tags").Preload("Category").Where("id = ? AND user_id = ? AND active = true", expenseID, userID).First(&expenseModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Expense{}, errors.New("expense not found")
@@ -137,7 +137,7 @@ func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entitie
 }
 
 func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
-	result := e.gorm.Model(&Expenses{}).Where("id", expense.ID).Updates(Expenses{
+	result := e.gorm.Model(&Expenses{}).Where("id AND active = true", expense.ID).Updates(Expenses{
 		Amount:     expense.Amount,
 		Notes:      expense.Notes,
 		CategoryID: expense.CategoryID,
