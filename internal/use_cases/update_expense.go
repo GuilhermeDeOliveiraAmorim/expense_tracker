@@ -73,34 +73,34 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 	}
 
 	if input.Amount > 0 {
-		err := searchedExpense.Expense.ChangeAmount(input.Amount)
+		err := searchedExpense.ChangeAmount(input.Amount)
 		if len(err) > 0 {
 			return UpdateExpenseOutputDto{}, err
 		}
 	}
 
 	if input.ExpenseDate != "" {
-		err := searchedExpense.Expense.ChangeExpenseDate(input.ExpenseDate)
+		err := searchedExpense.ChangeExpenseDate(input.ExpenseDate)
 		if len(err) > 0 {
 			return UpdateExpenseOutputDto{}, err
 		}
 	}
 
 	if input.CategoryID != "" {
-		err := searchedExpense.Expense.ChangeCategory(input.CategoryID)
+		err := searchedExpense.ChangeCategory(input.CategoryID)
 		if len(err) > 0 {
 			return UpdateExpenseOutputDto{}, err
 		}
 	}
 
 	if input.Notes != "" {
-		err := searchedExpense.Expense.ChangeNotes(input.Notes)
+		err := searchedExpense.ChangeNotes(input.Notes)
 		if len(err) > 0 {
 			return UpdateExpenseOutputDto{}, err
 		}
 	}
 
-	UpdateExpenseErr := c.ExpenseRepository.UpdateExpense(searchedExpense.Expense)
+	UpdateExpenseErr := c.ExpenseRepository.UpdateExpense(searchedExpense)
 	if UpdateExpenseErr != nil {
 		return UpdateExpenseOutputDto{}, []util.ProblemDetails{
 			{

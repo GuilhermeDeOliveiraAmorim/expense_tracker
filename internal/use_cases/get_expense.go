@@ -68,6 +68,6 @@ func (c *GetExpenseUseCase) Execute(input GetExpenseInputDto) (GetExpenseOutputD
 	}
 
 	return GetExpenseOutputDto{
-		Expense: searchedExpense.Expense,
+		Expense: searchedExpense,
 	}, nil
 }

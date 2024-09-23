@@ -14,6 +14,8 @@ type Expense struct {
 	CategoryID  string    `json:"category_id"`
 	TagIDs      []string  `json:"tag_ids"`
 	Notes       string    `json:"notes"`
+	Category    Category  `json:"category"`
+	Tags        []Tag     `json:"tags"`
 }
 
 func NewExpense(userID string, amount float64, expenseDate time.Time, categoryID string, notes string) (*Expense, []util.ProblemDetails) {

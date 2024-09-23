@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
-	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"gorm.io/gorm"
 )
 
@@ -62,14 +61,14 @@ func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
 	return nil
 }
 
-func (e *ExpenseRepository) GetExpenses(userID string) ([]repositories.GetExpense, error) {
+func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, error) {
 	var expensesModel []Expenses
 
 	if err := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = true", userID).Find(&expensesModel).Error; err != nil {
-		return []repositories.GetExpense{}, err
+		return []entities.Expense{}, err
 	}
 
-	var expenses []repositories.GetExpense
+	var expenses []entities.Expense
 
 	if len(expensesModel) > 0 {
 		for _, expenseModel := range expensesModel {
@@ -121,28 +120,26 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]repositories.GetExpens
 				Notes:       expenseModel.Notes,
 				CategoryID:  expenseModel.Category.ID,
 				TagIDs:      tagsIDs,
+				Category:    category,
+				Tags:        tags,
 			}
 
-			expenses = append(expenses, repositories.GetExpense{
-				Expense:  expense,
-				Category: category,
-				Tags:     tags,
-			})
+			expenses = append(expenses, expense)
 		}
 	}
 
 	return expenses, nil
 }
 
-func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (repositories.GetExpense, error) {
+func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entities.Expense, error) {
 	var expenseModel Expenses
 
 	result := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("id = ? AND user_id = ? AND active = true", expenseID, userID).First(&expenseModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return repositories.GetExpense{}, errors.New("expense not found")
+			return entities.Expense{}, errors.New("expense not found")
 		}
-		return repositories.GetExpense{}, errors.New(result.Error.Error())
+		return entities.Expense{}, errors.New(result.Error.Error())
 	}
 
 	category := entities.Category{
@@ -193,15 +190,11 @@ func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (reposit
 		Notes:       expenseModel.Notes,
 		CategoryID:  expenseModel.Category.ID,
 		TagIDs:      tagsIDs,
+		Category:    category,
+		Tags:        tags,
 	}
 
-	getExpense := repositories.GetExpense{
-		Expense:  expense,
-		Category: category,
-		Tags:     tags,
-	}
-
-	return getExpense, nil
+	return expense, nil
 }
 
 func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
