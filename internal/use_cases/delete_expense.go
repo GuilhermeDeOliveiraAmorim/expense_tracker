@@ -67,9 +67,9 @@ func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpen
 		}
 	}
 
-	expenseToDelete.Deactivate()
+	expenseToDelete.Expense.Deactivate()
 
-	deleteExpenseErr := c.ExpenseRepository.DeleteExpense(expenseToDelete)
+	deleteExpenseErr := c.ExpenseRepository.DeleteExpense(expenseToDelete.Expense)
 	if deleteExpenseErr != nil {
 		return DeleteExpenseOutputDto{}, []util.ProblemDetails{
 			{

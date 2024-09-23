@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"gorm.io/gorm"
 )
 
@@ -61,20 +62,49 @@ func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
 	return nil
 }
 
-func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, error) {
+func (e *ExpenseRepository) GetExpenses(userID string) ([]repositories.GetExpense, error) {
 	var expensesModel []Expenses
 
-	if err := e.gorm.Preload("Tags").Preload("Category").Where("user_id = ? AND active = true", userID).Find(&expensesModel).Error; err != nil {
-		return nil, err
+	if err := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = true", userID).Find(&expensesModel).Error; err != nil {
+		return []repositories.GetExpense{}, err
 	}
 
-	var expenses []entities.Expense
+	var expenses []repositories.GetExpense
 
 	if len(expensesModel) > 0 {
 		for _, expenseModel := range expensesModel {
-			var tagIDs []string
+			var tags []entities.Tag
+			var tagsIDs []string
+
+			category := entities.Category{
+
+				SharedEntity: entities.SharedEntity{
+					ID:            expenseModel.Category.ID,
+					Active:        expenseModel.Category.Active,
+					CreatedAt:     expenseModel.Category.CreatedAt,
+					UpdatedAt:     expenseModel.Category.UpdatedAt,
+					DeactivatedAt: expenseModel.Category.DeactivatedAt,
+				},
+				UserID: expenseModel.Category.UserID,
+				Name:   expenseModel.Category.Name,
+				Color:  expenseModel.Category.Color,
+			}
+
 			for _, tag := range expenseModel.Tags {
-				tagIDs = append(tagIDs, tag.ID)
+				tags = append(tags, entities.Tag{
+					SharedEntity: entities.SharedEntity{
+						ID:            tag.ID,
+						Active:        tag.Active,
+						CreatedAt:     tag.CreatedAt,
+						UpdatedAt:     tag.UpdatedAt,
+						DeactivatedAt: tag.DeactivatedAt,
+					},
+					UserID: tag.UserID,
+					Name:   tag.Name,
+					Color:  tag.Color,
+				})
+
+				tagsIDs = append(tagsIDs, tag.ID)
 			}
 
 			expense := entities.Expense{
@@ -90,31 +120,63 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 				ExpenseDate: expenseModel.ExpanseDate,
 				Notes:       expenseModel.Notes,
 				CategoryID:  expenseModel.Category.ID,
-				TagIDs:      tagIDs,
+				TagIDs:      tagsIDs,
 			}
 
-			expenses = append(expenses, expense)
+			expenses = append(expenses, repositories.GetExpense{
+				Expense:  expense,
+				Category: category,
+				Tags:     tags,
+			})
 		}
 	}
 
 	return expenses, nil
 }
 
-func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entities.Expense, error) {
+func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (repositories.GetExpense, error) {
 	var expenseModel Expenses
 
-	result := e.gorm.Preload("Tags").Preload("Category").Where("id = ? AND user_id = ? AND active = true", expenseID, userID).First(&expenseModel)
+	result := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("id = ? AND user_id = ? AND active = true", expenseID, userID).First(&expenseModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return entities.Expense{}, errors.New("expense not found")
+			return repositories.GetExpense{}, errors.New("expense not found")
 		}
-		return entities.Expense{}, errors.New(result.Error.Error())
+		return repositories.GetExpense{}, errors.New(result.Error.Error())
 	}
 
-	var tagIDs []string
+	category := entities.Category{
+
+		SharedEntity: entities.SharedEntity{
+			ID:            expenseModel.Category.ID,
+			Active:        expenseModel.Category.Active,
+			CreatedAt:     expenseModel.Category.CreatedAt,
+			UpdatedAt:     expenseModel.Category.UpdatedAt,
+			DeactivatedAt: expenseModel.Category.DeactivatedAt,
+		},
+		UserID: expenseModel.Category.UserID,
+		Name:   expenseModel.Category.Name,
+		Color:  expenseModel.Category.Color,
+	}
+
+	var tags []entities.Tag
+	var tagsIDs []string
 
 	for _, tag := range expenseModel.Tags {
-		tagIDs = append(tagIDs, tag.ID)
+		tags = append(tags, entities.Tag{
+			SharedEntity: entities.SharedEntity{
+				ID:            tag.ID,
+				Active:        tag.Active,
+				CreatedAt:     tag.CreatedAt,
+				UpdatedAt:     tag.UpdatedAt,
+				DeactivatedAt: tag.DeactivatedAt,
+			},
+			UserID: tag.UserID,
+			Name:   tag.Name,
+			Color:  tag.Color,
+		})
+
+		tagsIDs = append(tagsIDs, tag.ID)
 	}
 
 	expense := entities.Expense{
@@ -130,10 +192,16 @@ func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entitie
 		ExpenseDate: expenseModel.ExpanseDate,
 		Notes:       expenseModel.Notes,
 		CategoryID:  expenseModel.Category.ID,
-		TagIDs:      tagIDs,
+		TagIDs:      tagsIDs,
 	}
 
-	return expense, nil
+	getExpense := repositories.GetExpense{
+		Expense:  expense,
+		Category: category,
+		Tags:     tags,
+	}
+
+	return getExpense, nil
 }
 
 func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
