@@ -35,7 +35,7 @@ func (c *TagRepository) CreateTag(tag entities.Tag) error {
 }
 
 func (c *TagRepository) DeleteTag(tag entities.Tag) error {
-	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = true", tag.ID, tag.UserID).
+	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tag.ID, tag.UserID, true).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Tags{
 		Active:        tag.Active,
 		DeactivatedAt: tag.DeactivatedAt,
@@ -51,7 +51,7 @@ func (c *TagRepository) DeleteTag(tag entities.Tag) error {
 
 func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
 	var tagsModel []Tags
-	if err := c.gorm.Where("user_id = ? AND active = true", userID).Find(&tagsModel).Error; err != nil {
+	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&tagsModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -82,7 +82,7 @@ func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
 func (c *TagRepository) GetTag(userID string, tagID string) (entities.Tag, error) {
 	var tagModel Tags
 
-	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = true", tagID, userID).First(&tagModel)
+	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tagID, userID, true).First(&tagModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Tag{}, errors.New("tag not found")
@@ -109,7 +109,7 @@ func (c *TagRepository) GetTag(userID string, tagID string) (entities.Tag, error
 func (c *TagRepository) ThisTagExists(userID string, tagName string) (bool, error) {
 	var tagModel Tags
 
-	result := c.gorm.Model(&Tags{}).Where("name = ? AND user_id = ? AND active = true", tagName, userID).First(&tagModel)
+	result := c.gorm.Model(&Tags{}).Where("name = ? AND user_id = ? AND active = ?", tagName, userID, true).First(&tagModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("tag not found")

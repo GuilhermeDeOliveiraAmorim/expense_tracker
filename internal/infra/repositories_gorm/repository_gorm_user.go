@@ -35,7 +35,7 @@ func (u *UserRepository) CreateUser(user entities.User) error {
 }
 
 func (u *UserRepository) DeleteUser(user entities.User) error {
-	result := u.gorm.Model(&Users{}).Where("id = ? AND active = true", user.ID).
+	result := u.gorm.Model(&Users{}).Where("id = ? AND active = ?", user.ID, true).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Users{
 		Active:        user.Active,
 		DeactivatedAt: user.DeactivatedAt,

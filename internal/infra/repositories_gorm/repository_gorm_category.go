@@ -35,7 +35,7 @@ func (c *CategoryRepository) CreateCategory(category entities.Category) error {
 }
 
 func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
-	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = true", category.ID, category.UserID).
+	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", category.ID, category.UserID, true).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Categories{
 		Active:        category.Active,
 		DeactivatedAt: category.DeactivatedAt,
@@ -51,7 +51,7 @@ func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
 
 func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, error) {
 	var categoriesModel []Categories
-	if err := c.gorm.Where("user_id = ? AND active = true", userID).Find(&categoriesModel).Error; err != nil {
+	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&categoriesModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -82,7 +82,7 @@ func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, 
 func (c *CategoryRepository) GetCategory(userID string, categoryID string) (entities.Category, error) {
 	var categoryModel Categories
 
-	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = true", categoryID, userID).First(&categoryModel)
+	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", categoryID, userID, true).First(&categoryModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Category{}, errors.New("category not found")
@@ -107,7 +107,7 @@ func (c *CategoryRepository) GetCategory(userID string, categoryID string) (enti
 }
 
 func (c *CategoryRepository) UpdateCategory(category entities.Category) error {
-	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = true", category.ID, category.UserID).Updates(Categories{
+	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", category.ID, category.UserID, true).Updates(Categories{
 		Name:      category.Name,
 		Color:     category.Color,
 		UpdatedAt: category.UpdatedAt,
@@ -123,7 +123,7 @@ func (c *CategoryRepository) UpdateCategory(category entities.Category) error {
 func (c *CategoryRepository) ThisCategoryExists(userID string, categoryName string) (bool, error) {
 	var categoryModel Categories
 
-	result := c.gorm.Model(&Categories{}).Where("name = ? AND user_id = ? AND active = true", categoryName, userID).First(&categoryModel)
+	result := c.gorm.Model(&Categories{}).Where("name = ? AND user_id = ? AND active = ?", categoryName, userID, true).First(&categoryModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("category not found")
