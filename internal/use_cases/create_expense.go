@@ -14,8 +14,8 @@ type CreateExpenseInputDto struct {
 	Amount      float64  `json:"amount,string"`
 	ExpenseDate string   `json:"expense_date"`
 	CategoryID  string   `json:"category_id"`
-	Tags        []string `json:"tags"`
 	Notes       string   `json:"notes"`
+	Tags        []string `json:"tags"`
 }
 
 type CreateExpenseOutputDto struct {
