@@ -104,25 +104,6 @@ func (e *Expense) ChangeAmount(newAmount float64) []util.ProblemDetails {
 	}
 }
 
-func (e *Expense) AddTagByID(tagID string) []util.ProblemDetails {
-	var validationErrors []util.ProblemDetails
-
-	if tagID == "" {
-		validationErrors = append(validationErrors, util.ProblemDetails{
-			Type:     "Validation Error",
-			Title:    "Invalid Tag ID",
-			Status:   400,
-			Detail:   "Tag ID cannot be empty",
-			Instance: util.RFC400,
-		})
-		return validationErrors
-	}
-
-	e.TagIDs = append(e.TagIDs, tagID)
-
-	return validationErrors
-}
-
 func (e *Expense) ChangeExpenseDate(expenseDate string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
 
@@ -191,4 +172,47 @@ func (e *Expense) ChangeNotes(newNotes string) []util.ProblemDetails {
 
 		return validationErrors
 	}
+}
+
+func (e *Expense) ChangeTags(newTags []string) []util.ProblemDetails {
+	var validationErrors []util.ProblemDetails
+
+	for _, newTag := range newTags {
+		if newTag == "" {
+			validationErrors = append(validationErrors, util.ProblemDetails{
+				Type:     "Validation Error",
+				Title:    "Invalid Tag ID",
+				Status:   400,
+				Detail:   "Tag ID cannot be empty",
+				Instance: util.RFC400,
+			})
+		}
+	}
+
+	if len(validationErrors) > 0 {
+		return validationErrors
+	}
+
+	e.TagIDs = newTags
+	e.UpdatedAt = time.Now()
+	return validationErrors
+}
+
+func (e *Expense) AddTagByID(tagID string) []util.ProblemDetails {
+	var validationErrors []util.ProblemDetails
+
+	if tagID == "" {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Invalid Tag ID",
+			Status:   400,
+			Detail:   "Tag ID cannot be empty",
+			Instance: util.RFC400,
+		})
+		return validationErrors
+	}
+
+	e.TagIDs = append(e.TagIDs, tagID)
+
+	return validationErrors
 }
