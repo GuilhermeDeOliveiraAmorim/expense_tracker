@@ -77,21 +77,23 @@ func main() {
 
 		protected.POST("/tags", tagHandler.CreateTag)
 		protected.GET("/tags", tagHandler.GetTag)
-		protected.DELETE("/tags", tagHandler.DeleteTag)
 		protected.GET("/tags/all", tagHandler.GetTags)
+		protected.PATCH("/tags", tagHandler.UpdateTag)
+		protected.DELETE("/tags", tagHandler.DeleteTag)
 
 		protected.POST("/expenses", expenseHandler.CreateExpense)
-		protected.GET("/expenses/all", expenseHandler.GetExpenses)
 		protected.GET("/expenses", expenseHandler.GetExpense)
-		protected.DELETE("/expenses", expenseHandler.DeleteExpense)
+		protected.GET("/expenses/all", expenseHandler.GetExpenses)
 		protected.PATCH("/expenses", expenseHandler.UpdateExpense)
+		protected.DELETE("/expenses", expenseHandler.DeleteExpense)
+
+		protected.GET("/users", userHandler.GetUser)
+		protected.GET("/users/all", userHandler.GetUsers)
+		protected.PATCH("/users", userHandler.UpdateUser)
+		protected.DELETE("/users", userHandler.DeleteUser)
+
 		protected.GET("/expenses/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
 		protected.GET("/expenses/expense-simple-table-period", presentersHandler.ShowExpenseSimpleTablePeriod)
-
-		protected.GET("/users/all", userHandler.GetUsers)
-		protected.GET("/users", userHandler.GetUser)
-		protected.DELETE("/users", userHandler.DeleteUser)
-		protected.PATCH("/users", userHandler.UpdateUser)
 	}
 
 	r.Run(":8080")

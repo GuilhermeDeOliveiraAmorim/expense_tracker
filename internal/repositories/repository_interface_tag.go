@@ -8,4 +8,5 @@ type TagRepositoryInterface interface {
 	GetTags(userID string) ([]entities.Tag, error)
 	GetTag(userID string, tagID string) (entities.Tag, error)
 	ThisTagExists(userID string, tagName string) (bool, error)
+	UpdateTag(tag entities.Tag) error
 }

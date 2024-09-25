@@ -53,6 +53,12 @@ type UpdateCategoryRequest struct {
 	Color      string `json:"color"`
 }
 
+type UpdateTagRequest struct {
+	TagID string `json:"tag_id"`
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
 type CreateCategoryRequest struct {
 	Name  string `json:"name"`
 	Color string `json:"color"`

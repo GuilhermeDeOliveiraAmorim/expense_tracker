@@ -184,3 +184,30 @@ func (c *TagRepository) ThisTagExists(userID string, tagName string) (bool, erro
 
 	return true, nil
 }
+
+func (c *TagRepository) UpdateTag(tag entities.Tag) error {
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	result := tx.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tag.ID, tag.UserID, true).Updates(Tags{
+		Name:      tag.Name,
+		Color:     tag.Color,
+		UpdatedAt: tag.UpdatedAt,
+	})
+
+	if result.Error != nil {
+		tx.Rollback()
+		return errors.New(result.Error.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
+	}
+
+	return nil
+}

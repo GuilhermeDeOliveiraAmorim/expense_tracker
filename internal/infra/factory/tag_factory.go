@@ -11,6 +11,7 @@ type TagFactory struct {
 	DeleteTag *usecases.DeleteTagUseCase
 	GetTags   *usecases.GetTagsUseCase
 	GetTag    *usecases.GetTagUseCase
+	UpdateTag *usecases.UpdateTagUseCase
 }
 
 func NewTagFactory(db *gorm.DB) *TagFactory {
@@ -21,11 +22,13 @@ func NewTagFactory(db *gorm.DB) *TagFactory {
 	deleteTag := usecases.NewDeleteTagUseCase(tagRepository, userRepository)
 	getTags := usecases.NewGetTagsUseCase(tagRepository, userRepository)
 	getTag := usecases.NewGetTagUseCase(tagRepository, userRepository)
+	updateTag := usecases.NewUpdateTagUseCase(tagRepository, userRepository)
 
 	return &TagFactory{
 		CreateTag: createTag,
 		DeleteTag: deleteTag,
 		GetTags:   getTags,
 		GetTag:    getTag,
+		UpdateTag: updateTag,
 	}
 }

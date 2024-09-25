@@ -138,3 +138,38 @@ func (h *TagHandler) DeleteTag(c *gin.Context) {
 
 	c.JSON(http.StatusOK, output)
 }
+
+func (h *TagHandler) UpdateTag(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+		return
+	}
+
+	var request UpdateTagRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Did not bind JSON",
+			Status:   http.StatusBadRequest,
+			Detail:   err.Error(),
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	input := usecases.UpdateTagInputDto{
+		UserID: userID,
+		TagID:  request.TagID,
+		Name:   request.Name,
+		Color:  request.Color,
+	}
+
+	output, errs := h.tagFactory.UpdateTag.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}
