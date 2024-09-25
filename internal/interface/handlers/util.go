@@ -62,16 +62,17 @@ type CreateExpenseRequest struct {
 	Amount      float64  `json:"amount,string"`
 	ExpenseDate string   `json:"expense_date"`
 	CategoryID  string   `json:"category_id"`
-	Tags        []string `json:"tags"`
 	Notes       string   `json:"notes"`
+	Tags        []string `json:"tags"`
 }
 
 type UpdateExpenseRequest struct {
-	ExpenseID   string  `json:"expense_id"`
-	Amount      float64 `json:"amount,string"`
-	ExpenseDate string  `json:"expense_date"`
-	CategoryID  string  `json:"category_id"`
-	Notes       string  `json:"notes"`
+	ExpenseID   string   `json:"expense_id"`
+	Amount      float64  `json:"amount,string"`
+	ExpenseDate string   `json:"expense_date"`
+	CategoryID  string   `json:"category_id"`
+	Notes       string   `json:"notes"`
+	Tags        []string `json:"tags"`
 }
 
 type CreateTagRequest struct {

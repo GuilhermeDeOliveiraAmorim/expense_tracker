@@ -135,6 +135,7 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 		ExpenseDate: request.ExpenseDate,
 		CategoryID:  request.CategoryID,
 		Notes:       request.Notes,
+		Tags:        request.Tags,
 	}
 
 	output, erros := h.expenseFactory.UpdateExpense.Execute(input)
