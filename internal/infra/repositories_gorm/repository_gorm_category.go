@@ -18,7 +18,15 @@ func NewCategoryRepository(gorm *gorm.DB) *CategoryRepository {
 }
 
 func (c *CategoryRepository) CreateCategory(category entities.Category) error {
-	if err := c.gorm.Create(&Categories{
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	if err := tx.Create(&Categories{
 		ID:            category.ID,
 		Active:        category.Active,
 		CreatedAt:     category.CreatedAt,
@@ -35,7 +43,15 @@ func (c *CategoryRepository) CreateCategory(category entities.Category) error {
 }
 
 func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
-	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", category.ID, category.UserID, true).
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	result := tx.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", category.ID, category.UserID, true).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Categories{
 		Active:        category.Active,
 		DeactivatedAt: category.DeactivatedAt,
@@ -43,15 +59,29 @@ func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
 	})
 
 	if result.Error != nil {
+		tx.Rollback()
 		return errors.New(result.Error.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return nil
 }
 
 func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, error) {
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var categoriesModel []Categories
-	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&categoriesModel).Error; err != nil {
+	if err := tx.Where("user_id = ? AND active = ?", userID, true).Find(&categoriesModel).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -76,13 +106,25 @@ func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, 
 		}
 	}
 
+	if err := tx.Commit().Error; err != nil {
+		return nil, errors.New("failed to commit transaction: " + err.Error())
+	}
+
 	return categories, nil
 }
 
 func (c *CategoryRepository) GetCategory(userID string, categoryID string) (entities.Category, error) {
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var categoryModel Categories
 
-	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", categoryID, userID, true).First(&categoryModel)
+	result := tx.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", categoryID, userID, true).First(&categoryModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Category{}, errors.New("category not found")
@@ -103,32 +145,61 @@ func (c *CategoryRepository) GetCategory(userID string, categoryID string) (enti
 		Color:  categoryModel.Color,
 	}
 
+	if err := tx.Commit().Error; err != nil {
+		return entities.Category{}, errors.New("failed to commit transaction: " + err.Error())
+	}
+
 	return category, nil
 }
 
 func (c *CategoryRepository) UpdateCategory(category entities.Category) error {
-	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", category.ID, category.UserID, true).Updates(Categories{
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	result := tx.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", category.ID, category.UserID, true).Updates(Categories{
 		Name:      category.Name,
 		Color:     category.Color,
 		UpdatedAt: category.UpdatedAt,
 	})
 
 	if result.Error != nil {
+		tx.Rollback()
 		return errors.New(result.Error.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return nil
 }
 
 func (c *CategoryRepository) ThisCategoryExists(userID string, categoryName string) (bool, error) {
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var categoryModel Categories
 
-	result := c.gorm.Model(&Categories{}).Where("name = ? AND user_id = ? AND active = ?", categoryName, userID, true).First(&categoryModel)
+	result := tx.Model(&Categories{}).Where("name = ? AND user_id = ? AND active = ?", categoryName, userID, true).First(&categoryModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("category not found")
 		}
 		return false, errors.New(result.Error.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return false, errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return true, nil

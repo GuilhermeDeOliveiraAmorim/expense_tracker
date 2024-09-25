@@ -18,7 +18,15 @@ func NewTagRepository(gorm *gorm.DB) *TagRepository {
 }
 
 func (c *TagRepository) CreateTag(tag entities.Tag) error {
-	if err := c.gorm.Create(&Tags{
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	if err := tx.Create(&Tags{
 		ID:            tag.ID,
 		Active:        tag.Active,
 		CreatedAt:     tag.CreatedAt,
@@ -28,14 +36,27 @@ func (c *TagRepository) CreateTag(tag entities.Tag) error {
 		Name:          tag.Name,
 		Color:         tag.Color,
 	}).Error; err != nil {
+		tx.Rollback()
 		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return nil
 }
 
 func (c *TagRepository) DeleteTag(tag entities.Tag) error {
-	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tag.ID, tag.UserID, true).
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	result := tx.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tag.ID, tag.UserID, true).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Tags{
 		Active:        tag.Active,
 		DeactivatedAt: tag.DeactivatedAt,
@@ -43,15 +64,29 @@ func (c *TagRepository) DeleteTag(tag entities.Tag) error {
 	})
 
 	if result.Error != nil {
+		tx.Rollback()
 		return errors.New(result.Error.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return nil
 }
 
 func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var tagsModel []Tags
-	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&tagsModel).Error; err != nil {
+	if err := tx.Where("user_id = ? AND active = ?", userID, true).Find(&tagsModel).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 
@@ -76,14 +111,27 @@ func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
 		}
 	}
 
+	if err := tx.Commit().Error; err != nil {
+		return nil, errors.New("failed to commit transaction: " + err.Error())
+	}
+
 	return tags, nil
 }
 
 func (c *TagRepository) GetTag(userID string, tagID string) (entities.Tag, error) {
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var tagModel Tags
 
-	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tagID, userID, true).First(&tagModel)
+	result := tx.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tagID, userID, true).First(&tagModel)
 	if result.Error != nil {
+		tx.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Tag{}, errors.New("tag not found")
 		}
@@ -103,18 +151,35 @@ func (c *TagRepository) GetTag(userID string, tagID string) (entities.Tag, error
 		Color:  tagModel.Color,
 	}
 
+	if err := tx.Commit().Error; err != nil {
+		return entities.Tag{}, errors.New("failed to commit transaction: " + err.Error())
+	}
+
 	return tag, nil
 }
 
 func (c *TagRepository) ThisTagExists(userID string, tagName string) (bool, error) {
+	tx := c.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var tagModel Tags
 
-	result := c.gorm.Model(&Tags{}).Where("name = ? AND user_id = ? AND active = ?", tagName, userID, true).First(&tagModel)
+	result := tx.Model(&Tags{}).Where("name = ? AND user_id = ? AND active = ?", tagName, userID, true).First(&tagModel)
 	if result.Error != nil {
+		tx.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("tag not found")
 		}
 		return false, errors.New(result.Error.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return false, errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return true, nil

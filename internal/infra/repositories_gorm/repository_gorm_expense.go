@@ -19,6 +19,12 @@ func NewExpenseRepository(gorm *gorm.DB) *ExpenseRepository {
 
 func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 	tx := e.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
 
 	if err := tx.Create(&Expenses{
 		ID:            expense.ID,
@@ -43,10 +49,22 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 		}
 	}
 
-	return tx.Commit().Error
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
+	}
+
+	return nil
 }
 
 func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
+	tx := e.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	result := e.gorm.Model(&Expenses{}).Where("id = ? AND user_id = ? AND active = ?", expense.ID, expense.UserID, true).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Expenses{
 		Active:        expense.Active,
@@ -55,16 +73,30 @@ func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
 	})
 
 	if result.Error != nil {
+		tx.Rollback()
 		return errors.New(result.Error.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return nil
 }
 
 func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, error) {
+	tx := e.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var expensesModel []Expenses
 
-	if err := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Error; err != nil {
+	if err := tx.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Error; err != nil {
+		tx.Rollback()
 		return []entities.Expense{}, err
 	}
 
@@ -72,9 +104,6 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 
 	if len(expensesModel) > 0 {
 		for _, expenseModel := range expensesModel {
-			var tags []entities.Tag
-			var tagsIDs []string
-
 			category := entities.Category{
 
 				SharedEntity: entities.SharedEntity{
@@ -88,6 +117,9 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 				Name:   expenseModel.Category.Name,
 				Color:  expenseModel.Category.Color,
 			}
+
+			var tags []entities.Tag
+			var tagsIDs []string
 
 			for _, tag := range expenseModel.Tags {
 				tags = append(tags, entities.Tag{
@@ -128,14 +160,27 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 		}
 	}
 
+	if err := tx.Commit().Error; err != nil {
+		return []entities.Expense{}, errors.New("failed to commit transaction: " + err.Error())
+	}
+
 	return expenses, nil
 }
 
 func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entities.Expense, error) {
+	tx := e.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var expenseModel Expenses
 
-	result := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("id = ? AND user_id = ? AND active = ?", expenseID, userID, true).First(&expenseModel)
+	result := tx.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("id = ? AND user_id = ? AND active = ?", expenseID, userID, true).First(&expenseModel)
 	if result.Error != nil {
+		tx.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Expense{}, errors.New("expense not found")
 		}
@@ -194,10 +239,21 @@ func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entitie
 		Tags:        tags,
 	}
 
+	if err := tx.Commit().Error; err != nil {
+		return entities.Expense{}, errors.New("failed to commit transaction")
+	}
+
 	return expense, nil
 }
 
 func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
+	tx := e.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
 	result := e.gorm.Model(&Expenses{}).Where("id = ? AND active = ?", expense.ID, true).Updates(Expenses{
 		Amount:     expense.Amount,
 		Notes:      expense.Notes,
@@ -206,7 +262,25 @@ func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
 	})
 
 	if result.Error != nil {
+		tx.Rollback()
 		return errors.New(result.Error.Error())
+	}
+
+	var existingExpense Expenses
+	if err := tx.Preload("Tags").First(&existingExpense, "id = ? AND active = ?", expense.ID, true).Error; err != nil {
+		tx.Rollback()
+		return errors.New("failed to load existing expenses: " + err.Error())
+	}
+
+	if len(existingExpense.Tags) > 0 {
+		if err := tx.Model(&existingExpense).Association("Tags").Clear(); err != nil {
+			tx.Rollback()
+			return errors.New("failed to clear existing tags: " + err.Error())
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return nil
