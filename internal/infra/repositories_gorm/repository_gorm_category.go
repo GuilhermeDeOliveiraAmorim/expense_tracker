@@ -51,6 +51,17 @@ func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
 		}
 	}()
 
+	var expenseCount int64
+	if err := tx.Model(&Expenses{}).Where("category_id = ? AND active = ?", category.ID, true).Count(&expenseCount).Error; err != nil {
+		tx.Rollback()
+		return errors.New("failed to check expenses associated with the category: " + err.Error())
+	}
+
+	if expenseCount > 0 {
+		tx.Rollback()
+		return errors.New("cannot delete category: there are expenses associated with this category")
+	}
+
 	result := tx.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", category.ID, category.UserID, true).
 		Select("Active", "DeactivatedAt", "UpdatedAt").Updates(Categories{
 		Active:        category.Active,
