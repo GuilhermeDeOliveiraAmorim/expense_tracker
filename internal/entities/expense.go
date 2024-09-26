@@ -177,15 +177,17 @@ func (e *Expense) ChangeNotes(newNotes string) []util.ProblemDetails {
 func (e *Expense) ChangeTags(newTags []string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
 
-	for _, newTag := range newTags {
-		if newTag == "" {
-			validationErrors = append(validationErrors, util.ProblemDetails{
-				Type:     "Validation Error",
-				Title:    "Invalid Tag ID",
-				Status:   400,
-				Detail:   "Tag ID cannot be empty",
-				Instance: util.RFC400,
-			})
+	if len(newTags) > 0 {
+		for _, newTag := range newTags {
+			if newTag == "" {
+				validationErrors = append(validationErrors, util.ProblemDetails{
+					Type:     "Validation Error",
+					Title:    "Invalid Tag ID",
+					Status:   400,
+					Detail:   "Tag ID cannot be empty",
+					Instance: util.RFC400,
+				})
+			}
 		}
 	}
 

@@ -255,10 +255,11 @@ func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
 	}()
 
 	result := e.gorm.Model(&Expenses{}).Where("id = ? AND active = ?", expense.ID, true).Updates(Expenses{
-		Amount:     expense.Amount,
-		Notes:      expense.Notes,
-		CategoryID: expense.CategoryID,
-		UpdatedAt:  expense.UpdatedAt,
+		Amount:      expense.Amount,
+		Notes:       expense.Notes,
+		CategoryID:  expense.CategoryID,
+		ExpanseDate: expense.ExpenseDate,
+		UpdatedAt:   expense.UpdatedAt,
 	})
 
 	if result.Error != nil {
@@ -276,6 +277,19 @@ func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
 		if err := tx.Model(&existingExpense).Association("Tags").Clear(); err != nil {
 			tx.Rollback()
 			return errors.New("failed to clear existing tags: " + err.Error())
+		}
+	}
+
+	if len(expense.TagIDs) > 0 {
+		var newTags []Tags
+		if err := tx.Where("id IN ?", expense.TagIDs).Find(&newTags).Error; err != nil {
+			tx.Rollback()
+			return errors.New("failed to find new tags: " + err.Error())
+		}
+
+		if err := tx.Model(&existingExpense).Association("Tags").Append(newTags); err != nil {
+			tx.Rollback()
+			return errors.New("failed to add new tags: " + err.Error())
 		}
 	}
 
