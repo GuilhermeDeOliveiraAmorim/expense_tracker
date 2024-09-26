@@ -40,6 +40,8 @@ func NewCreateExpenseUseCase(
 }
 
 func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpenseOutputDto, []util.ProblemDetails) {
+	var validationErrors []util.ProblemDetails
+
 	user, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {
 		return CreateExpenseOutputDto{}, []util.ProblemDetails{
@@ -63,30 +65,19 @@ func (c *CreateExpenseUseCase) Execute(input CreateExpenseInputDto) (CreateExpen
 		}
 	}
 
-	location, err := time.LoadLocation(util.TIMEZONE)
-	if err != nil {
-		return CreateExpenseOutputDto{}, []util.ProblemDetails{
-			{
-				Type:     "Validation Error",
-				Title:    "Bad Request",
-				Status:   400,
-				Detail:   "Invalid timezone",
-				Instance: util.RFC400,
-			},
-		}
+	newExpenseDate, parseDateErr := util.ParseDate(input.ExpenseDate)
+	if parseDateErr != nil {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Invalid expense date format",
+			Instance: util.RFC400,
+		})
 	}
 
-	newExpenseDate, err := time.ParseInLocation(util.DATEFORMAT, input.ExpenseDate, location)
-	if err != nil {
-		return CreateExpenseOutputDto{}, []util.ProblemDetails{
-			{
-				Type:     "Validation Error",
-				Title:    "Bad Request",
-				Status:   400,
-				Detail:   "Invalid expense date format",
-				Instance: util.RFC400,
-			},
-		}
+	if len(validationErrors) > 0 {
+		return CreateExpenseOutputDto{}, validationErrors
 	}
 
 	newExpense, newExpenseErr := entities.NewExpense(input.UserID, input.Amount, newExpenseDate, input.CategoryID, input.Notes)

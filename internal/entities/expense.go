@@ -107,8 +107,22 @@ func (e *Expense) ChangeAmount(newAmount float64) []util.ProblemDetails {
 func (e *Expense) ChangeExpenseDate(expenseDate string) []util.ProblemDetails {
 	var validationErrors []util.ProblemDetails
 
-	newExpenseDate, err := time.Parse("02012006", expenseDate)
-	if err != nil {
+	if expenseDate == "" {
+		validationErrors = append(validationErrors, util.ProblemDetails{
+			Type:     "Validation Error",
+			Title:    "Bad Request",
+			Status:   400,
+			Detail:   "Missing expense date",
+			Instance: util.RFC400,
+		})
+	}
+
+	if len(validationErrors) > 0 {
+		return validationErrors
+	}
+
+	newExpenseDate, parseDateErr := util.ParseDate(expenseDate)
+	if parseDateErr != nil {
 		validationErrors = append(validationErrors, util.ProblemDetails{
 			Type:     "Validation Error",
 			Title:    "Bad Request",
