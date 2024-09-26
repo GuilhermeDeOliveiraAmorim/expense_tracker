@@ -254,12 +254,12 @@ func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
 		}
 	}()
 
-	result := e.gorm.Model(&Expenses{}).Where("id = ? AND active = ?", expense.ID, true).Updates(Expenses{
-		Amount:      expense.Amount,
-		Notes:       expense.Notes,
-		CategoryID:  expense.CategoryID,
-		ExpanseDate: expense.ExpenseDate,
-		UpdatedAt:   expense.UpdatedAt,
+	result := tx.Model(&Expenses{}).Where("id = ? AND active = ?", expense.ID, true).Updates(map[string]interface{}{
+		"amount":       expense.Amount,
+		"notes":        expense.Notes,
+		"category_id":  expense.CategoryID,
+		"expanse_date": expense.ExpenseDate,
+		"updated_at":   expense.UpdatedAt,
 	})
 
 	if result.Error != nil {

@@ -119,11 +119,9 @@ func (c *UpdateExpenseUseCase) Execute(input UpdateExpenseInputDto) (UpdateExpen
 		}
 	}
 
-	if input.Notes != "" {
-		err := searchedExpense.ChangeNotes(input.Notes)
-		if len(err) > 0 {
-			validationErrors = append(validationErrors, err...)
-		}
+	changeNotesErr := searchedExpense.ChangeNotes(input.Notes)
+	if len(changeNotesErr) > 0 {
+		validationErrors = append(validationErrors, changeNotesErr...)
 	}
 
 	changeTagsErr := searchedExpense.ChangeTags(input.Tags)
