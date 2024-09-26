@@ -64,7 +64,7 @@ func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
 
 	if expenseCount > 0 {
 		tx.Rollback()
-		return errors.New("cannot delete category: there are expenses associated with this category")
+		return errors.New("there are expenses associated with this category")
 	}
 
 	result := tx.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", category.ID, category.UserID, true).

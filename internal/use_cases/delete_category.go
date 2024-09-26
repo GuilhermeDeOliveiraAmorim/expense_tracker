@@ -69,14 +69,26 @@ func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCat
 
 	categoryToDelete.Deactivate()
 
-	DeleteCategoryErr := c.CategoryRepository.DeleteCategory(categoryToDelete)
-	if DeleteCategoryErr != nil {
+	deleteCategoryErr := c.CategoryRepository.DeleteCategory(categoryToDelete)
+	if deleteCategoryErr != nil {
+		if deleteCategoryErr.Error() == "there are expenses associated with this category" {
+			return DeleteCategoryOutputDto{}, []util.ProblemDetails{
+				{
+					Type:     "Conflict",
+					Title:    "Category has expenses",
+					Status:   409,
+					Detail:   "Error: " + deleteCategoryErr.Error(),
+					Instance: util.RFC409,
+				},
+			}
+		}
+
 		return DeleteCategoryOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Err deleting category",
 				Status:   500,
-				Detail:   DeleteCategoryErr.Error(),
+				Detail:   deleteCategoryErr.Error(),
 				Instance: util.RFC500,
 			},
 		}
