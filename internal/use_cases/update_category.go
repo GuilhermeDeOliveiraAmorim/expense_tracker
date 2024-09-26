@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"strings"
+
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
@@ -53,6 +55,31 @@ func (c *UpdateCategoryUseCase) Execute(input UpdateCategoryInputDto) (UpdateCat
 				Status:   403,
 				Detail:   "User is not active",
 				Instance: util.RFC403,
+			},
+		}
+	}
+
+	existingCategory, GetCategoryByNameErr := c.CategoryRepository.ThisCategoryExists(input.UserID, input.Name)
+	if GetCategoryByNameErr != nil && strings.Compare(GetCategoryByNameErr.Error(), "category not found") > 0 {
+		return UpdateCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Internal Server Error",
+				Title:    "Error fetching existing category",
+				Status:   500,
+				Detail:   GetCategoryByNameErr.Error(),
+				Instance: util.RFC500,
+			},
+		}
+	}
+
+	if existingCategory {
+		return UpdateCategoryOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Validation Error",
+				Title:    "Category already exists",
+				Status:   409,
+				Detail:   "A category with this name already exists",
+				Instance: util.RFC409,
 			},
 		}
 	}
