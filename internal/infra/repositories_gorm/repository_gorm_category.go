@@ -36,7 +36,12 @@ func (c *CategoryRepository) CreateCategory(category entities.Category) error {
 		Name:          category.Name,
 		Color:         category.Color,
 	}).Error; err != nil {
+		tx.Rollback()
 		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return nil
