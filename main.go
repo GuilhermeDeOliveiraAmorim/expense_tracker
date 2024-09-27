@@ -57,9 +57,6 @@ func main() {
 	userFactory := factory.NewUserFactory(db)
 	userHandler := handlers.NewUserHandler(userFactory)
 
-	presentersFactory := factory.NewPresentersFactory(db)
-	presentersHandler := handlers.NewPresentersHandler(presentersFactory)
-
 	public := r.Group("/")
 	{
 		public.POST("/users", userHandler.CreateUser)
@@ -73,7 +70,6 @@ func main() {
 		protected.DELETE("/categories", categoryHandler.DeleteCategory)
 		protected.GET("/categories/all", categoryHandler.GetCategories)
 		protected.PATCH("/categories", categoryHandler.UpdateCategory)
-		protected.GET("/categories/category-treemap-amount-period", presentersHandler.ShowCategoryTreemapAmountPeriod)
 
 		protected.POST("/tags", tagHandler.CreateTag)
 		protected.GET("/tags", tagHandler.GetTag)
@@ -91,9 +87,6 @@ func main() {
 		protected.GET("/users/all", userHandler.GetUsers)
 		protected.PATCH("/users", userHandler.UpdateUser)
 		protected.DELETE("/users", userHandler.DeleteUser)
-
-		protected.GET("/expenses/total-expenses-category-period", presentersHandler.ShowTotalExpensesCategoryPeriod)
-		protected.GET("/expenses/expense-simple-table-period", presentersHandler.ShowExpenseSimpleTablePeriod)
 	}
 
 	r.Run(":8080")
