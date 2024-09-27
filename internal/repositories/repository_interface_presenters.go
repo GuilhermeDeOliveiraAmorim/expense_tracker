@@ -5,8 +5,9 @@ import (
 )
 
 type CategoryExpense struct {
-	CategoryName string  `json:"category_name"`
-	Total        float64 `json:"total"`
+	CategoryName  string  `json:"category_name"`
+	CategoryColor string  `json:"category_color"`
+	Total         float64 `json:"total"`
 }
 
 type PresentersRepositoryInterface interface {
