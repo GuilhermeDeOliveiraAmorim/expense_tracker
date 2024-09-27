@@ -1,16 +1,14 @@
 package presenters
 
 import (
-	"time"
-
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type GetTotalExpensesForPeriodInputDto struct {
-	UserID    string    `json:"user_id"`
-	StartDate time.Time `json:"start_date"`
-	EndDate   time.Time `json:"end_date"`
+	UserID    string `json:"user_id"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 type GetTotalExpensesForPeriodOutputDto struct {
@@ -56,7 +54,33 @@ func (c *GetTotalExpensesForPeriodUseCase) Execute(input GetTotalExpensesForPeri
 		}
 	}
 
-	if input.StartDate.After(input.EndDate) {
+	startDate, err := util.ParseDate(input.StartDate)
+	if err != nil {
+		return GetTotalExpensesForPeriodOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Bad Request",
+				Title:    "Invalid start date",
+				Status:   400,
+				Detail:   "Start date is not in the correct format",
+				Instance: util.RFC400,
+			},
+		}
+	}
+
+	endDate, err := util.ParseDate(input.EndDate)
+	if err != nil {
+		return GetTotalExpensesForPeriodOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Bad Request",
+				Title:    "Invalid end date",
+				Status:   400,
+				Detail:   "End date is not in the correct format",
+				Instance: util.RFC400,
+			},
+		}
+	}
+
+	if startDate.After(endDate) {
 		return GetTotalExpensesForPeriodOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
@@ -68,7 +92,7 @@ func (c *GetTotalExpensesForPeriodUseCase) Execute(input GetTotalExpensesForPeri
 		}
 	}
 
-	total, err := c.PresentersRepository.GetTotalExpensesForPeriod(input.UserID, input.StartDate, input.EndDate)
+	total, err := c.PresentersRepository.GetTotalExpensesForPeriod(input.UserID, startDate, endDate)
 	if err != nil {
 		return GetTotalExpensesForPeriodOutputDto{}, []util.ProblemDetails{
 			{

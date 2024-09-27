@@ -1,15 +1,22 @@
 package factory
 
 import (
+	repositoriesgorm "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/repositories_gorm"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/presenters"
 	"gorm.io/gorm"
 )
 
 type PresentersFactory struct {
+	GetTotalExpensesForPeriod *presenters.GetTotalExpensesForPeriodUseCase
 }
 
 func NewPresentersFactory(db *gorm.DB) *PresentersFactory {
-	//presentersRepository := repositoriesgorm.NewPresentersRepository(db)
-	//userRepository := repositoriesgorm.NewUserRepository(db)
+	presentersRepository := repositoriesgorm.NewPresentersRepository(db)
+	userRepository := repositoriesgorm.NewUserRepository(db)
 
-	return &PresentersFactory{}
+	getTotalExpensesForPeriod := presenters.NewGetTotalExpensesForPeriodUseCase(presentersRepository, userRepository)
+
+	return &PresentersFactory{
+		GetTotalExpensesForPeriod: getTotalExpensesForPeriod,
+	}
 }
