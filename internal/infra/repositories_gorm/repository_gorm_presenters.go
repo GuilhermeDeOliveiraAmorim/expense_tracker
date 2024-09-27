@@ -40,5 +40,5 @@ func (p *PresentersRepository) GetTotalExpensesForPeriod(userID string, startDat
 		return 0, errors.New("failed to commit transaction")
 	}
 
-	return 0, nil
+	return total, nil
 }
