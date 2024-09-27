@@ -1,8 +1,6 @@
 package usecases
 
 import (
-	"strings"
-
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
@@ -55,31 +53,6 @@ func (c *UpdateTagUseCase) Execute(input UpdateTagInputDto) (UpdateTagOutputDto,
 				Status:   403,
 				Detail:   "User is not active",
 				Instance: util.RFC403,
-			},
-		}
-	}
-
-	existingTag, GetTagByNameErr := c.TagRepository.ThisTagExists(input.UserID, input.Name)
-	if GetTagByNameErr != nil && strings.Compare(GetTagByNameErr.Error(), "tag not found") > 0 {
-		return UpdateTagOutputDto{}, []util.ProblemDetails{
-			{
-				Type:     "Internal Server Error",
-				Title:    "Error fetching existing tag",
-				Status:   500,
-				Detail:   GetTagByNameErr.Error(),
-				Instance: util.RFC500,
-			},
-		}
-	}
-
-	if existingTag {
-		return UpdateTagOutputDto{}, []util.ProblemDetails{
-			{
-				Type:     "Validation Error",
-				Title:    "Tag already exists",
-				Status:   409,
-				Detail:   "A tag with this name already exists",
-				Instance: util.RFC409,
 			},
 		}
 	}
