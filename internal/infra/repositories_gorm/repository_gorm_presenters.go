@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"gorm.io/gorm"
 )
 
@@ -41,4 +42,31 @@ func (p *PresentersRepository) GetTotalExpensesForPeriod(userID string, startDat
 	}
 
 	return total, nil
+}
+
+func (p *PresentersRepository) GetExpensesByCategoryPeriod(userID string, startDate time.Time, endDate time.Time) ([]repositories.CategoryExpense, error) {
+	tx := p.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	var expensesByCategory []repositories.CategoryExpense
+
+	if err := tx.Table("expenses").
+		Select("category_name, SUM(amount) as total").
+		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
+		Group("category_name").
+		Scan(&expensesByCategory).Error; err != nil {
+		tx.Rollback()
+		return nil, errors.New("failed to fetch expenses by category: " + err.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, errors.New("failed to commit transaction")
+	}
+
+	return expensesByCategory, nil
 }

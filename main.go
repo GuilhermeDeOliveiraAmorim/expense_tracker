@@ -92,6 +92,7 @@ func main() {
 		protected.DELETE("/users", userHandler.DeleteUser)
 
 		protected.GET("/expenses/total", presentersHandler.GetTotalExpensesForPeriod)
+		protected.GET("/expenses/categories", presentersHandler.GetExpensesByCategoryPeriod)
 	}
 
 	r.Run(":8080")
