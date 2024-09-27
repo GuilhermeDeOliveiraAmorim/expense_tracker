@@ -57,6 +57,9 @@ func main() {
 	userFactory := factory.NewUserFactory(db)
 	userHandler := handlers.NewUserHandler(userFactory)
 
+	presentersFactory := factory.NewPresentersFactory(db)
+	presentersHandler := handlers.NewPresentersHandler(presentersFactory)
+
 	public := r.Group("/")
 	{
 		public.POST("/users", userHandler.CreateUser)
@@ -87,6 +90,8 @@ func main() {
 		protected.GET("/users/all", userHandler.GetUsers)
 		protected.PATCH("/users", userHandler.UpdateUser)
 		protected.DELETE("/users", userHandler.DeleteUser)
+
+		protected.GET("/expenses/total", presentersHandler.GetTotalExpensesForPeriod)
 	}
 
 	r.Run(":8080")
