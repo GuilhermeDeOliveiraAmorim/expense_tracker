@@ -59,7 +59,7 @@ func (p *PresentersRepository) GetExpensesByCategoryPeriod(userID string, startD
 		Select("categories.name as category_name, categories.color as category_color, SUM(expenses.amount) as total").
 		Joins("JOIN categories ON expenses.category_id = categories.id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
-		Group("categories.name, categories.color").
+		Group("categories.name, categories.color").Order("total").
 		Scan(&expensesByCategory).Error; err != nil {
 		tx.Rollback()
 		return nil, errors.New("failed to fetch expenses by category: " + err.Error())
