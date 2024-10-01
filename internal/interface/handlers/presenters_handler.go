@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/presenters"
@@ -118,34 +119,33 @@ func (h *PresentersHandler) GetMonthlyExpensesByCategoryPeriod(c *gin.Context) {
 		return
 	}
 
-	startDate := c.Query("start_date")
-	if startDate == "" {
+	year := c.Query("year")
+	if year == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
-			Title:    "Missing start date",
+			Title:    "Missing year date",
 			Status:   http.StatusBadRequest,
-			Detail:   "Start date is required",
+			Detail:   "Year date is required",
 			Instance: util.RFC400,
 		}})
 		return
 	}
 
-	endDate := c.Query("end_date")
-	if endDate == "" {
+	yearNumber, errYearNumber := strconv.Atoi(year)
+	if errYearNumber != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
 			Type:     "Bad Request",
-			Title:    "Missing end date",
+			Title:    "Invalid year date",
 			Status:   http.StatusBadRequest,
-			Detail:   "End date is required",
+			Detail:   "Year date is invalid",
 			Instance: util.RFC400,
 		}})
 		return
 	}
 
 	input := presenters.GetMonthlyExpensesByCategoryPeriodInputDto{
-		UserID:    userID,
-		StartDate: startDate,
-		EndDate:   endDate,
+		UserID: userID,
+		Year:   yearNumber,
 	}
 
 	output, errs := h.presenterFactory.GetMonthlyExpensesByCategoryPeriod.Execute(input)

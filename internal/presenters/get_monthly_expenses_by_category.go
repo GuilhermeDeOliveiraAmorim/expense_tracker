@@ -1,18 +1,20 @@
 package presenters
 
 import (
+	"time"
+
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
 type GetMonthlyExpensesByCategoryPeriodInputDto struct {
-	UserID    string `json:"user_id"`
-	StartDate string `json:"start_date"`
-	EndDate   string `json:"end_date"`
+	UserID string `json:"user_id"`
+	Year   int    `json:"year"`
 }
 
 type GetMonthlyExpensesByCategoryPeriodOutputDto struct {
-	Expenses []repositories.MonthlyCategoryExpense `json:"expenses"`
+	Expenses       []repositories.MonthlyCategoryExpense `json:"expenses"`
+	AvailableYears []int                                 `json:"available_years"`
 }
 
 type GetMonthlyExpensesByCategoryPeriodUseCase struct {
@@ -54,58 +56,45 @@ func (c *GetMonthlyExpensesByCategoryPeriodUseCase) Execute(input GetMonthlyExpe
 		}
 	}
 
-	startDate, err := util.ParseDate(input.StartDate)
-	if err != nil {
+	if input.Year < 1900 || input.Year > 99999 {
 		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
-				Title:    "Invalid start date",
+				Title:    "Invalid year",
 				Status:   400,
-				Detail:   "Start date is not in the correct format",
+				Detail:   "Year must be between 1900 and 9999",
 				Instance: util.RFC400,
 			},
 		}
 	}
 
-	endDate, err := util.ParseDate(input.EndDate)
-	if err != nil {
+	if input.Year > time.Now().Year() {
 		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
-				Title:    "Invalid end date",
+				Title:    "Invalid year",
 				Status:   400,
-				Detail:   "End date is not in the correct format",
+				Detail:   "Year must be less than or equal to the current year",
 				Instance: util.RFC400,
 			},
 		}
 	}
 
-	if startDate.After(endDate) {
-		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
-			{
-				Type:     "Bad Request",
-				Title:    "Invalid date range",
-				Status:   400,
-				Detail:   "Start date must be before end date",
-				Instance: util.RFC400,
-			},
-		}
-	}
-
-	expenses, err := c.PresentersRepository.GetMonthlyExpensesByCategoryPeriod(input.UserID, startDate, endDate)
-	if err != nil {
+	expenses, availableYears, getMonthlyExpensesByCategoryPeriodErr := c.PresentersRepository.GetMonthlyExpensesByCategoryPeriod(input.UserID, input.Year)
+	if getMonthlyExpensesByCategoryPeriodErr != nil {
 		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Could not calculate total expenses",
 				Status:   500,
-				Detail:   err.Error(),
+				Detail:   getMonthlyExpensesByCategoryPeriodErr.Error(),
 				Instance: util.RFC500,
 			},
 		}
 	}
 
 	return GetMonthlyExpensesByCategoryPeriodOutputDto{
-		Expenses: expenses,
+		Expenses:       expenses,
+		AvailableYears: availableYears,
 	}, nil
 }

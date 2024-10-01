@@ -19,5 +19,5 @@ type MonthlyCategoryExpense struct {
 type PresentersRepositoryInterface interface {
 	GetTotalExpensesForPeriod(userID string, StartDate time.Time, EndDate time.Time) (float64, error)
 	GetExpensesByCategoryPeriod(userID string, StartDate time.Time, EndDate time.Time) ([]CategoryExpense, error)
-	GetMonthlyExpensesByCategoryPeriod(userID string, StartDate time.Time, EndDate time.Time) ([]MonthlyCategoryExpense, error)
+	GetMonthlyExpensesByCategoryPeriod(userID string, Year int) ([]MonthlyCategoryExpense, []int, error)
 }

@@ -79,7 +79,7 @@ func (p *PresentersRepository) GetExpensesByCategoryPeriod(userID string, startD
 	return expensesByCategory, nil
 }
 
-func (p *PresentersRepository) GetMonthlyExpensesByCategoryPeriod(userID string, startDate time.Time, endDate time.Time) ([]repositories.MonthlyCategoryExpense, error) {
+func (p *PresentersRepository) GetMonthlyExpensesByCategoryPeriod(userID string, year int) ([]repositories.MonthlyCategoryExpense, []int, error) {
 	tx := p.gorm.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -99,18 +99,30 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryPeriod(userID string,
 	err := tx.Table("expenses").
 		Select("EXTRACT(YEAR FROM expanse_date) AS year, TO_CHAR(expanse_date, 'Month') AS month, categories.name AS category_name, categories.color AS color, SUM(expenses.amount) AS total").
 		Joins("INNER JOIN categories ON expenses.category_id = categories.id").
-		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
+		Where("expenses.user_id = ? AND EXTRACT(YEAR FROM expenses.expanse_date) = ? AND expenses.active = ?", userID, year, true).
 		Group("year, month, categories.name, categories.color").
 		Order("MIN(expanse_date)").
 		Scan(&results).Error
 
 	if err != nil {
 		tx.Rollback()
-		return nil, errors.New("failed to fetch monthly expenses by category: " + err.Error())
+		return nil, []int{}, errors.New("failed to fetch monthly expenses by category: " + err.Error())
+	}
+
+	var years []int
+	err = tx.Table("expenses").
+		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) AS year").
+		Where("expenses.user_id = ? AND expenses.active = ?", userID, true).
+		Order("year").
+		Scan(&years).Error
+
+	if err != nil {
+		tx.Rollback()
+		return nil, nil, errors.New("failed to fetch available years: " + err.Error())
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		return nil, errors.New("failed to commit transaction")
+		return nil, []int{}, errors.New("failed to commit transaction")
 	}
 
 	monthlyExpensesMap := make(map[string]repositories.MonthlyCategoryExpense)
@@ -147,7 +159,7 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryPeriod(userID string,
 		return getMonthOrder(monthlyExpenses[i].Month) < getMonthOrder(monthlyExpenses[j].Month)
 	})
 
-	return monthlyExpenses, nil
+	return monthlyExpenses, years, nil
 }
 
 func getMonthOrder(month string) int {
