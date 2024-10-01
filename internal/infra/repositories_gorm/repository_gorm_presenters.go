@@ -30,11 +30,15 @@ func (p *PresentersRepository) GetTotalExpensesForPeriod(userID string, startDat
 	var total float64
 
 	if err := tx.Table("expenses").
-		Select("SUM(amount)").
+		Select("COALESCE(SUM(amount), 0)").
 		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
 		Scan(&total).Error; err != nil {
-		tx.Rollback()
-		return 0, errors.New("failed to calculate total expenses: " + err.Error())
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			total = 0
+		} else {
+			tx.Rollback()
+			return 0, errors.New("failed to fetch total expenses: " + err.Error())
+		}
 	}
 
 	if err := tx.Commit().Error; err != nil {
