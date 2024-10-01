@@ -7,8 +7,9 @@ import (
 )
 
 type PresentersFactory struct {
-	GetTotalExpensesForPeriod   *presenters.GetTotalExpensesForPeriodUseCase
-	GetExpensesByCategoryPeriod *presenters.GetExpensesByCategoryPeriodUseCase
+	GetTotalExpensesForPeriod          *presenters.GetTotalExpensesForPeriodUseCase
+	GetExpensesByCategoryPeriod        *presenters.GetExpensesByCategoryPeriodUseCase
+	GetMonthlyExpensesByCategoryPeriod *presenters.GetMonthlyExpensesByCategoryPeriodUseCase
 }
 
 func NewPresentersFactory(db *gorm.DB) *PresentersFactory {
@@ -17,9 +18,11 @@ func NewPresentersFactory(db *gorm.DB) *PresentersFactory {
 
 	getTotalExpensesForPeriod := presenters.NewGetTotalExpensesForPeriodUseCase(presentersRepository, userRepository)
 	getExpensesByCategoryPeriod := presenters.NewGetExpensesByCategoryPeriodUseCase(presentersRepository, userRepository)
+	getMonthlyExpensesByCategoryPeriod := presenters.NewGetMonthlyExpensesByCategoryPeriodUseCase(presentersRepository, userRepository)
 
 	return &PresentersFactory{
-		GetTotalExpensesForPeriod:   getTotalExpensesForPeriod,
-		GetExpensesByCategoryPeriod: getExpensesByCategoryPeriod,
+		GetTotalExpensesForPeriod:          getTotalExpensesForPeriod,
+		GetExpensesByCategoryPeriod:        getExpensesByCategoryPeriod,
+		GetMonthlyExpensesByCategoryPeriod: getMonthlyExpensesByCategoryPeriod,
 	}
 }
