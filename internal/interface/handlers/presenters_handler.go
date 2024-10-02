@@ -112,7 +112,7 @@ func (h *PresentersHandler) GetExpensesByCategoryPeriod(c *gin.Context) {
 	c.JSON(http.StatusOK, output)
 }
 
-func (h *PresentersHandler) GetMonthlyExpensesByCategoryPeriod(c *gin.Context) {
+func (h *PresentersHandler) GetMonthlyExpensesByCategoryYear(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
 		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
@@ -143,12 +143,57 @@ func (h *PresentersHandler) GetMonthlyExpensesByCategoryPeriod(c *gin.Context) {
 		return
 	}
 
-	input := presenters.GetMonthlyExpensesByCategoryPeriodInputDto{
+	input := presenters.GetMonthlyExpensesByCategoryYearInputDto{
 		UserID: userID,
 		Year:   yearNumber,
 	}
 
-	output, errs := h.presenterFactory.GetMonthlyExpensesByCategoryPeriod.Execute(input)
+	output, errs := h.presenterFactory.GetMonthlyExpensesByCategoryYear.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}
+
+func (h *PresentersHandler) GetMonthlyExpensesByTagYear(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+		return
+	}
+
+	year := c.Query("year")
+	if year == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing year date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year date is required",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	yearNumber, errYearNumber := strconv.Atoi(year)
+	if errYearNumber != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Invalid year date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year date is invalid",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	input := presenters.GetMonthlyExpensesByTagYearInputDto{
+		UserID: userID,
+		Year:   yearNumber,
+	}
+
+	output, errs := h.presenterFactory.GetMonthlyExpensesByTagYear.Execute(input)
 	if len(errs) > 0 {
 		handleErrors(c, errs)
 		return

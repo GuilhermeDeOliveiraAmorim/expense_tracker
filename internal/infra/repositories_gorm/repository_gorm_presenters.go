@@ -79,7 +79,7 @@ func (p *PresentersRepository) GetExpensesByCategoryPeriod(userID string, startD
 	return expensesByCategory, nil
 }
 
-func (p *PresentersRepository) GetMonthlyExpensesByCategoryPeriod(userID string, year int) ([]repositories.MonthlyCategoryExpense, []int, error) {
+func (p *PresentersRepository) GetMonthlyExpensesByCategoryYear(userID string, year int) ([]repositories.MonthlyCategoryExpense, []int, error) {
 	tx := p.gorm.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -156,6 +156,94 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryPeriod(userID string,
 	var monthlyExpenses []repositories.MonthlyCategoryExpense
 	for _, categories := range monthlyExpensesMap {
 		monthlyExpenses = append(monthlyExpenses, categories)
+	}
+
+	sort.Slice(monthlyExpenses, func(i, j int) bool {
+		return getMonthOrder(monthlyExpenses[i].Month) < getMonthOrder(monthlyExpenses[j].Month)
+	})
+
+	return monthlyExpenses, years, nil
+}
+
+func (p *PresentersRepository) GetMonthlyExpensesByTagYear(userID string, year int) ([]repositories.MonthlyTagExpense, []int, error) {
+	tx := p.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	var results []struct {
+		Year    int     `gorm:"column:year"`
+		Month   string  `gorm:"column:month"`
+		TagName string  `gorm:"column:tag_name"`
+		Color   string  `gorm:"column:color"`
+		Total   float64 `gorm:"column:total"`
+	}
+
+	err := tx.Table("expenses").
+		Select("EXTRACT(YEAR FROM expanse_date) AS year, TO_CHAR(expanse_date, 'Month') AS month, tags.name AS tag_name, tags.color AS color, SUM(expenses.amount) AS total").
+		Joins("INNER JOIN expense_tags ON expenses.id = expense_tags.expenses_id").
+		Joins("INNER JOIN tags ON expense_tags.tags_id = tags.id").
+		Where("expenses.user_id = ? AND EXTRACT(YEAR FROM expenses.expanse_date) = ? AND expenses.active = ?", userID, year, true).
+		Group("year, month, tags.name, tags.color").
+		Order("MIN(expanse_date)").
+		Scan(&results).Error
+
+	if err != nil {
+		tx.Rollback()
+		return nil, []int{}, errors.New("failed to fetch monthly expenses by tag: " + err.Error())
+	}
+
+	var years []int
+
+	err = tx.Table("expenses").
+		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) AS year").
+		Where("expenses.user_id = ? AND expenses.active = ?", userID, true).
+		Order("year").
+		Scan(&years).Error
+
+	if err != nil {
+		tx.Rollback()
+		return nil, nil, errors.New("failed to fetch available years: " + err.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, []int{}, errors.New("failed to commit transaction")
+	}
+
+	monthlyExpensesMap := make(map[string]repositories.MonthlyTagExpense)
+
+	for _, result := range results {
+		month := strings.TrimSpace(result.Month)
+		key := fmt.Sprintf("%d-%s", result.Year, month)
+
+		if _, exists := monthlyExpensesMap[key]; !exists {
+			monthlyExpensesMap[key] = repositories.MonthlyTagExpense{
+				Month: month,
+				Year:  result.Year,
+				Tags:  []repositories.TagExpense{},
+				Total: 0,
+			}
+		}
+
+		current := monthlyExpensesMap[key]
+
+		current.Tags = append(current.Tags, repositories.TagExpense{
+			TagName:  result.TagName,
+			TagColor: result.Color,
+			Total:    result.Total,
+		})
+
+		current.Total += result.Total
+
+		monthlyExpensesMap[key] = current
+	}
+
+	var monthlyExpenses []repositories.MonthlyTagExpense
+	for _, tags := range monthlyExpensesMap {
+		monthlyExpenses = append(monthlyExpenses, tags)
 	}
 
 	sort.Slice(monthlyExpenses, func(i, j int) bool {

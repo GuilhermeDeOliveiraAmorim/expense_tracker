@@ -7,35 +7,35 @@ import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 )
 
-type GetMonthlyExpensesByCategoryPeriodInputDto struct {
+type GetMonthlyExpensesByCategoryYearInputDto struct {
 	UserID string `json:"user_id"`
 	Year   int    `json:"year"`
 }
 
-type GetMonthlyExpensesByCategoryPeriodOutputDto struct {
+type GetMonthlyExpensesByCategoryYearOutputDto struct {
 	Expenses       []repositories.MonthlyCategoryExpense `json:"expenses"`
 	AvailableYears []int                                 `json:"available_years"`
 }
 
-type GetMonthlyExpensesByCategoryPeriodUseCase struct {
+type GetMonthlyExpensesByCategoryYearUseCase struct {
 	PresentersRepository repositories.PresentersRepositoryInterface
 	UserRepository       repositories.UserRepositoryInterface
 }
 
-func NewGetMonthlyExpensesByCategoryPeriodUseCase(
+func NewGetMonthlyExpensesByCategoryYearUseCase(
 	PresentersRepository repositories.PresentersRepositoryInterface,
 	UserRepository repositories.UserRepositoryInterface,
-) *GetMonthlyExpensesByCategoryPeriodUseCase {
-	return &GetMonthlyExpensesByCategoryPeriodUseCase{
+) *GetMonthlyExpensesByCategoryYearUseCase {
+	return &GetMonthlyExpensesByCategoryYearUseCase{
 		PresentersRepository: PresentersRepository,
 		UserRepository:       UserRepository,
 	}
 }
 
-func (c *GetMonthlyExpensesByCategoryPeriodUseCase) Execute(input GetMonthlyExpensesByCategoryPeriodInputDto) (GetMonthlyExpensesByCategoryPeriodOutputDto, []util.ProblemDetails) {
+func (c *GetMonthlyExpensesByCategoryYearUseCase) Execute(input GetMonthlyExpensesByCategoryYearInputDto) (GetMonthlyExpensesByCategoryYearOutputDto, []util.ProblemDetails) {
 	user, err := c.UserRepository.GetUser(input.UserID)
 	if err != nil {
-		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
+		return GetMonthlyExpensesByCategoryYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Not Found",
 				Title:    "User not found",
@@ -45,7 +45,7 @@ func (c *GetMonthlyExpensesByCategoryPeriodUseCase) Execute(input GetMonthlyExpe
 			},
 		}
 	} else if !user.Active {
-		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
+		return GetMonthlyExpensesByCategoryYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Forbidden",
 				Title:    "User is not active",
@@ -57,7 +57,7 @@ func (c *GetMonthlyExpensesByCategoryPeriodUseCase) Execute(input GetMonthlyExpe
 	}
 
 	if input.Year < 1900 || input.Year > 99999 {
-		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
+		return GetMonthlyExpensesByCategoryYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
 				Title:    "Invalid year",
@@ -69,7 +69,7 @@ func (c *GetMonthlyExpensesByCategoryPeriodUseCase) Execute(input GetMonthlyExpe
 	}
 
 	if input.Year > time.Now().Year() {
-		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
+		return GetMonthlyExpensesByCategoryYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
 				Title:    "Invalid year",
@@ -80,20 +80,20 @@ func (c *GetMonthlyExpensesByCategoryPeriodUseCase) Execute(input GetMonthlyExpe
 		}
 	}
 
-	expenses, availableYears, getMonthlyExpensesByCategoryPeriodErr := c.PresentersRepository.GetMonthlyExpensesByCategoryPeriod(input.UserID, input.Year)
-	if getMonthlyExpensesByCategoryPeriodErr != nil {
-		return GetMonthlyExpensesByCategoryPeriodOutputDto{}, []util.ProblemDetails{
+	expenses, availableYears, getMonthlyExpensesByCategoryYearErr := c.PresentersRepository.GetMonthlyExpensesByCategoryYear(input.UserID, input.Year)
+	if getMonthlyExpensesByCategoryYearErr != nil {
+		return GetMonthlyExpensesByCategoryYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Internal Server Error",
 				Title:    "Could not calculate total expenses",
 				Status:   500,
-				Detail:   getMonthlyExpensesByCategoryPeriodErr.Error(),
+				Detail:   getMonthlyExpensesByCategoryYearErr.Error(),
 				Instance: util.RFC500,
 			},
 		}
 	}
 
-	return GetMonthlyExpensesByCategoryPeriodOutputDto{
+	return GetMonthlyExpensesByCategoryYearOutputDto{
 		Expenses:       expenses,
 		AvailableYears: availableYears,
 	}, nil

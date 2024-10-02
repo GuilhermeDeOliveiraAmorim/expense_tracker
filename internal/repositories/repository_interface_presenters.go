@@ -10,6 +10,12 @@ type CategoryExpense struct {
 	Total         float64 `json:"total"`
 }
 
+type TagExpense struct {
+	TagName  string  `json:"tag_name"`
+	TagColor string  `json:"tag_color"`
+	Total    float64 `json:"total"`
+}
+
 type MonthlyCategoryExpense struct {
 	Month      string            `json:"month"`
 	Year       int               `json:"year"`
@@ -17,8 +23,16 @@ type MonthlyCategoryExpense struct {
 	Total      float64           `json:"total"`
 }
 
+type MonthlyTagExpense struct {
+	Month string       `json:"month"`
+	Year  int          `json:"year"`
+	Tags  []TagExpense `json:"tags"`
+	Total float64      `json:"total"`
+}
+
 type PresentersRepositoryInterface interface {
 	GetTotalExpensesForPeriod(userID string, StartDate time.Time, EndDate time.Time) (float64, error)
 	GetExpensesByCategoryPeriod(userID string, StartDate time.Time, EndDate time.Time) ([]CategoryExpense, error)
-	GetMonthlyExpensesByCategoryPeriod(userID string, Year int) ([]MonthlyCategoryExpense, []int, error)
+	GetMonthlyExpensesByCategoryYear(userID string, Year int) ([]MonthlyCategoryExpense, []int, error)
+	GetMonthlyExpensesByTagYear(userID string, Year int) ([]MonthlyTagExpense, []int, error)
 }
