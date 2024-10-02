@@ -14,6 +14,7 @@ type MonthlyCategoryExpense struct {
 	Month      string            `json:"month"`
 	Year       int               `json:"year"`
 	Categories []CategoryExpense `json:"categories"`
+	Total      float64           `json:"total"`
 }
 
 type PresentersRepositoryInterface interface {

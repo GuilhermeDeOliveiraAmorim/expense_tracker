@@ -136,6 +136,7 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryPeriod(userID string,
 				Month:      month,
 				Year:       result.Year,
 				Categories: []repositories.CategoryExpense{},
+				Total:      0,
 			}
 		}
 
@@ -146,6 +147,8 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryPeriod(userID string,
 			CategoryColor: result.Color,
 			Total:         result.Total,
 		})
+
+		current.Total += result.Total
 
 		monthlyExpensesMap[key] = current
 	}
