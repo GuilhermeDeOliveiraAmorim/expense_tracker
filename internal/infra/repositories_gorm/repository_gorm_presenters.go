@@ -273,9 +273,12 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 	var total float64
 	var month string
 
+	startOfMonth := time.Now().AddDate(0, 0, -time.Now().Day()+1)
+	endOfMonth := time.Now()
+
 	if err := tx.Table("expenses").
 		Select("COALESCE(SUM(amount), 0)").
-		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, time.Now().AddDate(0, -1, 0), time.Now(), true).
+		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startOfMonth, endOfMonth, true).
 		Scan(&total).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			total = 0
@@ -285,13 +288,7 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 		}
 	}
 
-	if err := tx.Table("expenses").
-		Select("TO_CHAR(expanse_date, 'Month')").
-		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, time.Now().AddDate(0, -1, 0), time.Now(), true).
-		Scan(&month).Error; err != nil {
-		tx.Rollback()
-		return 0, "", errors.New("failed to fetch month: " + err.Error())
-	}
+	month = time.Now().Format("January")
 
 	if err := tx.Commit().Error; err != nil {
 		return 0, "", errors.New("failed to commit transaction")
