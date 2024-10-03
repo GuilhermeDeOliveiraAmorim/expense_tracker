@@ -35,4 +35,5 @@ type PresentersRepositoryInterface interface {
 	GetExpensesByCategoryPeriod(userID string, StartDate time.Time, EndDate time.Time) ([]CategoryExpense, error)
 	GetMonthlyExpensesByCategoryYear(userID string, Year int) ([]MonthlyCategoryExpense, []int, error)
 	GetMonthlyExpensesByTagYear(userID string, Year int) ([]MonthlyTagExpense, []int, error)
+	GetTotalExpensesForCurrentMonth(userID string) (float64, string, error)
 }

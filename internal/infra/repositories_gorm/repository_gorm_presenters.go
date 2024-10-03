@@ -260,3 +260,42 @@ func getMonthOrder(month string) int {
 	}
 	return months[month]
 }
+
+func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (float64, string, error) {
+	tx := p.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	var total float64
+	var month string
+
+	if err := tx.Table("expenses").
+		Select("COALESCE(SUM(amount), 0)").
+		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, time.Now().AddDate(0, -1, 0), time.Now(), true).
+		Scan(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			total = 0
+		} else {
+			tx.Rollback()
+			return 0, "", errors.New("failed to fetch total expenses: " + err.Error())
+		}
+	}
+
+	if err := tx.Table("expenses").
+		Select("TO_CHAR(expanse_date, 'Month')").
+		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, time.Now().AddDate(0, -1, 0), time.Now(), true).
+		Scan(&month).Error; err != nil {
+		tx.Rollback()
+		return 0, "", errors.New("failed to fetch month: " + err.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return 0, "", errors.New("failed to commit transaction")
+	}
+
+	return total, month, nil
+}
