@@ -296,3 +296,84 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 
 	return total, month, nil
 }
+
+func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, year int) (repositories.MonthExpenses, error) {
+	var monthExpenses repositories.MonthExpenses
+	monthExpenses.Month = time.Month(month).String()
+	monthExpenses.Year = year
+
+	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	endDate := startDate.AddDate(0, 1, 0).Add(-time.Nanosecond)
+
+	var expenses []Expenses
+	if err := p.gorm.Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
+		Find(&expenses).Error; err != nil {
+		return repositories.MonthExpenses{}, errors.New("failed to fetch expenses: " + err.Error())
+	}
+
+	weeks := make(map[int]map[string]*repositories.DayExpense)
+
+	for _, expense := range expenses {
+		weekNumber, _ := expense.ExpanseDate.ISOWeek()
+		dayKey := expense.ExpanseDate.Format("02")
+
+		if weeks[weekNumber] == nil {
+			weeks[weekNumber] = make(map[string]*repositories.DayExpense)
+		}
+
+		if _, exists := weeks[weekNumber][dayKey]; !exists {
+			weeks[weekNumber][dayKey] = &repositories.DayExpense{
+				Day:     dayKey,
+				DayName: expense.ExpanseDate.Weekday().String(),
+				Total:   0,
+				Tags:    []repositories.ExpenseTag{},
+			}
+		}
+
+		var tags []Tags
+		if err := p.gorm.Table("tags").
+			Joins("JOIN expense_tags ON tags.id = expense_tags.tags_id").
+			Where("expense_tags.expenses_id = ?", expense.ID).
+			Select("tags.name, tags.color").
+			Find(&tags).Error; err != nil {
+			return repositories.MonthExpenses{}, errors.New("failed to fetch tags for expense: " + err.Error())
+		}
+
+		weeks[weekNumber][dayKey].Total += expense.Amount
+
+		for _, tag := range tags {
+
+			tagFound := false
+			for i, dayTag := range weeks[weekNumber][dayKey].Tags {
+				if dayTag.Name == tag.Name {
+					weeks[weekNumber][dayKey].Tags[i].Total += expense.Amount
+					tagFound = true
+					break
+				}
+			}
+
+			if !tagFound {
+				weeks[weekNumber][dayKey].Tags = append(weeks[weekNumber][dayKey].Tags, repositories.ExpenseTag{
+					Name:  tag.Name,
+					Color: tag.Color,
+					Total: expense.Amount,
+				})
+			}
+		}
+	}
+
+	for weekNumber, days := range weeks {
+		weekExpenses := repositories.WeekExpenses{
+			Week: weekNumber,
+			Days: []repositories.DayExpense{},
+		}
+
+		for _, day := range days {
+			weekExpenses.Days = append(weekExpenses.Days, *day)
+		}
+
+		monthExpenses.Weeks = append(monthExpenses.Weeks, weekExpenses)
+	}
+
+	return monthExpenses, nil
+}
