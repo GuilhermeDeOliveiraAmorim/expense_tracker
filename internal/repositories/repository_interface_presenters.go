@@ -61,4 +61,5 @@ type PresentersRepositoryInterface interface {
 	GetMonthlyExpensesByTagYear(userID string, Year int) ([]MonthlyTagExpense, []int, error)
 	GetTotalExpensesForCurrentMonth(userID string) (float64, string, error)
 	GetExpensesByMonthYear(userID string, month int, year int) (MonthExpenses, error)
+	GetTotalExpensesForCurrentWeek(userID string) (float64, string, error)
 }

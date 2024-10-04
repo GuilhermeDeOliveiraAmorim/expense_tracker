@@ -377,3 +377,7 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 
 	return monthExpenses, nil
 }
+
+func (p *PresentersRepository) GetTotalExpensesForCurrentWeek(userID string) (float64, string, error) {
+	return 0, "", errors.New("not implemented")
+}

@@ -291,3 +291,23 @@ func (h *PresentersHandler) GetExpensesByMonthYear(c *gin.Context) {
 
 	c.JSON(http.StatusOK, output)
 }
+
+func (h *PresentersHandler) GetTotalExpensesForCurrentWeek(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+		return
+	}
+
+	input := presenters.GetTotalExpensesForCurrentWeekInputDto{
+		UserID: userID,
+	}
+
+	output, errs := h.presenterFactory.GetTotalExpensesForCurrentWeek.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}

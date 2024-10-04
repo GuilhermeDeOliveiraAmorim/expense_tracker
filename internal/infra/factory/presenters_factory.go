@@ -12,6 +12,7 @@ type PresentersFactory struct {
 	GetMonthlyExpensesByCategoryYear *presenters.GetMonthlyExpensesByCategoryYearUseCase
 	GetMonthlyExpensesByTagYear      *presenters.GetMonthlyExpensesByTagYearUseCase
 	GetTotalExpensesForCurrentMonth  *presenters.GetTotalExpensesForCurrentMonthUseCase
+	GetTotalExpensesForCurrentWeek   *presenters.GetTotalExpensesForCurrentWeekUseCase
 	GetExpensesByMonthYear           *presenters.GetExpensesByMonthYearUseCase
 }
 
@@ -24,6 +25,7 @@ func NewPresentersFactory(db *gorm.DB) *PresentersFactory {
 	getMonthlyExpensesByCategoryYear := presenters.NewGetMonthlyExpensesByCategoryYearUseCase(presentersRepository, userRepository)
 	getMonthlyExpensesByTagYear := presenters.NewGetMonthlyExpensesByTagYearUseCase(presentersRepository, userRepository)
 	getTotalExpensesForCurrentMonth := presenters.NewGetTotalExpensesForCurrentMonthUseCase(presentersRepository, userRepository)
+	getTotalExpensesForCurrentWeek := presenters.NewGetTotalExpensesForCurrentWeekUseCase(presentersRepository, userRepository)
 	getExpensesByMonthYear := presenters.NewGetExpensesByMonthYearUseCase(presentersRepository, userRepository)
 
 	return &PresentersFactory{
@@ -32,6 +34,7 @@ func NewPresentersFactory(db *gorm.DB) *PresentersFactory {
 		GetMonthlyExpensesByCategoryYear: getMonthlyExpensesByCategoryYear,
 		GetMonthlyExpensesByTagYear:      getMonthlyExpensesByTagYear,
 		GetTotalExpensesForCurrentMonth:  getTotalExpensesForCurrentMonth,
+		GetTotalExpensesForCurrentWeek:   getTotalExpensesForCurrentWeek,
 		GetExpensesByMonthYear:           getExpensesByMonthYear,
 	}
 }
