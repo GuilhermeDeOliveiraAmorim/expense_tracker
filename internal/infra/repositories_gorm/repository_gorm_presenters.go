@@ -379,5 +379,43 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 }
 
 func (p *PresentersRepository) GetTotalExpensesForCurrentWeek(userID string) (float64, string, error) {
-	return 0, "", errors.New("not implemented")
+	tx := p.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	var totalExpenses float64
+
+	now := time.Now()
+
+	year, week := now.ISOWeek()
+	startOfWeek := time.Date(year, 0, 1, 0, 0, 0, 0, now.Location()).
+		AddDate(0, 0, (week-1)*7)
+	for startOfWeek.Weekday() != time.Monday {
+		startOfWeek = startOfWeek.AddDate(0, 0, -1)
+	}
+
+	endOfWeek := startOfWeek.AddDate(0, 0, 6)
+
+	var expenses []Expenses
+	if err := p.gorm.
+		Where("user_id = ? AND expanse_date BETWEEN ? AND ?", userID, startOfWeek, endOfWeek).
+		Find(&expenses).Error; err != nil {
+		return 0, "", errors.New("failed to fetch expenses: " + err.Error())
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return 0, "", errors.New("failed to commit transaction")
+	}
+
+	for _, expense := range expenses {
+		totalExpenses += expense.Amount
+	}
+
+	weekInterval := fmt.Sprintf("%s - %s", startOfWeek.Format("02/01/2006"), endOfWeek.Format("02/01/2006"))
+
+	return totalExpenses, weekInterval, nil
 }
