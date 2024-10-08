@@ -11,7 +11,7 @@ type GetTotalExpensesForCurrentWeekInputDto struct {
 
 type GetTotalExpensesForCurrentWeekOutputDto struct {
 	TotalExpenses float64 `json:"total_expenses"`
-	CurrentWeek   string  `json:"current_month"`
+	CurrentWeek   string  `json:"current_week"`
 }
 
 type GetTotalExpensesForCurrentWeekUseCase struct {
