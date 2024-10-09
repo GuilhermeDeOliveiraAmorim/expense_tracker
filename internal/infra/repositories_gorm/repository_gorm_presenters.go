@@ -314,7 +314,11 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 	weeks := make(map[int]map[string]*repositories.DayExpense)
 
 	for _, expense := range expenses {
-		weekNumber, _ := expense.ExpanseDate.ISOWeek()
+
+		_, weekNumber := expense.ExpanseDate.ISOWeek()
+
+		weekNumber = int(weekNumber)
+
 		dayKey := expense.ExpanseDate.Format("02")
 
 		if weeks[weekNumber] == nil {
@@ -342,8 +346,8 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 		weeks[weekNumber][dayKey].Total += expense.Amount
 
 		for _, tag := range tags {
-
 			tagFound := false
+
 			for i, dayTag := range weeks[weekNumber][dayKey].Tags {
 				if dayTag.Name == tag.Name {
 					weeks[weekNumber][dayKey].Tags[i].Total += expense.Amount
