@@ -31,9 +31,10 @@ type MonthlyTagExpense struct {
 }
 
 type MonthExpenses struct {
-	Month string         `json:"month"`
-	Year  int            `json:"year"`
-	Weeks []WeekExpenses `json:"weeks"`
+	Month         string         `json:"month"`
+	Year          int            `json:"year"`
+	TotalExpenses float64        `json:"total_expenses"`
+	Weeks         []WeekExpenses `json:"weeks"`
 }
 
 type WeekExpenses struct {

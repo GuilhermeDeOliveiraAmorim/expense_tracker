@@ -328,6 +328,7 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 	}
 
 	weeks := make(map[int]map[string]*repositories.DayExpense)
+	totalExpenses := 0.0
 
 	for _, expense := range expenses {
 
@@ -360,6 +361,7 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 		}
 
 		weeks[weekNumber][dayKey].Total += expense.Amount
+		totalExpenses += expense.Amount
 
 		for _, tag := range tags {
 			tagFound := false
@@ -381,6 +383,8 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 			}
 		}
 	}
+
+	monthExpenses.TotalExpenses = totalExpenses
 
 	for weekNumber, days := range weeks {
 		weekExpenses := repositories.WeekExpenses{
