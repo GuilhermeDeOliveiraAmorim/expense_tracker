@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"gorm.io/gorm"
 )
 
@@ -263,6 +264,11 @@ func getMonthOrder(month string) int {
 }
 
 func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (float64, string, error) {
+	location, err := time.LoadLocation(util.TIMEZONE)
+	if err != nil {
+		return 0, "", errors.New("failed to load timezone: " + err.Error())
+	}
+
 	tx := p.gorm.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -274,8 +280,9 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 	var total float64
 	var month string
 
-	startOfMonth := time.Now().AddDate(0, 0, -time.Now().Day()+1)
-	endOfMonth := time.Now()
+	now := time.Now().In(location)
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, location)
+	endOfMonth := now
 
 	if err := tx.Table("expenses").
 		Select("COALESCE(SUM(amount), 0)").
@@ -393,6 +400,10 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 
 		monthExpenses.Weeks = append(monthExpenses.Weeks, weekExpenses)
 	}
+
+	sort.Slice(monthExpenses.Weeks, func(i, j int) bool {
+		return monthExpenses.Weeks[i].Week < monthExpenses.Weeks[j].Week
+	})
 
 	return monthExpenses, nil
 }
