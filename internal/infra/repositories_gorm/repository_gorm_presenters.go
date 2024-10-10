@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -298,6 +299,14 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 }
 
 func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, year int) (repositories.MonthExpenses, error) {
+	tx := p.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
 	var monthExpenses repositories.MonthExpenses
 	monthExpenses.Month = time.Month(month).String()
 	monthExpenses.Year = year
@@ -306,7 +315,7 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 	endDate := startDate.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
 	var expenses []Expenses
-	if err := p.gorm.Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
+	if err := tx.Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
 		Find(&expenses).Error; err != nil {
 		return repositories.MonthExpenses{}, errors.New("failed to fetch expenses: " + err.Error())
 	}
@@ -335,7 +344,7 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 		}
 
 		var tags []Tags
-		if err := p.gorm.Table("tags").
+		if err := tx.Table("tags").
 			Joins("JOIN expense_tags ON tags.id = expense_tags.tags_id").
 			Where("expense_tags.expenses_id = ?", expense.ID).
 			Select("tags.name, tags.color").
@@ -375,6 +384,12 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 		for _, day := range days {
 			weekExpenses.Days = append(weekExpenses.Days, *day)
 		}
+
+		sort.Slice(weekExpenses.Days, func(i, j int) bool {
+			dayI, _ := strconv.Atoi(weekExpenses.Days[i].Day)
+			dayJ, _ := strconv.Atoi(weekExpenses.Days[j].Day)
+			return dayI < dayJ
+		})
 
 		monthExpenses.Weeks = append(monthExpenses.Weeks, weekExpenses)
 	}
