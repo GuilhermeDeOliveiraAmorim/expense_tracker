@@ -409,6 +409,11 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 }
 
 func (p *PresentersRepository) GetTotalExpensesForCurrentWeek(userID string) (float64, string, error) {
+	location, err := time.LoadLocation(util.TIMEZONE)
+	if err != nil {
+		return 0, "", errors.New("failed to load timezone: " + err.Error())
+	}
+
 	tx := p.gorm.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -419,7 +424,7 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentWeek(userID string) (fl
 
 	var totalExpenses float64
 
-	now := time.Now()
+	now := time.Now().In(location)
 
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 
