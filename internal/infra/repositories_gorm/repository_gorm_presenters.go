@@ -409,6 +409,22 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 		return monthExpenses.Weeks[i].Week < monthExpenses.Weeks[j].Week
 	})
 
+	var availableYears []int
+	if err := tx.Table("expenses").
+		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) as year").
+		Where("user_id = ? AND active = ?", userID, true).
+		Order("year DESC").
+		Pluck("year", &availableYears).Error; err != nil {
+		tx.Rollback()
+		return repositories.MonthExpenses{}, errors.New("failed to fetch available years: " + err.Error())
+	}
+
+	monthExpenses.AvailableYears = availableYears
+
+	if err := tx.Commit().Error; err != nil {
+		return repositories.MonthExpenses{}, errors.New("failed to commit transaction")
+	}
+
 	return monthExpenses, nil
 }
 

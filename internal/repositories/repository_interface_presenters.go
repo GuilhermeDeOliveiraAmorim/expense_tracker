@@ -35,6 +35,7 @@ type MonthExpenses struct {
 	Year          int            `json:"year"`
 	TotalExpenses float64        `json:"total_expenses"`
 	Weeks         []WeekExpenses `json:"weeks"`
+	AvailableYears []int          `json:"available_years"`
 }
 
 type WeekExpenses struct {
