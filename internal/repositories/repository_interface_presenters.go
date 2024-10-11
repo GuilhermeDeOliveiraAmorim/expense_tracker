@@ -55,6 +55,18 @@ type ExpenseTag struct {
 	Total float64 `json:"total"`
 }
 
+type MonthCurrentYear struct {
+	Month string  `json:"month"`
+	Total float64 `json:"total"`
+}
+
+type ExpensesMonthCurrentYear struct {
+	Year           int                `json:"year"`
+	Total          float64            `json:"total"`
+	Months         []MonthCurrentYear `json:"months"`
+	AvailableYears []int              `json:"available_years"`
+}
+
 type PresentersRepositoryInterface interface {
 	GetTotalExpensesForPeriod(userID string, StartDate time.Time, EndDate time.Time) (float64, error)
 	GetExpensesByCategoryPeriod(userID string, StartDate time.Time, EndDate time.Time) ([]CategoryExpense, error)
@@ -63,4 +75,5 @@ type PresentersRepositoryInterface interface {
 	GetTotalExpensesForCurrentMonth(userID string) (float64, string, error)
 	GetExpensesByMonthYear(userID string, month int, year int) (MonthExpenses, error)
 	GetTotalExpensesForCurrentWeek(userID string) (float64, string, error)
+	GetTotalExpensesMonthCurrentYear(userID string, year int) (ExpensesMonthCurrentYear, error)
 }

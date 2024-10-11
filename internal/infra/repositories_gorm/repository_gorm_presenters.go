@@ -453,3 +453,68 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentWeek(userID string) (fl
 
 	return totalExpenses, weekInterval, nil
 }
+
+func (p *PresentersRepository) GetTotalExpensesMonthCurrentYear(userID string, year int) (repositories.ExpensesMonthCurrentYear, error) {
+	tx := p.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	var expensesMonthCurrentYear repositories.ExpensesMonthCurrentYear
+	expensesMonthCurrentYear.Year = year
+
+	months := make([]repositories.MonthCurrentYear, 12)
+	for i := 0; i < 12; i++ {
+		months[i] = repositories.MonthCurrentYear{
+			Month: time.Month(i + 1).String(),
+			Total: 0,
+		}
+	}
+
+	type ExpenseMonth struct {
+		Month int     `json:"month"`
+		Total float64 `json:"total"`
+	}
+
+	var expenses []ExpenseMonth
+	if err := tx.Table("expenses").
+		Select("EXTRACT(MONTH FROM expanse_date) as month, COALESCE(SUM(amount), 0) as total").
+		Where("user_id = ? AND EXTRACT(YEAR FROM expanse_date) = ? AND active = ?", userID, year, true).
+		Group("EXTRACT(MONTH FROM expanse_date)").
+		Order("EXTRACT(MONTH FROM expanse_date)").
+		Find(&expenses).Error; err != nil {
+		tx.Rollback()
+		return repositories.ExpensesMonthCurrentYear{}, errors.New("failed to fetch expenses by month: " + err.Error())
+	}
+
+	for _, expense := range expenses {
+		months[expense.Month-1].Total = expense.Total
+	}
+
+	var totalYear float64
+	for _, month := range months {
+		totalYear += month.Total
+	}
+	expensesMonthCurrentYear.Total = totalYear
+	expensesMonthCurrentYear.Months = months
+
+	var availableYears []int
+	if err := tx.Table("expenses").
+		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) as year").
+		Where("user_id = ? AND active = ?", userID, true).
+		Order("year DESC").
+		Pluck("year", &availableYears).Error; err != nil {
+		tx.Rollback()
+		return repositories.ExpensesMonthCurrentYear{}, errors.New("failed to fetch available years: " + err.Error())
+	}
+	expensesMonthCurrentYear.AvailableYears = availableYears
+
+	if err := tx.Commit().Error; err != nil {
+		return repositories.ExpensesMonthCurrentYear{}, errors.New("failed to commit transaction")
+	}
+
+	return expensesMonthCurrentYear, nil
+}

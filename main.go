@@ -98,6 +98,7 @@ func main() {
 		protected.GET("/expenses/monthly/total", presentersHandler.GetTotalExpensesForCurrentMonth)
 		protected.GET("/expenses/monthly/year", presentersHandler.GetExpensesByMonthYear)
 		protected.GET("/expenses/weekly/total", presentersHandler.GetTotalExpensesForCurrentWeek)
+		protected.GET("/expenses/total/monthly/year", presentersHandler.GetTotalExpensesMonthCurrentYear)
 	}
 
 	r.Run(":8080")

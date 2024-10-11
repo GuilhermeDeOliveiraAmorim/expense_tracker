@@ -311,3 +311,48 @@ func (h *PresentersHandler) GetTotalExpensesForCurrentWeek(c *gin.Context) {
 
 	c.JSON(http.StatusOK, output)
 }
+
+func (h *PresentersHandler) GetTotalExpensesMonthCurrentYear(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+		return
+	}
+
+	year := c.Query("year")
+	if year == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing year date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year date is required",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	yearNumber, errYearNumber := strconv.Atoi(year)
+	if errYearNumber != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Invalid year date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year date is invalid",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	input := presenters.GetTotalExpensesMonthCurrentYearInputDto{
+		UserID: userID,
+		Year:   yearNumber,
+	}
+
+	output, errs := h.presenterFactory.GetTotalExpensesMonthCurrentYear.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}
