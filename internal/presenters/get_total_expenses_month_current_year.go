@@ -13,7 +13,7 @@ type GetTotalExpensesMonthCurrentYearInputDto struct {
 }
 
 type GetTotalExpensesMonthCurrentYearOutputDto struct {
-	ExpensesMonthCurrentYear repositories.ExpensesMonthCurrentYear `json:"expenses"`
+	ExpensesMonthCurrentYear repositories.ExpensesMonthCurrentYear `json:"expenses_month_current_year"`
 }
 
 type GetTotalExpensesMonthCurrentYearUseCase struct {
