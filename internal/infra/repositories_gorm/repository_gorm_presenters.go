@@ -551,6 +551,16 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	endDate := startDate.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
+	var totalExpenses float64
+	if err := tx.Table("expenses").
+		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
+		Select("COALESCE(SUM(amount), 0)").
+		Scan(&totalExpenses).Error; err != nil {
+		tx.Rollback()
+		return repositories.CategoryTagsTotals{}, errors.New("failed to calculate total expenses for the month: " + err.Error())
+	}
+	categoryTagsTotals.Total = totalExpenses
+
 	var results []struct {
 		CategoryName string
 		TagName      string
@@ -593,6 +603,36 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	sort.Slice(categoryTagsTotals.Categories, func(i, j int) bool {
 		return categoryTagsTotals.Categories[i].Name < categoryTagsTotals.Categories[j].Name
 	})
+
+	var availableYears []int
+	if err := tx.Table("expenses").
+		Distinct("EXTRACT(YEAR FROM expanse_date)").
+		Where("user_id = ? AND active = ?", userID, true).
+		Order("EXTRACT(YEAR FROM expanse_date) DESC").
+		Pluck("EXTRACT(YEAR FROM expanse_date)", &availableYears).Error; err != nil {
+		tx.Rollback()
+		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch available years: " + err.Error())
+	}
+	categoryTagsTotals.AvailableYears = availableYears
+
+	var availableMonths []struct {
+		Month int
+	}
+	if err := tx.Table("expenses").
+		Select("DISTINCT EXTRACT(MONTH FROM expanse_date) AS month").
+		Where("user_id = ? AND EXTRACT(YEAR FROM expanse_date) = ? AND active = ?", userID, year, true).
+		Order("month ASC").
+		Scan(&availableMonths).Error; err != nil {
+		tx.Rollback()
+		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch available months: " + err.Error())
+	}
+
+	for _, m := range availableMonths {
+		categoryTagsTotals.AvailableMonths = append(categoryTagsTotals.AvailableMonths, repositories.MonthOption{
+			Label: time.Month(m.Month).String(),
+			Value: fmt.Sprintf("%02d", m.Month),
+		})
+	}
 
 	if err := tx.Commit().Error; err != nil {
 		return repositories.CategoryTagsTotals{}, errors.New("failed to commit transaction")

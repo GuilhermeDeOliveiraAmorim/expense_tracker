@@ -79,10 +79,18 @@ type CategoryWithTags struct {
 	Tags  []CategoryTagTotal `json:"tags"`
 }
 
+type MonthOption struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+}
+
 type CategoryTagsTotals struct {
-	Month      string             `json:"month"`
-	Year       int                `json:"year"`
-	Categories []CategoryWithTags `json:"categories"`
+	Month           string             `json:"month"`
+	Year            int                `json:"year"`
+	Total           float64            `json:"total"`
+	Categories      []CategoryWithTags `json:"categories"`
+	AvailableYears  []int              `json:"available_years"`
+	AvailableMonths []MonthOption      `json:"available_months"`
 }
 
 type PresentersRepositoryInterface interface {
