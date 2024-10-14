@@ -356,3 +356,73 @@ func (h *PresentersHandler) GetTotalExpensesMonthCurrentYear(c *gin.Context) {
 
 	c.JSON(http.StatusOK, output)
 }
+
+func (h *PresentersHandler) GetCategoryTagsTotalsByMonthYear(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+		return
+	}
+
+	year := c.Query("year")
+	if year == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing year date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year date is required",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	yearNumber, errYearNumber := strconv.Atoi(year)
+	if errYearNumber != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Invalid year date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year date is invalid",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	month := c.Query("month")
+	if month == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing month date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year date is required",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	monthNumber, errYearNumber := strconv.Atoi(month)
+	if errYearNumber != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Invalid year date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year date is invalid",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	input := presenters.GetCategoryTagsTotalsByMonthYearInputDto{
+		UserID: userID,
+		Year:   yearNumber,
+		Month:  monthNumber,
+	}
+
+	output, errs := h.presenterFactory.GetCategoryTagsTotalsByMonthYear.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}

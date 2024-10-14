@@ -31,10 +31,10 @@ type MonthlyTagExpense struct {
 }
 
 type MonthExpenses struct {
-	Month         string         `json:"month"`
-	Year          int            `json:"year"`
-	TotalExpenses float64        `json:"total_expenses"`
-	Weeks         []WeekExpenses `json:"weeks"`
+	Month          string         `json:"month"`
+	Year           int            `json:"year"`
+	TotalExpenses  float64        `json:"total_expenses"`
+	Weeks          []WeekExpenses `json:"weeks"`
 	AvailableYears []int          `json:"available_years"`
 }
 
@@ -68,6 +68,23 @@ type ExpensesMonthCurrentYear struct {
 	AvailableYears []int              `json:"available_years"`
 }
 
+type CategoryTagTotal struct {
+	Name  string  `json:"name"`
+	Total float64 `json:"total"`
+}
+
+type CategoryWithTags struct {
+	Name  string             `json:"name"`
+	Total float64            `json:"total"`
+	Tags  []CategoryTagTotal `json:"tags"`
+}
+
+type CategoryTagsTotals struct {
+	Month      string             `json:"month"`
+	Year       int                `json:"year"`
+	Categories []CategoryWithTags `json:"categories"`
+}
+
 type PresentersRepositoryInterface interface {
 	GetTotalExpensesForPeriod(userID string, StartDate time.Time, EndDate time.Time) (float64, error)
 	GetExpensesByCategoryPeriod(userID string, StartDate time.Time, EndDate time.Time) ([]CategoryExpense, error)
@@ -77,4 +94,5 @@ type PresentersRepositoryInterface interface {
 	GetExpensesByMonthYear(userID string, month int, year int) (MonthExpenses, error)
 	GetTotalExpensesForCurrentWeek(userID string) (float64, string, error)
 	GetTotalExpensesMonthCurrentYear(userID string, year int) (ExpensesMonthCurrentYear, error)
+	GetCategoryTagsTotalsByMonthYear(userID string, month int, year int) (CategoryTagsTotals, error)
 }

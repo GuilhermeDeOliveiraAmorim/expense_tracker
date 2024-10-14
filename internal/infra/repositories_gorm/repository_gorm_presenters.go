@@ -534,3 +534,69 @@ func (p *PresentersRepository) GetTotalExpensesMonthCurrentYear(userID string, y
 
 	return expensesMonthCurrentYear, nil
 }
+
+func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, month int, year int) (repositories.CategoryTagsTotals, error) {
+	tx := p.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	var categoryTagsTotals repositories.CategoryTagsTotals
+	categoryTagsTotals.Month = time.Month(month).String()
+	categoryTagsTotals.Year = year
+
+	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	endDate := startDate.AddDate(0, 1, 0).Add(-time.Nanosecond)
+
+	var results []struct {
+		CategoryName string
+		TagName      string
+		Total        float64
+	}
+
+	if err := tx.Table("expenses").
+		Select("categories.name as category_name, tags.name as tag_name, COALESCE(SUM(expenses.amount), 0) as total").
+		Joins("LEFT JOIN categories ON categories.id = expenses.category_id").
+		Joins("LEFT JOIN expense_tags ON expense_tags.expenses_id = expenses.id").
+		Joins("LEFT JOIN tags ON tags.id = expense_tags.tags_id").
+		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
+		Group("categories.name, tags.name").
+		Scan(&results).Error; err != nil {
+		tx.Rollback()
+		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category and tags: " + err.Error())
+	}
+
+	categoryMap := make(map[string]*repositories.CategoryWithTags)
+	for _, result := range results {
+		if categoryMap[result.CategoryName] == nil {
+			categoryMap[result.CategoryName] = &repositories.CategoryWithTags{
+				Name:  result.CategoryName,
+				Total: 0,
+				Tags:  []repositories.CategoryTagTotal{},
+			}
+		}
+
+		categoryMap[result.CategoryName].Total += result.Total
+		categoryMap[result.CategoryName].Tags = append(categoryMap[result.CategoryName].Tags, repositories.CategoryTagTotal{
+			Name:  result.TagName,
+			Total: result.Total,
+		})
+	}
+
+	for _, category := range categoryMap {
+		categoryTagsTotals.Categories = append(categoryTagsTotals.Categories, *category)
+	}
+
+	sort.Slice(categoryTagsTotals.Categories, func(i, j int) bool {
+		return categoryTagsTotals.Categories[i].Name < categoryTagsTotals.Categories[j].Name
+	})
+
+	if err := tx.Commit().Error; err != nil {
+		return repositories.CategoryTagsTotals{}, errors.New("failed to commit transaction")
+	}
+
+	return categoryTagsTotals, nil
+}
