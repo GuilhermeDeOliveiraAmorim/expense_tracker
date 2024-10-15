@@ -640,3 +640,37 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 
 	return categoryTagsTotals, nil
 }
+
+func (p *PresentersRepository) GetAvailableMonthsYears(userID string) ([]int, []repositories.MonthOption, error) {
+	tx := p.gorm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			panic(r)
+		}
+	}()
+
+	var availableYears []int
+	if err := tx.Table("expenses").
+		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) as year").
+		Where("user_id = ? AND active = ?", userID, true).
+		Order("year DESC").
+		Pluck("year", &availableYears).Error; err != nil {
+		tx.Rollback()
+		return nil, nil, errors.New("failed to fetch available years: " + err.Error())
+	}
+
+	var monthOptions []repositories.MonthOption
+	for i := 1; i <= 12; i++ {
+		monthOptions = append(monthOptions, repositories.MonthOption{
+			Label: time.Month(i).String(),
+			Value: fmt.Sprintf("%02d", i),
+		})
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, nil, errors.New("failed to commit transaction")
+	}
+
+	return availableYears, monthOptions, nil
+}

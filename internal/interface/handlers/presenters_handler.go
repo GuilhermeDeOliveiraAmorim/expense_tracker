@@ -426,3 +426,23 @@ func (h *PresentersHandler) GetCategoryTagsTotalsByMonthYear(c *gin.Context) {
 
 	c.JSON(http.StatusOK, output)
 }
+
+func (h *PresentersHandler) GetAvailableMonthsYears(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+		return
+	}
+
+	input := presenters.GetAvailableMonthsYearsInputDto{
+		UserID: userID,
+	}
+
+	output, errs := h.presenterFactory.GetAvailableMonthsYears.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}
