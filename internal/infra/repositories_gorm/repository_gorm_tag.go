@@ -2,6 +2,7 @@ package repositoriesgorm
 
 import (
 	"errors"
+	"sort"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"gorm.io/gorm"
@@ -85,7 +86,7 @@ func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
 	}()
 
 	var tagsModel []Tags
-	if err := tx.Where("user_id = ? AND active = ?", userID, true).Find(&tagsModel).Error; err != nil {
+	if err := tx.Where("user_id = ? AND active = ?", userID, true).Find(&tagsModel).Order("created_at DESC").Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
@@ -109,6 +110,10 @@ func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
 
 			tags = append(tags, tag)
 		}
+
+		sort.Slice(tags, func(i, j int) bool {
+			return tags[i].CreatedAt.After(tags[j].CreatedAt)
+		})
 	}
 
 	if err := tx.Commit().Error; err != nil {

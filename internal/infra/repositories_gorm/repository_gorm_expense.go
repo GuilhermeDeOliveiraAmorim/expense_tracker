@@ -2,6 +2,7 @@ package repositoriesgorm
 
 import (
 	"errors"
+	"sort"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"gorm.io/gorm"
@@ -95,7 +96,7 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 
 	var expensesModel []Expenses
 
-	if err := tx.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Error; err != nil {
+	if err := tx.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Order("expense_date DESC").Error; err != nil {
 		tx.Rollback()
 		return []entities.Expense{}, err
 	}
@@ -158,6 +159,10 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 
 			expenses = append(expenses, expense)
 		}
+
+		sort.Slice(expenses, func(i, j int) bool {
+			return expenses[i].ExpenseDate.After(expenses[j].ExpenseDate)
+		})
 	}
 
 	if err := tx.Commit().Error; err != nil {
