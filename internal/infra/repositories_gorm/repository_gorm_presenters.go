@@ -559,7 +559,7 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		tx.Rollback()
 		return repositories.CategoryTagsTotals{}, errors.New("failed to calculate total expenses for the month: " + err.Error())
 	}
-	categoryTagsTotals.Total = totalExpenses
+	categoryTagsTotals.ExpensesAmount = totalExpenses
 
 	var results []struct {
 		CategoryName string
@@ -583,16 +583,16 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	for _, result := range results {
 		if categoryMap[result.CategoryName] == nil {
 			categoryMap[result.CategoryName] = &repositories.CategoryWithTags{
-				Name:  result.CategoryName,
-				Total: 0,
-				Tags:  []repositories.CategoryTagTotal{},
+				Name:           result.CategoryName,
+				CategoryAmount: 0,
+				Tags:           []repositories.CategoryTagTotal{},
 			}
 		}
 
-		categoryMap[result.CategoryName].Total += result.Total
+		categoryMap[result.CategoryName].CategoryAmount += result.Total
 		categoryMap[result.CategoryName].Tags = append(categoryMap[result.CategoryName].Tags, repositories.CategoryTagTotal{
-			Name:  result.TagName,
-			Total: result.Total,
+			Name:      result.TagName,
+			TagAmount: result.Total,
 		})
 	}
 
