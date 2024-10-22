@@ -551,6 +551,7 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	endDate := startDate.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
+	// Calcula o total de despesas para o mês
 	var totalExpenses float64
 	if err := tx.Table("expenses").
 		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
@@ -561,49 +562,72 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	}
 	categoryTagsTotals.ExpensesAmount = totalExpenses
 
+	// Consulta para obter totais de categorias
 	var results []struct {
-		CategoryName string
-		TagName      string
-		Total        float64
+		CategoryName  string
+		CategoryTotal float64
 	}
 
 	if err := tx.Table("expenses").
-		Select("categories.name as category_name, tags.name as tag_name, COALESCE(SUM(expenses.amount), 0) as total").
+		Select("categories.name as category_name, COALESCE(SUM(expenses.amount), 0) as category_total").
+		Joins("LEFT JOIN categories ON categories.id = expenses.category_id").
+		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
+		Group("categories.name").
+		Scan(&results).Error; err != nil {
+		tx.Rollback()
+		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category: " + err.Error())
+	}
+
+	// Map para armazenar as categorias e suas tags
+	categoryMap := make(map[string]*repositories.CategoryWithTags)
+	for _, result := range results {
+		categoryMap[result.CategoryName] = &repositories.CategoryWithTags{
+			Name:           result.CategoryName,
+			CategoryAmount: result.CategoryTotal,
+			Tags:           []repositories.CategoryTagTotal{},
+		}
+	}
+
+	// Consulta para obter totais de tags
+	var resultsTags []struct {
+		CategoryName string
+		TagName      string
+		TagTotal     float64
+	}
+
+	if err := tx.Table("expenses").
+		Select("categories.name as category_name, tags.name as tag_name, COALESCE(SUM(expenses.amount), 0) as tag_total").
 		Joins("LEFT JOIN categories ON categories.id = expenses.category_id").
 		Joins("LEFT JOIN expense_tags ON expense_tags.expenses_id = expenses.id").
 		Joins("LEFT JOIN tags ON tags.id = expense_tags.tags_id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
 		Group("categories.name, tags.name").
-		Scan(&results).Error; err != nil {
+		Scan(&resultsTags).Error; err != nil {
 		tx.Rollback()
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category and tags: " + err.Error())
 	}
 
-	categoryMap := make(map[string]*repositories.CategoryWithTags)
-	for _, result := range results {
-		if categoryMap[result.CategoryName] == nil {
-			categoryMap[result.CategoryName] = &repositories.CategoryWithTags{
-				Name:           result.CategoryName,
-				CategoryAmount: 0,
-				Tags:           []repositories.CategoryTagTotal{},
-			}
+	// Preenchendo as tags nas categorias
+	for _, result := range resultsTags {
+		if category, exists := categoryMap[result.CategoryName]; exists {
+			category.Tags = append(category.Tags, repositories.CategoryTagTotal{
+				Name:      result.TagName,
+				TagAmount: result.TagTotal,
+			})
 		}
-
-		categoryMap[result.CategoryName].CategoryAmount += result.Total
-		categoryMap[result.CategoryName].Tags = append(categoryMap[result.CategoryName].Tags, repositories.CategoryTagTotal{
-			Name:      result.TagName,
-			TagAmount: result.Total,
-		})
 	}
 
+	// Adiciona as categorias no resultado final
 	for _, category := range categoryMap {
 		categoryTagsTotals.Categories = append(categoryTagsTotals.Categories, *category)
 	}
 
+	// Ordena as categorias pelo nome
 	sort.Slice(categoryTagsTotals.Categories, func(i, j int) bool {
 		return categoryTagsTotals.Categories[i].Name < categoryTagsTotals.Categories[j].Name
 	})
 
+	// Obtém os anos disponíveis
 	var availableYears []int
 	if err := tx.Table("expenses").
 		Distinct("EXTRACT(YEAR FROM expanse_date)").
@@ -615,6 +639,7 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	}
 	categoryTagsTotals.AvailableYears = availableYears
 
+	// Obtém os meses disponíveis
 	var availableMonths []struct {
 		Month int
 	}
