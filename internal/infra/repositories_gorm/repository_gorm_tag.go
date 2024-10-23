@@ -116,10 +116,6 @@ func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
 		})
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return nil, errors.New("failed to commit transaction: " + err.Error())
-	}
-
 	return tags, nil
 }
 
@@ -156,10 +152,6 @@ func (c *TagRepository) GetTag(userID string, tagID string) (entities.Tag, error
 		Color:  tagModel.Color,
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return entities.Tag{}, errors.New("failed to commit transaction: " + err.Error())
-	}
-
 	return tag, nil
 }
 
@@ -181,10 +173,6 @@ func (c *TagRepository) ThisTagExists(userID string, tagName string) (bool, erro
 			return false, errors.New("tag not found")
 		}
 		return false, errors.New(result.Error.Error())
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return false, errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return true, nil

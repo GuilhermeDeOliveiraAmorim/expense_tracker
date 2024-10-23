@@ -46,10 +46,6 @@ func (p *PresentersRepository) GetTotalExpensesForPeriod(userID string, startDat
 		}
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return 0, errors.New("failed to commit transaction")
-	}
-
 	return total, nil
 }
 
@@ -72,10 +68,6 @@ func (p *PresentersRepository) GetExpensesByCategoryPeriod(userID string, startD
 		Scan(&expensesByCategory).Error; err != nil {
 		tx.Rollback()
 		return nil, errors.New("failed to fetch expenses by category: " + err.Error())
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, errors.New("failed to commit transaction")
 	}
 
 	return expensesByCategory, nil
@@ -121,10 +113,6 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryYear(userID string, y
 	if err != nil {
 		tx.Rollback()
 		return nil, nil, errors.New("failed to fetch available years: " + err.Error())
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, []int{}, errors.New("failed to commit transaction")
 	}
 
 	monthlyExpensesMap := make(map[string]repositories.MonthlyCategoryExpense)
@@ -211,10 +199,6 @@ func (p *PresentersRepository) GetMonthlyExpensesByTagYear(userID string, year i
 		return nil, nil, errors.New("failed to fetch available years: " + err.Error())
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return nil, []int{}, errors.New("failed to commit transaction")
-	}
-
 	monthlyExpensesMap := make(map[string]repositories.MonthlyTagExpense)
 
 	for _, result := range results {
@@ -297,10 +281,6 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 	}
 
 	month = time.Now().Format("January")
-
-	if err := tx.Commit().Error; err != nil {
-		return 0, "", errors.New("failed to commit transaction")
-	}
 
 	return total, month, nil
 }
@@ -421,10 +401,6 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 
 	monthExpenses.AvailableYears = availableYears
 
-	if err := tx.Commit().Error; err != nil {
-		return repositories.MonthExpenses{}, errors.New("failed to commit transaction")
-	}
-
 	return monthExpenses, nil
 }
 
@@ -455,10 +431,6 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentWeek(userID string) (fl
 		Where("user_id = ? AND expanse_date BETWEEN ? AND ?", userID, startOfMonth, endOfWeek).
 		Find(&expenses).Error; err != nil {
 		return 0, "", errors.New("failed to fetch expenses: " + err.Error())
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return 0, "", errors.New("failed to commit transaction")
 	}
 
 	for _, expense := range expenses {
@@ -528,10 +500,6 @@ func (p *PresentersRepository) GetTotalExpensesMonthCurrentYear(userID string, y
 	}
 	expensesMonthCurrentYear.AvailableYears = availableYears
 
-	if err := tx.Commit().Error; err != nil {
-		return repositories.ExpensesMonthCurrentYear{}, errors.New("failed to commit transaction")
-	}
-
 	return expensesMonthCurrentYear, nil
 }
 
@@ -551,7 +519,6 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	endDate := startDate.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
-	// Calcula o total de despesas para o mês
 	var totalExpenses float64
 	if err := tx.Table("expenses").
 		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
@@ -562,7 +529,6 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	}
 	categoryTagsTotals.ExpensesAmount = totalExpenses
 
-	// Consulta para obter totais de categorias
 	var results []struct {
 		CategoryName  string
 		CategoryTotal float64
@@ -578,7 +544,6 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category: " + err.Error())
 	}
 
-	// Map para armazenar as categorias e suas tags
 	categoryMap := make(map[string]*repositories.CategoryWithTags)
 	for _, result := range results {
 		categoryMap[result.CategoryName] = &repositories.CategoryWithTags{
@@ -588,7 +553,6 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		}
 	}
 
-	// Consulta para obter totais de tags
 	var resultsTags []struct {
 		CategoryName string
 		TagName      string
@@ -607,7 +571,6 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category and tags: " + err.Error())
 	}
 
-	// Preenchendo as tags nas categorias
 	for _, result := range resultsTags {
 		if category, exists := categoryMap[result.CategoryName]; exists {
 			category.Tags = append(category.Tags, repositories.CategoryTagTotal{
@@ -617,17 +580,14 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		}
 	}
 
-	// Adiciona as categorias no resultado final
 	for _, category := range categoryMap {
 		categoryTagsTotals.Categories = append(categoryTagsTotals.Categories, *category)
 	}
 
-	// Ordena as categorias pelo nome
 	sort.Slice(categoryTagsTotals.Categories, func(i, j int) bool {
 		return categoryTagsTotals.Categories[i].Name < categoryTagsTotals.Categories[j].Name
 	})
 
-	// Obtém os anos disponíveis
 	var availableYears []int
 	if err := tx.Table("expenses").
 		Distinct("EXTRACT(YEAR FROM expanse_date)").
@@ -639,7 +599,6 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	}
 	categoryTagsTotals.AvailableYears = availableYears
 
-	// Obtém os meses disponíveis
 	var availableMonths []struct {
 		Month int
 	}
@@ -657,10 +616,6 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 			Label: time.Month(m.Month).String(),
 			Value: fmt.Sprintf("%02d", m.Month),
 		})
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return repositories.CategoryTagsTotals{}, errors.New("failed to commit transaction")
 	}
 
 	return categoryTagsTotals, nil
@@ -691,10 +646,6 @@ func (p *PresentersRepository) GetAvailableMonthsYears(userID string) ([]int, []
 			Label: time.Month(i).String(),
 			Value: fmt.Sprintf("%02d", i),
 		})
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return nil, nil, errors.New("failed to commit transaction")
 	}
 
 	return availableYears, monthOptions, nil

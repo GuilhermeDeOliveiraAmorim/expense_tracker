@@ -127,10 +127,6 @@ func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, 
 		})
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return nil, errors.New("failed to commit transaction: " + err.Error())
-	}
-
 	return categories, nil
 }
 
@@ -164,10 +160,6 @@ func (c *CategoryRepository) GetCategory(userID string, categoryID string) (enti
 		UserID: categoryModel.UserID,
 		Name:   categoryModel.Name,
 		Color:  categoryModel.Color,
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return entities.Category{}, errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return category, nil
@@ -217,10 +209,6 @@ func (c *CategoryRepository) ThisCategoryExists(userID string, categoryName stri
 			return false, errors.New("category not found")
 		}
 		return false, errors.New(result.Error.Error())
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return false, errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return true, nil

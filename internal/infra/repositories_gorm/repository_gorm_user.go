@@ -109,10 +109,6 @@ func (u *UserRepository) GetUsers() ([]entities.User, error) {
 		}
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return nil, errors.New("failed to commit transaction: " + err.Error())
-	}
-
 	return users, nil
 }
 
@@ -145,10 +141,6 @@ func (u *UserRepository) GetUser(userID string) (entities.User, error) {
 			DeactivatedAt: userModel.DeactivatedAt,
 		},
 		Name: userModel.Name,
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return entities.User{}, errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return user, nil
@@ -215,10 +207,6 @@ func (u *UserRepository) GetUserByEmail(userEmail string) (entities.User, error)
 		},
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return entities.User{}, errors.New("failed to commit transaction: " + err.Error())
-	}
-
 	return user, nil
 }
 
@@ -240,10 +228,6 @@ func (u *UserRepository) ThisUserExists(userName string) (bool, error) {
 			return false, errors.New("user not found")
 		}
 		return false, errors.New(result.Error.Error())
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return false, errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return true, nil
@@ -269,10 +253,6 @@ func (u *UserRepository) ThisUserEmailExists(userEmail string) (bool, error) {
 		return false, errors.New(result.Error.Error())
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return false, errors.New("failed to commit transaction: " + err.Error())
-	}
-
 	return true, nil
 }
 
@@ -294,10 +274,6 @@ func (u *UserRepository) ThisUserNameExists(userName string) (bool, error) {
 			return false, errors.New("not found")
 		}
 		return false, errors.New(result.Error.Error())
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return false, errors.New("failed to commit transaction: " + err.Error())
 	}
 
 	return true, nil

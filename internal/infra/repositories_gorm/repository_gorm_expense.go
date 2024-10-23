@@ -165,10 +165,6 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 		})
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return []entities.Expense{}, errors.New("failed to commit transaction: " + err.Error())
-	}
-
 	return expenses, nil
 }
 
@@ -242,10 +238,6 @@ func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entitie
 		TagIDs:      tagsIDs,
 		Category:    category,
 		Tags:        tags,
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return entities.Expense{}, errors.New("failed to commit transaction")
 	}
 
 	return expense, nil
