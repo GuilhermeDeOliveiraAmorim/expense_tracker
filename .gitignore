@@ -23,9 +23,13 @@ go.work
 
 # Variables Keys
 .env
+.env.dev
 .env.prod
-internal/config/env.go
+.env.dev.go
+.env.prod.go
+internal/config/env.dev.go
 internal/config/env.prod.go
+internal/config/env.prod
 
 # DB path
 /postgres-data

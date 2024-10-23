@@ -16,12 +16,18 @@ import (
 )
 
 func main() {
-	dsn := "host=" + config.DB_LOCAL.DB_HOST + " user=" + config.DB_LOCAL.DB_USER + " password=" + config.DB_LOCAL.DB_PASSWORD + " dbname=" + config.DB_LOCAL.DB_NAME + " port=" + config.DB_LOCAL.DB_PORT + " sslmode=disable"
+	dsn := "host=" + config.DB_VAR.DB_HOST + " user=" + config.DB_VAR.DB_USER + " password=" + config.DB_VAR.DB_PASSWORD + " dbname=" + config.DB_VAR.DB_NAME + " port=" + config.DB_VAR.DB_PORT + " sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("Failed to connect database")
 	}
 	fmt.Println("Successful connection")
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic("Failed to get SQL DB")
+	}
+	defer sqlDB.Close()
 
 	if err := db.AutoMigrate(
 		repositoriesgorm.Categories{},
