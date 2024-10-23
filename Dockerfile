@@ -1,20 +1,28 @@
 # Build Stage
-FROM golang:1.21.5 AS builder
+FROM golang:1.21.5 AS build
 
-WORKDIR /build
+WORKDIR /app
 
+# Copia e baixa as dependências
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copia o restante do código
 COPY . .
-RUN go build -o /build/app .
+
+# Compila o binário de forma estática
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o cloudrun
 
 # Final Stage
-FROM golang:1.21.5
+FROM scratch
 
-# Crie o diretório /app se ele não existir
-RUN mkdir -p /app
+WORKDIR /app
 
-COPY --from=builder /build/app /app
+# Copia o binário da etapa de build
+COPY --from=build /app/cloudrun .
 
-CMD ["/app/app"]
+# Expõe a porta 8080
+EXPOSE 8080
+
+# Define o ENTRYPOINT
+ENTRYPOINT ["./cloudrun"]
