@@ -28,6 +28,7 @@ go.work
 .env.dev.go
 .env.prod.go
 internal/config/env.dev.go
+internal/config/env.dev
 internal/config/env.prod.go
 internal/config/env.prod
 
