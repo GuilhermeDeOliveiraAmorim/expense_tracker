@@ -11,22 +11,15 @@ import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
-	dsn := "host=" + config.DB_VAR.DB_HOST + " user=" + config.DB_VAR.DB_USER + " password=" + config.DB_VAR.DB_PASSWORD + " dbname=" + config.DB_VAR.DB_NAME + " port=" + config.DB_VAR.DB_PORT + " sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, sqlDB, err := util.SetupDatabaseConnection(util.POSTGRES)
 	if err != nil {
 		panic("Failed to connect database")
 	}
 	fmt.Println("Successful connection")
 
-	sqlDB, err := db.DB()
-	if err != nil {
-		panic("Failed to get SQL DB")
-	}
 	defer sqlDB.Close()
 
 	if err := db.AutoMigrate(
@@ -43,7 +36,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{config.FRONT_END_URL_VAR.FRONT_END_URL},
+		AllowOrigins:     []string{config.FRONT_END_URL_VAR.FRONT_END_URL_DEV, config.FRONT_END_URL_VAR.FRONT_END_URL_PROD},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},

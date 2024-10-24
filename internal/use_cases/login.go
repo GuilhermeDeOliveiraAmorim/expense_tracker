@@ -47,7 +47,7 @@ func (c *LoginUseCase) Execute(input LoginInputDto) (LoginOutputDto, []util.Prob
 				Type:     "Internal Server Error",
 				Title:    "Error getting user",
 				Status:   500,
-				Detail:   "Error getting user by email",
+				Detail:   getUserByEmailErr.Error(),
 				Instance: util.RFC500,
 			},
 		}

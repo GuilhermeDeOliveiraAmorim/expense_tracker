@@ -1,5 +1,31 @@
 version: "3"
 services:
+  mysql_reading:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    restart: always
+    container_name: mysql_reading
+    hostname: mysql_reading
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      MYSQL_DATABASE: mysql
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: mysql
+      MYSQL_LOG_CONSOLE: "true"
+    volumes:
+      - mysql_volume:/var/lib/mysql
+      - ./mysql_logs:/var/log/mysql
+    networks:
+      - expense-tracker
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   postgres_reading:
     image: postgres:13-alpine
     ports:
@@ -21,11 +47,13 @@ services:
     restart: always
     depends_on:
       - postgres_reading
+      - mysql_reading
     networks:
       - expense-tracker
 
 volumes:
   postgres_volume:
+  mysql_volume:
 
 networks:
   expense-tracker:
