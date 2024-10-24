@@ -9,7 +9,7 @@ import (
 )
 
 func HashEmailWithHMAC(email string) (string, []ProblemDetails) {
-	key := []byte(config.SECRETS_VAR.JWT_SECRET)
+	key := []byte(config.SECRETS_LOCAL.JWT_SECRET)
 	h := hmac.New(sha256.New, key)
 	h.Write([]byte(email))
 

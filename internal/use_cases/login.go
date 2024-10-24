@@ -83,7 +83,7 @@ func (c *LoginUseCase) Execute(input LoginInputDto) (LoginOutputDto, []util.Prob
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	jwtSecret := []byte(config.SECRETS_VAR.JWT_SECRET)
+	jwtSecret := []byte(config.SECRETS_LOCAL.JWT_SECRET)
 
 	tokenString, err := token.SignedString(jwtSecret)
 	if err != nil {
