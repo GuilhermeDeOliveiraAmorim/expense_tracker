@@ -76,17 +76,9 @@ func (u *UserRepository) DeleteUser(user entities.User) error {
 }
 
 func (u *UserRepository) GetUsers() ([]entities.User, error) {
-	tx := u.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var usersModel []Users
-	if err := tx.Find(&usersModel).Error; err != nil {
-		tx.Rollback()
+	if err := u.gorm.Find(&usersModel).Error; err != nil {
+		u.gorm.Rollback()
 		return nil, err
 	}
 
@@ -107,25 +99,19 @@ func (u *UserRepository) GetUsers() ([]entities.User, error) {
 
 			users = append(users, user)
 		}
+	} else {
+		users = []entities.User{}
 	}
 
 	return users, nil
 }
 
 func (u *UserRepository) GetUser(userID string) (entities.User, error) {
-	tx := u.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
+var userModel Users
 
-	var userModel Users
-
-	result := tx.Model(&Users{}).Where("id = ?", userID).First(&userModel)
+	result := u.gorm.Model(&Users{}).Where("id = ?", userID).First(&userModel)
 	if result.Error != nil {
-		tx.Rollback()
+		u.gorm.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.User{}, errors.New("user not found")
 		}

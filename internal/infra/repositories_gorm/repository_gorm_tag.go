@@ -77,17 +77,9 @@ func (c *TagRepository) DeleteTag(tag entities.Tag) error {
 }
 
 func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
-	tx := c.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var tagsModel []Tags
-	if err := tx.Where("user_id = ? AND active = ?", userID, true).Find(&tagsModel).Order("created_at DESC").Error; err != nil {
-		tx.Rollback()
+	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&tagsModel).Order("created_at DESC").Error; err != nil {
+		c.gorm.Rollback()
 		return nil, err
 	}
 
@@ -114,25 +106,19 @@ func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
 		sort.Slice(tags, func(i, j int) bool {
 			return tags[i].CreatedAt.After(tags[j].CreatedAt)
 		})
+	} else {
+		tags = []entities.Tag{}
 	}
 
 	return tags, nil
 }
 
 func (c *TagRepository) GetTag(userID string, tagID string) (entities.Tag, error) {
-	tx := c.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var tagModel Tags
 
-	result := tx.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tagID, userID, true).First(&tagModel)
+	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tagID, userID, true).First(&tagModel)
 	if result.Error != nil {
-		tx.Rollback()
+		c.gorm.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Tag{}, errors.New("tag not found")
 		}
@@ -156,19 +142,11 @@ func (c *TagRepository) GetTag(userID string, tagID string) (entities.Tag, error
 }
 
 func (c *TagRepository) ThisTagExists(userID string, tagName string) (bool, error) {
-	tx := c.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var tagModel Tags
 
-	result := tx.Model(&Tags{}).Where("name = ? AND user_id = ? AND active = ?", tagName, userID, true).First(&tagModel)
+	result := c.gorm.Model(&Tags{}).Where("name = ? AND user_id = ? AND active = ?", tagName, userID, true).First(&tagModel)
 	if result.Error != nil {
-		tx.Rollback()
+		c.gorm.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("tag not found")
 		}

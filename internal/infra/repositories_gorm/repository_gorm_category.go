@@ -88,17 +88,9 @@ func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
 }
 
 func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, error) {
-	tx := c.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var categoriesModel []Categories
-	if err := tx.Where("user_id = ? AND active = ?", userID, true).Find(&categoriesModel).Order("created_at DESC").Error; err != nil {
-		tx.Rollback()
+	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&categoriesModel).Order("created_at DESC").Error; err != nil {
+		c.gorm.Rollback()
 		return nil, err
 	}
 
@@ -125,23 +117,17 @@ func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, 
 		sort.Slice(categories, func(i, j int) bool {
 			return categories[i].CreatedAt.After(categories[j].CreatedAt)
 		})
+	} else {
+		categories = []entities.Category{}
 	}
 
 	return categories, nil
 }
 
 func (c *CategoryRepository) GetCategory(userID string, categoryID string) (entities.Category, error) {
-	tx := c.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var categoryModel Categories
 
-	result := tx.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", categoryID, userID, true).First(&categoryModel)
+	result := c.gorm.Model(&Categories{}).Where("id = ? AND user_id = ? AND active = ?", categoryID, userID, true).First(&categoryModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Category{}, errors.New("category not found")
@@ -193,17 +179,9 @@ func (c *CategoryRepository) UpdateCategory(category entities.Category) error {
 }
 
 func (c *CategoryRepository) ThisCategoryExists(userID string, categoryName string) (bool, error) {
-	tx := c.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var categoryModel Categories
 
-	result := tx.Model(&Categories{}).Where("name = ? AND user_id = ? AND active = ?", categoryName, userID, true).First(&categoryModel)
+	result := c.gorm.Model(&Categories{}).Where("name = ? AND user_id = ? AND active = ?", categoryName, userID, true).First(&categoryModel)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("category not found")

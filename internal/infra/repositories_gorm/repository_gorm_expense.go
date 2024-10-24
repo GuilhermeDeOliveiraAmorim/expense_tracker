@@ -86,18 +86,10 @@ func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
 }
 
 func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, error) {
-	tx := e.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var expensesModel []Expenses
 
-	if err := tx.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Order("expense_date DESC").Error; err != nil {
-		tx.Rollback()
+	if err := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Order("expense_date DESC").Error; err != nil {
+		e.gorm.Rollback()
 		return []entities.Expense{}, err
 	}
 
@@ -163,25 +155,19 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 		sort.Slice(expenses, func(i, j int) bool {
 			return expenses[i].ExpenseDate.After(expenses[j].ExpenseDate)
 		})
+	} else {
+		expenses = []entities.Expense{}
 	}
 
 	return expenses, nil
 }
 
 func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entities.Expense, error) {
-	tx := e.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var expenseModel Expenses
 
-	result := tx.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("id = ? AND user_id = ? AND active = ?", expenseID, userID, true).First(&expenseModel)
+	result := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("id = ? AND user_id = ? AND active = ?", expenseID, userID, true).First(&expenseModel)
 	if result.Error != nil {
-		tx.Rollback()
+		e.gorm.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Expense{}, errors.New("expense not found")
 		}
