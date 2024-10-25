@@ -50,7 +50,7 @@ func main() {
 
 	public := r.Group("/")
 	{
-		public.POST("/users", userHandler.CreateUser)
+		public.POST("/signup", userHandler.CreateUser)
 		public.POST("/login", userHandler.Login)
 	}
 
