@@ -41,11 +41,7 @@ func (c *TagRepository) CreateTag(tag entities.Tag) error {
 		return err
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (c *TagRepository) DeleteTag(tag entities.Tag) error {
@@ -69,17 +65,12 @@ func (c *TagRepository) DeleteTag(tag entities.Tag) error {
 		return errors.New(result.Error.Error())
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (c *TagRepository) GetTags(userID string) ([]entities.Tag, error) {
 	var tagsModel []Tags
 	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&tagsModel).Order("created_at DESC").Error; err != nil {
-		c.gorm.Rollback()
 		return nil, err
 	}
 
@@ -118,7 +109,6 @@ func (c *TagRepository) GetTag(userID string, tagID string) (entities.Tag, error
 
 	result := c.gorm.Model(&Tags{}).Where("id = ? AND user_id = ? AND active = ?", tagID, userID, true).First(&tagModel)
 	if result.Error != nil {
-		c.gorm.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Tag{}, errors.New("tag not found")
 		}
@@ -146,7 +136,6 @@ func (c *TagRepository) ThisTagExists(userID string, tagName string) (bool, erro
 
 	result := c.gorm.Model(&Tags{}).Where("name = ? AND user_id = ? AND active = ?", tagName, userID, true).First(&tagModel)
 	if result.Error != nil {
-		c.gorm.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("tag not found")
 		}
@@ -176,9 +165,5 @@ func (c *TagRepository) UpdateTag(tag entities.Tag) error {
 		return errors.New(result.Error.Error())
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }

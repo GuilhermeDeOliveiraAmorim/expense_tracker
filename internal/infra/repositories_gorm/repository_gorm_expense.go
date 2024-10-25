@@ -50,11 +50,7 @@ func (e *ExpenseRepository) CreateExpense(expense entities.Expense) error {
 		}
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (e *ExpenseRepository) DeleteExpense(expense entities.Expense) error {
@@ -89,7 +85,6 @@ func (e *ExpenseRepository) GetExpenses(userID string) ([]entities.Expense, erro
 	var expensesModel []Expenses
 
 	if err := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Order("expense_date DESC").Error; err != nil {
-		e.gorm.Rollback()
 		return []entities.Expense{}, err
 	}
 
@@ -167,7 +162,6 @@ func (e *ExpenseRepository) GetExpense(userID string, expenseID string) (entitie
 
 	result := e.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("id = ? AND user_id = ? AND active = ?", expenseID, userID, true).First(&expenseModel)
 	if result.Error != nil {
-		e.gorm.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.Expense{}, errors.New("expense not found")
 		}
@@ -276,9 +270,5 @@ func (e *ExpenseRepository) UpdateExpense(expense entities.Expense) error {
 		}
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }

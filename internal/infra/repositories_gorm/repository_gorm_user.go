@@ -40,11 +40,7 @@ func (u *UserRepository) CreateUser(user entities.User) error {
 		return err
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (u *UserRepository) DeleteUser(user entities.User) error {
@@ -68,17 +64,12 @@ func (u *UserRepository) DeleteUser(user entities.User) error {
 		return errors.New(result.Error.Error())
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (u *UserRepository) GetUsers() ([]entities.User, error) {
 	var usersModel []Users
 	if err := u.gorm.Find(&usersModel).Error; err != nil {
-		u.gorm.Rollback()
 		return nil, err
 	}
 
@@ -107,11 +98,10 @@ func (u *UserRepository) GetUsers() ([]entities.User, error) {
 }
 
 func (u *UserRepository) GetUser(userID string) (entities.User, error) {
-var userModel Users
+	var userModel Users
 
 	result := u.gorm.Model(&Users{}).Where("id = ?", userID).First(&userModel)
 	if result.Error != nil {
-		u.gorm.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.User{}, errors.New("user not found")
 		}
@@ -151,27 +141,14 @@ func (u *UserRepository) UpdateUser(user entities.User) error {
 		return errors.New(result.Error.Error())
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (u *UserRepository) GetUserByEmail(userEmail string) (entities.User, error) {
-	tx := u.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var userModel Users
 
-	result := tx.Model(&Users{}).Where("email = ?", userEmail).First(&userModel)
+	result := u.gorm.Model(&Users{}).Where("email = ?", userEmail).First(&userModel)
 	if result.Error != nil {
-		tx.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return entities.User{}, errors.New("user not found")
 		}
@@ -197,19 +174,10 @@ func (u *UserRepository) GetUserByEmail(userEmail string) (entities.User, error)
 }
 
 func (u *UserRepository) ThisUserExists(userName string) (bool, error) {
-	tx := u.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var userModel Users
 
-	result := tx.Model(&Users{}).Where("name = ?", userName).First(&userModel)
+	result := u.gorm.Model(&Users{}).Where("name = ?", userName).First(&userModel)
 	if result.Error != nil {
-		tx.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("user not found")
 		}
@@ -220,19 +188,10 @@ func (u *UserRepository) ThisUserExists(userName string) (bool, error) {
 }
 
 func (u *UserRepository) ThisUserEmailExists(userEmail string) (bool, error) {
-	tx := u.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var userModel Users
 
-	result := tx.Model(&Users{}).Where("email = ?", userEmail).First(&userModel)
+	result := u.gorm.Model(&Users{}).Where("email = ?", userEmail).First(&userModel)
 	if result.Error != nil {
-		tx.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("not found")
 		}
@@ -243,19 +202,10 @@ func (u *UserRepository) ThisUserEmailExists(userEmail string) (bool, error) {
 }
 
 func (u *UserRepository) ThisUserNameExists(userName string) (bool, error) {
-	tx := u.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var userModel Users
 
-	result := tx.Model(&Users{}).Where("name = ?", userName).First(&userModel)
+	result := u.gorm.Model(&Users{}).Where("name = ?", userName).First(&userModel)
 	if result.Error != nil {
-		tx.Rollback()
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return false, errors.New("not found")
 		}

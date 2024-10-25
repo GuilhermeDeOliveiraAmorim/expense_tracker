@@ -24,24 +24,15 @@ func NewPresentersRepository(gorm *gorm.DB) *PresentersRepository {
 }
 
 func (p *PresentersRepository) GetTotalExpensesForPeriod(userID string, startDate time.Time, endDate time.Time) (float64, error) {
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var total float64
 
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("COALESCE(SUM(amount), 0)").
 		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
 		Scan(&total).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			total = 0
 		} else {
-			tx.Rollback()
 			return 0, errors.New("failed to fetch total expenses: " + err.Error())
 		}
 	}
@@ -50,23 +41,14 @@ func (p *PresentersRepository) GetTotalExpensesForPeriod(userID string, startDat
 }
 
 func (p *PresentersRepository) GetExpensesByCategoryPeriod(userID string, startDate time.Time, endDate time.Time) ([]repositories.CategoryExpense, error) {
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var expensesByCategory []repositories.CategoryExpense
 
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("categories.name as category_name, categories.color as category_color, SUM(expenses.amount) as total").
 		Joins("JOIN categories ON expenses.category_id = categories.id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
 		Group("categories.name, categories.color").Order("total").
 		Scan(&expensesByCategory).Error; err != nil {
-		tx.Rollback()
 		return nil, errors.New("failed to fetch expenses by category: " + err.Error())
 	}
 
@@ -74,14 +56,6 @@ func (p *PresentersRepository) GetExpensesByCategoryPeriod(userID string, startD
 }
 
 func (p *PresentersRepository) GetMonthlyExpensesByCategoryYear(userID string, year int) ([]repositories.MonthlyCategoryExpense, []int, error) {
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var results []struct {
 		Year         int     `gorm:"column:year"`
 		Month        string  `gorm:"column:month"`
@@ -90,7 +64,7 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryYear(userID string, y
 		Total        float64 `gorm:"column:total"`
 	}
 
-	err := tx.Table("expenses").
+	err := p.gorm.Table("expenses").
 		Select("EXTRACT(YEAR FROM expanse_date) AS year, TO_CHAR(expanse_date, 'Month') AS month, categories.name AS category_name, categories.color AS color, SUM(expenses.amount) AS total").
 		Joins("INNER JOIN categories ON expenses.category_id = categories.id").
 		Where("expenses.user_id = ? AND EXTRACT(YEAR FROM expenses.expanse_date) = ? AND expenses.active = ?", userID, year, true).
@@ -99,19 +73,18 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryYear(userID string, y
 		Scan(&results).Error
 
 	if err != nil {
-		tx.Rollback()
 		return nil, []int{}, errors.New("failed to fetch monthly expenses by category: " + err.Error())
 	}
 
 	var years []int
-	err = tx.Table("expenses").
+	err = p.gorm.Table("expenses").
 		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) AS year").
 		Where("expenses.user_id = ? AND expenses.active = ?", userID, true).
 		Order("year").
 		Scan(&years).Error
 
 	if err != nil {
-		tx.Rollback()
+		p.gorm.Rollback()
 		return nil, nil, errors.New("failed to fetch available years: " + err.Error())
 	}
 
@@ -156,14 +129,6 @@ func (p *PresentersRepository) GetMonthlyExpensesByCategoryYear(userID string, y
 }
 
 func (p *PresentersRepository) GetMonthlyExpensesByTagYear(userID string, year int) ([]repositories.MonthlyTagExpense, []int, error) {
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var results []struct {
 		Year    int     `gorm:"column:year"`
 		Month   string  `gorm:"column:month"`
@@ -172,7 +137,7 @@ func (p *PresentersRepository) GetMonthlyExpensesByTagYear(userID string, year i
 		Total   float64 `gorm:"column:total"`
 	}
 
-	err := tx.Table("expenses").
+	err := p.gorm.Table("expenses").
 		Select("EXTRACT(YEAR FROM expanse_date) AS year, TO_CHAR(expanse_date, 'Month') AS month, tags.name AS tag_name, tags.color AS color, SUM(expenses.amount) AS total").
 		Joins("INNER JOIN expense_tags ON expenses.id = expense_tags.expenses_id").
 		Joins("INNER JOIN tags ON expense_tags.tags_id = tags.id").
@@ -182,20 +147,18 @@ func (p *PresentersRepository) GetMonthlyExpensesByTagYear(userID string, year i
 		Scan(&results).Error
 
 	if err != nil {
-		tx.Rollback()
 		return nil, []int{}, errors.New("failed to fetch monthly expenses by tag: " + err.Error())
 	}
 
 	var years []int
 
-	err = tx.Table("expenses").
+	err = p.gorm.Table("expenses").
 		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) AS year").
 		Where("expenses.user_id = ? AND expenses.active = ?", userID, true).
 		Order("year").
 		Scan(&years).Error
 
 	if err != nil {
-		tx.Rollback()
 		return nil, nil, errors.New("failed to fetch available years: " + err.Error())
 	}
 
@@ -253,14 +216,6 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 		return 0, "", errors.New("failed to load timezone: " + err.Error())
 	}
 
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var total float64
 	var month string
 
@@ -268,14 +223,13 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, location)
 	endOfMonth := now
 
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("COALESCE(SUM(amount), 0)").
 		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startOfMonth, endOfMonth, true).
 		Scan(&total).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			total = 0
 		} else {
-			tx.Rollback()
 			return 0, "", errors.New("failed to fetch total expenses: " + err.Error())
 		}
 	}
@@ -286,14 +240,6 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentMonth(userID string) (f
 }
 
 func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, year int) (repositories.MonthExpenses, error) {
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var monthExpenses repositories.MonthExpenses
 	monthExpenses.Month = time.Month(month).String()
 	monthExpenses.Year = year
@@ -302,7 +248,7 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 	endDate := startDate.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
 	var expenses []Expenses
-	if err := tx.Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
+	if err := p.gorm.Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
 		Find(&expenses).Error; err != nil {
 		return repositories.MonthExpenses{}, errors.New("failed to fetch expenses: " + err.Error())
 	}
@@ -332,7 +278,7 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 		}
 
 		var tags []Tags
-		if err := tx.Table("tags").
+		if err := p.gorm.Table("tags").
 			Joins("JOIN expense_tags ON tags.id = expense_tags.tags_id").
 			Where("expense_tags.expenses_id = ?", expense.ID).
 			Select("tags.name, tags.color").
@@ -390,12 +336,11 @@ func (p *PresentersRepository) GetExpensesByMonthYear(userID string, month int, 
 	})
 
 	var availableYears []int
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) as year").
 		Where("user_id = ? AND active = ?", userID, true).
 		Order("year DESC").
 		Pluck("year", &availableYears).Error; err != nil {
-		tx.Rollback()
 		return repositories.MonthExpenses{}, errors.New("failed to fetch available years: " + err.Error())
 	}
 
@@ -409,14 +354,6 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentWeek(userID string) (fl
 	if err != nil {
 		return 0, "", errors.New("failed to load timezone: " + err.Error())
 	}
-
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
 
 	var totalExpenses float64
 
@@ -443,14 +380,6 @@ func (p *PresentersRepository) GetTotalExpensesForCurrentWeek(userID string) (fl
 }
 
 func (p *PresentersRepository) GetTotalExpensesMonthCurrentYear(userID string, year int) (repositories.ExpensesMonthCurrentYear, error) {
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var expensesMonthCurrentYear repositories.ExpensesMonthCurrentYear
 	expensesMonthCurrentYear.Year = year
 
@@ -468,13 +397,12 @@ func (p *PresentersRepository) GetTotalExpensesMonthCurrentYear(userID string, y
 	}
 
 	var expenses []ExpenseMonth
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("EXTRACT(MONTH FROM expanse_date) as month, COALESCE(SUM(amount), 0) as total").
 		Where("user_id = ? AND EXTRACT(YEAR FROM expanse_date) = ? AND active = ?", userID, year, true).
 		Group("EXTRACT(MONTH FROM expanse_date)").
 		Order("EXTRACT(MONTH FROM expanse_date)").
 		Find(&expenses).Error; err != nil {
-		tx.Rollback()
 		return repositories.ExpensesMonthCurrentYear{}, errors.New("failed to fetch expenses by month: " + err.Error())
 	}
 
@@ -490,12 +418,11 @@ func (p *PresentersRepository) GetTotalExpensesMonthCurrentYear(userID string, y
 	expensesMonthCurrentYear.Months = months
 
 	var availableYears []int
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) as year").
 		Where("user_id = ? AND active = ?", userID, true).
 		Order("year DESC").
 		Pluck("year", &availableYears).Error; err != nil {
-		tx.Rollback()
 		return repositories.ExpensesMonthCurrentYear{}, errors.New("failed to fetch available years: " + err.Error())
 	}
 	expensesMonthCurrentYear.AvailableYears = availableYears
@@ -504,14 +431,6 @@ func (p *PresentersRepository) GetTotalExpensesMonthCurrentYear(userID string, y
 }
 
 func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, month int, year int) (repositories.CategoryTagsTotals, error) {
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var categoryTagsTotals repositories.CategoryTagsTotals
 	categoryTagsTotals.Month = time.Month(month).String()
 	categoryTagsTotals.Year = year
@@ -520,11 +439,10 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	endDate := startDate.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
 	var totalExpenses float64
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Where("user_id = ? AND expanse_date BETWEEN ? AND ? AND active = ?", userID, startDate, endDate, true).
 		Select("COALESCE(SUM(amount), 0)").
 		Scan(&totalExpenses).Error; err != nil {
-		tx.Rollback()
 		return repositories.CategoryTagsTotals{}, errors.New("failed to calculate total expenses for the month: " + err.Error())
 	}
 	categoryTagsTotals.ExpensesAmount = totalExpenses
@@ -534,13 +452,12 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		CategoryTotal float64
 	}
 
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("categories.name as category_name, COALESCE(SUM(expenses.amount), 0) as category_total").
 		Joins("LEFT JOIN categories ON categories.id = expenses.category_id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
 		Group("categories.name").
 		Scan(&results).Error; err != nil {
-		tx.Rollback()
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category: " + err.Error())
 	}
 
@@ -559,7 +476,7 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		TagTotal     float64
 	}
 
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("categories.name as category_name, tags.name as tag_name, COALESCE(SUM(expenses.amount), 0) as tag_total").
 		Joins("LEFT JOIN categories ON categories.id = expenses.category_id").
 		Joins("LEFT JOIN expense_tags ON expense_tags.expenses_id = expenses.id").
@@ -567,7 +484,6 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
 		Group("categories.name, tags.name").
 		Scan(&resultsTags).Error; err != nil {
-		tx.Rollback()
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category and tags: " + err.Error())
 	}
 
@@ -589,12 +505,11 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	})
 
 	var availableYears []int
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Distinct("EXTRACT(YEAR FROM expanse_date)").
 		Where("user_id = ? AND active = ?", userID, true).
 		Order("EXTRACT(YEAR FROM expanse_date) DESC").
 		Pluck("EXTRACT(YEAR FROM expanse_date)", &availableYears).Error; err != nil {
-		tx.Rollback()
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch available years: " + err.Error())
 	}
 	categoryTagsTotals.AvailableYears = availableYears
@@ -602,12 +517,11 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	var availableMonths []struct {
 		Month int
 	}
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("DISTINCT EXTRACT(MONTH FROM expanse_date) AS month").
 		Where("user_id = ? AND EXTRACT(YEAR FROM expanse_date) = ? AND active = ?", userID, year, true).
 		Order("month ASC").
 		Scan(&availableMonths).Error; err != nil {
-		tx.Rollback()
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch available months: " + err.Error())
 	}
 
@@ -622,21 +536,12 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 }
 
 func (p *PresentersRepository) GetAvailableMonthsYears(userID string) ([]int, []repositories.MonthOption, error) {
-	tx := p.gorm.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-			panic(r)
-		}
-	}()
-
 	var availableYears []int
-	if err := tx.Table("expenses").
+	if err := p.gorm.Table("expenses").
 		Select("DISTINCT EXTRACT(YEAR FROM expanse_date) as year").
 		Where("user_id = ? AND active = ?", userID, true).
 		Order("year DESC").
 		Pluck("year", &availableYears).Error; err != nil {
-		tx.Rollback()
 		return nil, nil, errors.New("failed to fetch available years: " + err.Error())
 	}
 

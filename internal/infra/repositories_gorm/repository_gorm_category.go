@@ -41,11 +41,7 @@ func (c *CategoryRepository) CreateCategory(category entities.Category) error {
 		return err
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
@@ -80,17 +76,12 @@ func (c *CategoryRepository) DeleteCategory(category entities.Category) error {
 		return errors.New(result.Error.Error())
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (c *CategoryRepository) GetCategories(userID string) ([]entities.Category, error) {
 	var categoriesModel []Categories
-	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&categoriesModel).Order("created_at DESC").Error; err != nil {
-		c.gorm.Rollback()
+	if err := c.gorm.Where("user_id = ? AND active = ?", userID, true).Find(&categoriesModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -171,11 +162,7 @@ func (c *CategoryRepository) UpdateCategory(category entities.Category) error {
 		return errors.New(result.Error.Error())
 	}
 
-	if err := tx.Commit().Error; err != nil {
-		return errors.New("failed to commit transaction: " + err.Error())
-	}
-
-	return nil
+	return tx.Commit().Error
 }
 
 func (c *CategoryRepository) ThisCategoryExists(userID string, categoryName string) (bool, error) {
