@@ -109,7 +109,8 @@ func Shutdown(db *gorm.DB) {
 }
 
 func NeonConnection() *gorm.DB {
-	db, err := gorm.Open(postgres.Open("postgresql://expense_tracker_owner:b2DatTKY5JIN@ep-odd-rain-a4zliklq.us-east-1.aws.neon.tech/expense_tracker?sslmode=require"), &gorm.Config{
+	dsn := "postgresql://" + config.DB_NEON.DB_USER + ":" + config.DB_NEON.DB_PASSWORD + "@" + config.DB_NEON.DB_HOST + "/" + config.DB_NEON.DB_NAME + "?sslmode=require"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: NewLogger(),
 	})
 	if err != nil {
