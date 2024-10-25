@@ -105,7 +105,7 @@ func (lo *Login) CompareAndDecrypt(hashedData string, data string) bool {
 }
 
 func (lo *Login) EncryptEmail() error {
-	key := []byte(config.SECRETS_LOCAL.JWT_SECRET)
+	key := []byte(config.SECRETS_VAR.JWT_SECRET)
 	h := hmac.New(sha256.New, key)
 	h.Write([]byte(lo.Email))
 	lo.Email = hex.EncodeToString(h.Sum(nil))
