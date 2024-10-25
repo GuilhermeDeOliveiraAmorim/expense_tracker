@@ -14,24 +14,13 @@ import (
 )
 
 func main() {
-	db, sqlDB, err := util.SetupDatabaseConnection(util.POSTGRES)
+	db, sqlDB, err := util.SetupDatabaseConnection(util.NEON)
 	if err != nil {
 		panic("Failed to connect database")
 	}
 	fmt.Println("Successful connection")
 
-	defer sqlDB.Close()
-
-	if err := db.AutoMigrate(
-		repositoriesgorm.Categories{},
-		repositoriesgorm.Tags{},
-		repositoriesgorm.Expenses{},
-		repositoriesgorm.Users{},
-	); err != nil {
-		fmt.Println("Error during migration:", err)
-		return
-	}
-	fmt.Println("Successful migration")
+	repositoriesgorm.Migration(db, sqlDB)
 
 	r := gin.Default()
 

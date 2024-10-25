@@ -16,6 +16,7 @@ import (
 const (
 	POSTGRES = "postgres"
 	MYSQL    = "mysql"
+	NEON     = "neon"
 )
 
 func NewLogger() logger.Interface {
@@ -65,6 +66,8 @@ func SetupDatabaseConnection(SGBD string) (*gorm.DB, *sql.DB, error) {
 		db = NewPostgresDB()
 	case MYSQL:
 		db = NewMySQLDB()
+	case NEON:
+		db = NeonConnection()
 	default:
 		return nil, nil, nil
 	}
@@ -74,24 +77,24 @@ func SetupDatabaseConnection(SGBD string) (*gorm.DB, *sql.DB, error) {
 		return nil, nil, err
 	}
 
-	sqlDB.SetMaxIdleConns(5)
-	sqlDB.SetMaxOpenConns(10)
-	sqlDB.SetConnMaxLifetime(5 * time.Minute)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(20)
+	sqlDB.SetConnMaxLifetime(2 * time.Minute)
 
 	return db, sqlDB, nil
 }
 
-func CheckConnection(db *gorm.DB) error {
+func CheckConnection(db *gorm.DB) bool {
 	sqlDB, err := db.DB()
 	if err != nil {
-		return err
+		return false
 	}
 
 	if err := sqlDB.Ping(); err != nil {
-		return err
+		return false
 	}
 
-	return nil
+	return true
 }
 
 func Shutdown(db *gorm.DB) {
@@ -103,4 +106,15 @@ func Shutdown(db *gorm.DB) {
 	if err := sqlDB.Close(); err != nil {
 		log.Printf("Error closing database connection: %v", err)
 	}
+}
+
+func NeonConnection() *gorm.DB {
+	db, err := gorm.Open(postgres.Open("postgresql://expense_tracker_owner:b2DatTKY5JIN@ep-odd-rain-a4zliklq.us-east-1.aws.neon.tech/expense_tracker?sslmode=require"), &gorm.Config{
+		Logger: NewLogger(),
+	})
+	if err != nil {
+		log.Printf("Error connecting to database: %v", err)
+		return nil
+	}
+	return db
 }
