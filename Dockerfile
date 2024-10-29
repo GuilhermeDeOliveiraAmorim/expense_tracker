@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.21.5 AS builder
+FROM golang:1.23.2 AS builder
 
 WORKDIR /build
 
@@ -10,7 +10,7 @@ COPY . .
 RUN go build -o /build/app .
 
 # Final Stage
-FROM golang:1.21.5
+FROM golang:1.23.2
 
 # Crie o diretório /app se ele não existir
 RUN mkdir -p /app
