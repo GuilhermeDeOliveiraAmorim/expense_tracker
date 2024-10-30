@@ -84,6 +84,6 @@ func (c *DeleteExpenseUseCase) Execute(input DeleteExpenseInputDto) (DeleteExpen
 
 	return DeleteExpenseOutputDto{
 		SuccessMessage: "Expense deleted successfully",
-		ContentMessage: "Expense ID: " + input.ExpenseID,
+		ContentMessage: "Expense with amount " + util.FloatToBRL(expenseToDelete.Amount) + " deleted",
 	}, nil
 }

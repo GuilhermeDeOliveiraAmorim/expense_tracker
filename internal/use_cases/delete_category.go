@@ -96,6 +96,6 @@ func (c *DeleteCategoryUseCase) Execute(input DeleteCategoryInputDto) (DeleteCat
 
 	return DeleteCategoryOutputDto{
 		SuccessMessage: "Category deleted successfully",
-		ContentMessage: "Category ID: " + input.CategoryID,
+		ContentMessage: "Category " + categoryToDelete.Name + " deleted",
 	}, nil
 }

@@ -57,6 +57,6 @@ func (c *DeleteUserUseCase) Execute(input DeleteUserInputDto) (DeleteUserOutputD
 
 	return DeleteUserOutputDto{
 		SuccessMessage: "User deleted successfully",
-		ContentMessage: "User ID: " + input.UserID,
+		ContentMessage: "User " + userToDelete.Name + " deleted",
 	}, nil
 }

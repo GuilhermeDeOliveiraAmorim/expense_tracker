@@ -84,6 +84,6 @@ func (c *DeleteTagUseCase) Execute(input DeleteTagInputDto) (DeleteTagOutputDto,
 
 	return DeleteTagOutputDto{
 		SuccessMessage: "Tag deleted successfully",
-		ContentMessage: "Tag ID: " + input.TagID,
+		ContentMessage: "Tag " + tagToDelete.Name + " deleted",
 	}, nil
 }
