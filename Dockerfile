@@ -1,20 +1,24 @@
 # Build Stage
 FROM golang:1.23.2 AS builder
 
-WORKDIR /build
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    libleptonica-dev \
+    libtesseract-dev \
+    && apt-get clean
 
+# Crie o diretório do aplicativo
+WORKDIR /app
+
+# Copia e instala dependências Go
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copia o código fonte
 COPY . .
-RUN go build -o /build/app .
 
-# Final Stage
-FROM golang:1.23.2
+# Compila o binário
+RUN go build -o app .
 
-# Crie o diretório /app se ele não existir
-RUN mkdir -p /app
-
-COPY --from=builder /build/app /app
-
-CMD ["/app/app"]
+# Defina o ponto de entrada
+CMD ["./app"]

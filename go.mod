@@ -16,6 +16,8 @@ require (
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/dslipak/pdf v0.0.2 // indirect
+	github.com/ebitengine/purego v0.8.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -28,6 +30,8 @@ require (
 	github.com/jackc/pgx/v5 v5.5.5 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/jung-kurt/gofpdf v1.16.2 // indirect
+	github.com/jupiterrider/ffi v0.2.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
@@ -47,9 +51,11 @@ require (
 )
 
 require (
+	github.com/gen2brain/go-fitz v1.24.14
 	github.com/gin-gonic/gin v1.10.0
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/otiai10/gosseract/v2 v2.4.1
 	golang.org/x/text v0.19.0 // indirect
 	gorm.io/driver/postgres v1.5.9
 )
