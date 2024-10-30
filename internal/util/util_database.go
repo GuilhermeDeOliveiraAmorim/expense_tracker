@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/config"
-	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -46,26 +45,12 @@ func NewPostgresDB() *gorm.DB {
 	return db
 }
 
-func NewMySQLDB() *gorm.DB {
-	dsn := config.DB_MYSQL.DB_USER + ":" + config.DB_MYSQL.DB_PASSWORD + "@tcp(" + config.DB_MYSQL.DB_HOST + ":" + config.DB_MYSQL.DB_PORT + ")/" + config.DB_MYSQL.DB_NAME + "?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: NewLogger(),
-	})
-	if err != nil {
-		log.Printf("Error connecting to database: %v", err)
-		return nil
-	}
-	return db
-}
-
 func SetupDatabaseConnection(SGBD string) (*gorm.DB, *sql.DB, error) {
 	var db *gorm.DB
 
 	switch SGBD {
 	case POSTGRES:
 		db = NewPostgresDB()
-	case MYSQL:
-		db = NewMySQLDB()
 	case NEON:
 		db = NeonConnection()
 	default:
