@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	db, sqlDB, err := util.SetupDatabaseConnection(util.NEON)
+	db, sqlDB, err := util.SetupDatabaseConnection(util.POSTGRES)
 	if err != nil {
 		panic("Failed to connect database")
 	}
@@ -47,6 +47,9 @@ func main() {
 
 	presentersFactory := factory.NewPresentersFactory(db)
 	presentersHandler := handlers.NewPresentersHandler(presentersFactory)
+
+	pdfImporterFactory := factory.NewPdfImporterFactory(db)
+	pdfImporterHandler := handlers.NewPdfImporterHandler(pdfImporterFactory)
 
 	public := r.Group("/")
 	{
@@ -90,6 +93,8 @@ func main() {
 		protected.GET("/expenses/tags/monthly/total", presentersHandler.GetCategoryTagsTotalsByMonthYear)
 
 		protected.GET("/util/months/years", presentersHandler.GetAvailableMonthsYears)
+
+		protected.POST("/import/pdf", pdfImporterHandler.ImportPdf)
 	}
 
 	r.Run(":8080")
