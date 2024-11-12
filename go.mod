@@ -74,6 +74,8 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/spf13/viper v1.19.0
+	github.com/swaggo/files v1.0.1
+	github.com/swaggo/gin-swagger v1.6.0
 	golang.org/x/text v0.20.0 // indirect
 	gorm.io/driver/postgres v1.5.9
 )
