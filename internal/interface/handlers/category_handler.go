@@ -22,13 +22,15 @@ func NewCategoryHandler(factory *factory.CategoryFactory) *CategoryHandler {
 // CreateCategory godoc
 // @Summary Create a new category
 // @Description Create a new category with the provided details
-// @Tags categories
+// @Tags Categories
 // @Accept json
 // @Produce json
 // @Success 201 {object} usecases.CreateCategoryOutputDto
 // @Failure 400 {object} util.ProblemDetails
 // @Failure 500 {object} util.ProblemDetails
 // @Param request body CreateCategoryRequest true "Request body to create a new category"
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
 // @Router /categories [post]
 func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	userID, err := getUserID(c)
@@ -67,7 +69,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 // GetCategory godoc
 // @Summary Get category details
 // @Description Get details of a category by its ID
-// @Tags categories
+// @Tags Categories
 // @Accept json
 // @Produce json
 // @Success 200 {object} usecases.GetCategoryOutputDto
@@ -75,6 +77,8 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 // @Failure 404 {object} util.ProblemDetails
 // @Failure 500 {object} util.ProblemDetails
 // @Param category_id query string true "Category ID"
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
 // @Router /categories/{category_id} [get]
 func (h *CategoryHandler) GetCategory(c *gin.Context) {
 	userID, err := getUserID(c)
@@ -112,13 +116,15 @@ func (h *CategoryHandler) GetCategory(c *gin.Context) {
 // GetCategories godoc
 // @Summary Get all categories
 // @Description Retrieve all categories for the authenticated user
-// @Tags categories
+// @Tags Categories
 // @Accept json
 // @Produce json
 // @Success 200 {array} usecases.GetCategoriesOutputDto
 // @Failure 400 {object} util.ProblemDetails
 // @Failure 500 {object} util.ProblemDetails
-// @Router /categories [get]
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
+// @Router /categories/all [get]
 func (h *CategoryHandler) GetCategories(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -142,7 +148,7 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 // UpdateCategory godoc
 // @Summary Update a category
 // @Description Update details of an existing category
-// @Tags categories
+// @Tags Categories
 // @Accept json
 // @Produce json
 // @Success 200 {object} usecases.UpdateCategoryOutputDto
@@ -150,7 +156,9 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 // @Failure 404 {object} util.ProblemDetails
 // @Failure 500 {object} util.ProblemDetails
 // @Param request body UpdateCategoryRequest true "Request body to update a category"
-// @Router /categories/{category_id} [put]
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
+// @Router /categories/{category_id} [patch]
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -189,7 +197,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 // DeleteCategory godoc
 // @Summary Delete a category
 // @Description Delete a category by its ID
-// @Tags categories
+// @Tags Categories
 // @Accept json
 // @Produce json
 // @Success 200 {object} usecases.DeleteCategoryOutputDto
@@ -197,6 +205,8 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 // @Failure 404 {object} util.ProblemDetails
 // @Failure 500 {object} util.ProblemDetails
 // @Param category_id query string true "Category ID"
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
 // @Router /categories/{category_id} [delete]
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	userID, err := getUserID(c)

@@ -19,6 +19,18 @@ func NewExpenseHandler(factory *factory.ExpenseFactory) *ExpenseHandler {
 	}
 }
 
+// @Summary      Create an expense
+// @Description  Create a new expense entry
+// @Tags         Expenses
+// @Accept       json
+// @Produce      json
+// @Param        request body CreateExpenseRequest true "Expense data"
+// @Success      201 {object} usecases.CreateExpenseOutputDto
+// @Failure      400 {object} util.ProblemDetails "Bad Request"
+// @Failure      500 {object} util.ProblemDetails "Internal Server Error"
+// @Failure		 401 {object} util.ProblemDetails "Unauthorized"
+// @Security	 BearerAuth
+// @Router       /expenses [post]
 func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -56,6 +68,19 @@ func (h *ExpenseHandler) CreateExpense(c *gin.Context) {
 	c.JSON(http.StatusCreated, output)
 }
 
+// @Summary      Get a specific expense
+// @Description  Retrieve an expense by its ID
+// @Tags         Expenses
+// @Accept       json
+// @Produce      json
+// @Param        expense_id query string true "Expense ID"
+// @Success      200 {object} usecases.GetExpenseOutputDto
+// @Failure      400 {object} util.ProblemDetails "Bad Request"
+// @Failure      401 {object} util.ProblemDetails "Unauthorized"
+// @Failure		 401 {object} util.ProblemDetails "Unauthorized"
+// @Security	 BearerAuth
+// @Failure      500 {object} util.ProblemDetails "Internal Server Error"
+// @Router       /expenses/{expense_id} [get]
 func (h *ExpenseHandler) GetExpense(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -89,6 +114,16 @@ func (h *ExpenseHandler) GetExpense(c *gin.Context) {
 	c.JSON(http.StatusOK, output)
 }
 
+// @Summary      Get all expenses
+// @Description  Retrieve all expenses for the authenticated user
+// @Tags         Expenses
+// @Accept       json
+// @Produce      json
+// @Success      200 {array} usecases.GetExpensesOutputDto
+// @Failure		 401 {object} util.ProblemDetails "Unauthorized"
+// @Security	 BearerAuth
+// @Failure      500 {object} util.ProblemDetails "Internal Server Error"
+// @Router       /expenses/all [get]
 func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -109,6 +144,19 @@ func (h *ExpenseHandler) GetExpenses(c *gin.Context) {
 	c.JSON(http.StatusOK, output)
 }
 
+// @Summary      Update an expense
+// @Description  Update an existing expense
+// @Tags         Expenses
+// @Accept       json
+// @Produce      json
+// @Param        request body UpdateExpenseRequest true "Updated expense data"
+// @Success      200 {object} usecases.UpdateExpenseOutputDto
+// @Failure      400 {object} util.ProblemDetails "Bad Request"
+// @Failure		 401 {object} util.ProblemDetails "Unauthorized"
+// @Security	 BearerAuth
+// @Failure      404 {object} util.ProblemDetails "Expense Not Found"
+// @Failure      500 {object} util.ProblemDetails "Internal Server Error"
+// @Router       /expenses/{expense_id} [patch]
 func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -147,6 +195,19 @@ func (h *ExpenseHandler) UpdateExpense(c *gin.Context) {
 	c.JSON(http.StatusOK, output)
 }
 
+// @Summary      Delete an expense
+// @Description  Delete an expense by its ID
+// @Tags         Expenses
+// @Accept       json
+// @Produce      json
+// @Param        expense_id query string true "Expense ID"
+// @Success      200 {object} usecases.DeleteExpenseOutputDto
+// @Failure      400 {object} util.ProblemDetails "Bad Request"
+// @Failure		 401 {object} util.ProblemDetails "Unauthorized"
+// @Security	 BearerAuth
+// @Failure      404 {object} util.ProblemDetails "Expense Not Found"
+// @Failure      500 {object} util.ProblemDetails "Internal Server Error"
+// @Router       /expenses/{expense_id} [delete]
 func (h *ExpenseHandler) DeleteExpense(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
