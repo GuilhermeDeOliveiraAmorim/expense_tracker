@@ -7,6 +7,10 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+
+RUN go install github.com/swaggo/swag/cmd/swag@latest && \
+    swag init -g ./main.go -o ./api
+    
 RUN go build -o /build/app .
 
 # Final Stage
