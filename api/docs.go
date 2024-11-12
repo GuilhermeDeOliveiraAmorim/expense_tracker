@@ -25,42 +25,6 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/categories": {
-            "get": {
-                "description": "Retrieve all categories for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "categories"
-                ],
-                "summary": "Get all categories",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/usecases.GetCategoriesOutputDto"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/util.ProblemDetails"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/util.ProblemDetails"
-                        }
-                    }
-                }
-            },
             "post": {
                 "security": [
                     {
@@ -75,7 +39,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "Categories"
                 ],
                 "summary": "Create a new category",
                 "parameters": [
@@ -117,6 +81,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/categories/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all categories for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get all categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/usecases.GetCategoriesOutputDto"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
         "/categories/{category_id}": {
             "get": {
                 "security": [
@@ -132,7 +145,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "Categories"
                 ],
                 "summary": "Get category details",
                 "parameters": [
@@ -178,6 +191,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete a category by its ID",
                 "consumes": [
                     "application/json"
@@ -186,7 +204,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "Categories"
                 ],
                 "summary": "Delete a category",
                 "parameters": [
@@ -211,6 +229,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/util.ProblemDetails"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -226,6 +250,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update details of an existing category",
                 "consumes": [
                     "application/json"
@@ -234,7 +263,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "categories"
+                    "Categories"
                 ],
                 "summary": "Update a category",
                 "parameters": [
@@ -261,6 +290,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/util.ProblemDetails"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -277,43 +312,12 @@ const docTemplate = `{
             }
         },
         "/expenses": {
-            "get": {
-                "description": "Retrieve all expenses for the authenticated user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "expenses"
-                ],
-                "summary": "Get all expenses",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/usecases.GetExpensesOutputDto"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/util.ProblemDetails"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/util.ProblemDetails"
-                        }
-                    }
-                }
-            },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Create a new expense entry",
                 "consumes": [
                     "application/json"
@@ -322,7 +326,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "expenses"
+                    "Expenses"
                 ],
                 "summary": "Create an expense",
                 "parameters": [
@@ -364,8 +368,573 @@ const docTemplate = `{
                 }
             }
         },
+        "/expenses/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all expenses for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Expenses"
+                ],
+                "summary": "Get all expenses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/usecases.GetExpensesOutputDto"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/available-months-years": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the list of months and years for which expense data is available for a user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Utility"
+                ],
+                "summary": "Get available months and years",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetAvailableMonthsYearsOutputDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/categories": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the expenses of a user categorized by category for a specified date range",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get expenses by category for a period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (DDMMYYYY)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (DDMMYYYY)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetExpensesByCategoryPeriodOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Missing start date or end date",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/categories/monthly": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the monthly expenses of a user categorized by category for a specific year",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get monthly expenses by category for a specific year",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Year (YYYY)",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetMonthlyExpensesByCategoryYearOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Missing or invalid year",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/monthly/total": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the total expenses of a user for the current month",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get total expenses for the current month",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetTotalExpensesForCurrentMonthOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/monthly/year": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves expenses of a user for a specific month and year",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get expenses by month and year",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "year",
+                        "description": "Year of the expenses",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "month",
+                        "description": "Month of the expenses",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetExpensesByMonthYearOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Missing or invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/tags/monthly": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the monthly expenses of a user categorized by tags for a specific year",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get monthly expenses by tag for a specific year",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Year (YYYY)",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetMonthlyExpensesByTagYearOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Missing or invalid year",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/tags/monthly/total": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the total expenses by category tags for a given month and year for a user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get totals of expenses by category tags for a specific month and year",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Year for which to retrieve expenses by category tags",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Month for which to retrieve expenses by category tags",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetCategoryTagsTotalsByMonthYearOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Missing or invalid year/month",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/total": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the total expenses of a user for a specified date range",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get total expenses for a period",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (DDMMYYYY)",
+                        "name": "start_date",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (DDMMYYYY)",
+                        "name": "end_date",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetTotalExpensesForPeriodOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Missing start date or end date",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/total/monthly/year": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the total expenses for each month of the specified year for a user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get total expenses for each month in the specified year",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Year for which to retrieve monthly expenses",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetTotalExpensesMonthCurrentYearOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Missing or invalid year",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/weekly/total": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the total expenses of a user for the current week",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get total expenses for the current week",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetTotalExpensesForCurrentWeekOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid parameters",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
         "/expenses/{expense_id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Retrieve an expense by its ID",
                 "consumes": [
                     "application/json"
@@ -374,7 +943,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "expenses"
+                    "Expenses"
                 ],
                 "summary": "Get a specific expense",
                 "parameters": [
@@ -405,12 +974,6 @@ const docTemplate = `{
                             "$ref": "#/definitions/util.ProblemDetails"
                         }
                     },
-                    "404": {
-                        "description": "Expense Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/util.ProblemDetails"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -420,6 +983,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Delete an expense by its ID",
                 "consumes": [
                     "application/json"
@@ -428,7 +996,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "expenses"
+                    "Expenses"
                 ],
                 "summary": "Delete an expense",
                 "parameters": [
@@ -474,6 +1042,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update an existing expense",
                 "consumes": [
                     "application/json"
@@ -482,7 +1055,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "expenses"
+                    "Expenses"
                 ],
                 "summary": "Update an expense",
                 "parameters": [
@@ -523,6 +1096,86 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "post": {
+                "description": "Authenticates a user and returns a JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Login a user",
+                "parameters": [
+                    {
+                        "description": "User credentials",
+                        "name": "LoginRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usecases.LoginInputDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.LoginOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "Registers a new user in the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Create a new user",
+                "parameters": [
+                    {
+                        "description": "User data",
+                        "name": "CreateUserRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usecases.CreateUserInputDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.CreateUserOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/util.ProblemDetails"
                         }
@@ -748,6 +1401,179 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the details of a user by their user_id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get a user by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.GetUserOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes a specific user by their user_id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Delete a user by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.DeleteUserOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates details of a specific user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Update a user",
+                "parameters": [
+                    {
+                        "description": "User data to update",
+                        "name": "UpdateUserRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/usecases.UpdateUserInputDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.UpdateUserOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/all": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves a list of all users",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/usecases.GetUsersOutputDto"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -961,6 +1787,369 @@ const docTemplate = `{
                 }
             }
         },
+        "presenters.GetAvailableMonthsYearsOutputDto": {
+            "type": "object",
+            "properties": {
+                "available_months": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.MonthOption"
+                    }
+                },
+                "available_years": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "presenters.GetCategoryTagsTotalsByMonthYearOutputDto": {
+            "type": "object",
+            "properties": {
+                "expenses": {
+                    "$ref": "#/definitions/repositories.CategoryTagsTotals"
+                }
+            }
+        },
+        "presenters.GetExpensesByCategoryPeriodOutputDto": {
+            "type": "object",
+            "properties": {
+                "expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.CategoryExpense"
+                    }
+                }
+            }
+        },
+        "presenters.GetExpensesByMonthYearOutputDto": {
+            "type": "object",
+            "properties": {
+                "expenses": {
+                    "$ref": "#/definitions/repositories.MonthExpenses"
+                }
+            }
+        },
+        "presenters.GetMonthlyExpensesByCategoryYearOutputDto": {
+            "type": "object",
+            "properties": {
+                "available_years": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.MonthlyCategoryExpense"
+                    }
+                }
+            }
+        },
+        "presenters.GetMonthlyExpensesByTagYearOutputDto": {
+            "type": "object",
+            "properties": {
+                "available_years": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.MonthlyTagExpense"
+                    }
+                }
+            }
+        },
+        "presenters.GetTotalExpensesForCurrentMonthOutputDto": {
+            "type": "object",
+            "properties": {
+                "current_month": {
+                    "type": "string"
+                },
+                "total_expenses": {
+                    "type": "number"
+                }
+            }
+        },
+        "presenters.GetTotalExpensesForCurrentWeekOutputDto": {
+            "type": "object",
+            "properties": {
+                "current_week": {
+                    "type": "string"
+                },
+                "total_expenses": {
+                    "type": "number"
+                }
+            }
+        },
+        "presenters.GetTotalExpensesForPeriodOutputDto": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "presenters.GetTotalExpensesMonthCurrentYearOutputDto": {
+            "type": "object",
+            "properties": {
+                "expenses_month_current_year": {
+                    "$ref": "#/definitions/repositories.ExpensesMonthCurrentYear"
+                }
+            }
+        },
+        "repositories.CategoryExpense": {
+            "type": "object",
+            "properties": {
+                "category_color": {
+                    "type": "string"
+                },
+                "category_name": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "repositories.CategoryTagTotal": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "tag_amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "repositories.CategoryTagsTotals": {
+            "type": "object",
+            "properties": {
+                "available_months": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.MonthOption"
+                    }
+                },
+                "available_years": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.CategoryWithTags"
+                    }
+                },
+                "expenses_amount": {
+                    "type": "number"
+                },
+                "month": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "repositories.CategoryWithTags": {
+            "type": "object",
+            "properties": {
+                "category_amount": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.CategoryTagTotal"
+                    }
+                }
+            }
+        },
+        "repositories.DayExpense": {
+            "type": "object",
+            "properties": {
+                "day": {
+                    "type": "string"
+                },
+                "day_name": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.ExpenseTag"
+                    }
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "repositories.ExpenseTag": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "repositories.ExpensesMonthCurrentYear": {
+            "type": "object",
+            "properties": {
+                "available_years": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "months": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.MonthCurrentYear"
+                    }
+                },
+                "total": {
+                    "type": "number"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "repositories.MonthCurrentYear": {
+            "type": "object",
+            "properties": {
+                "month": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "repositories.MonthExpenses": {
+            "type": "object",
+            "properties": {
+                "available_years": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "month": {
+                    "type": "string"
+                },
+                "total_expenses": {
+                    "type": "number"
+                },
+                "weeks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.WeekExpenses"
+                    }
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "repositories.MonthOption": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "repositories.MonthlyCategoryExpense": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.CategoryExpense"
+                    }
+                },
+                "month": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "repositories.MonthlyTagExpense": {
+            "type": "object",
+            "properties": {
+                "month": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.TagExpense"
+                    }
+                },
+                "total": {
+                    "type": "number"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "repositories.TagExpense": {
+            "type": "object",
+            "properties": {
+                "tag_color": {
+                    "type": "string"
+                },
+                "tag_name": {
+                    "type": "string"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "repositories.WeekExpenses": {
+            "type": "object",
+            "properties": {
+                "days": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/repositories.DayExpense"
+                    }
+                },
+                "week": {
+                    "type": "integer"
+                }
+            }
+        },
         "usecases.CreateCategoryOutputDto": {
             "type": "object",
             "properties": {
@@ -1003,6 +2192,37 @@ const docTemplate = `{
                 }
             }
         },
+        "usecases.CreateUserInputDto": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.CreateUserOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "usecases.DeleteCategoryOutputDto": {
             "type": "object",
             "properties": {
@@ -1026,6 +2246,17 @@ const docTemplate = `{
             }
         },
         "usecases.DeleteTagOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.DeleteUserOutputDto": {
             "type": "object",
             "properties": {
                 "content_message": {
@@ -1093,6 +2324,56 @@ const docTemplate = `{
                 }
             }
         },
+        "usecases.GetUserOutputDto": {
+            "type": "object",
+            "properties": {
+                "user": {
+                    "$ref": "#/definitions/usecases.UserOutput"
+                }
+            }
+        },
+        "usecases.GetUsersOutputDto": {
+            "type": "object",
+            "properties": {
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/usecases.UserOutput"
+                    }
+                }
+            }
+        },
+        "usecases.LoginInputDto": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.LoginOutputDto": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "content_message": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "usecases.UpdateCategoryOutputDto": {
             "type": "object",
             "properties": {
@@ -1131,6 +2412,54 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "tag_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.UpdateUserInputDto": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.UpdateUserOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.UserOutput": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deactivated_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

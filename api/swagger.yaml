@@ -138,6 +138,240 @@ definitions:
       tag_id:
         type: string
     type: object
+  presenters.GetAvailableMonthsYearsOutputDto:
+    properties:
+      available_months:
+        items:
+          $ref: '#/definitions/repositories.MonthOption'
+        type: array
+      available_years:
+        items:
+          type: integer
+        type: array
+    type: object
+  presenters.GetCategoryTagsTotalsByMonthYearOutputDto:
+    properties:
+      expenses:
+        $ref: '#/definitions/repositories.CategoryTagsTotals'
+    type: object
+  presenters.GetExpensesByCategoryPeriodOutputDto:
+    properties:
+      expenses:
+        items:
+          $ref: '#/definitions/repositories.CategoryExpense'
+        type: array
+    type: object
+  presenters.GetExpensesByMonthYearOutputDto:
+    properties:
+      expenses:
+        $ref: '#/definitions/repositories.MonthExpenses'
+    type: object
+  presenters.GetMonthlyExpensesByCategoryYearOutputDto:
+    properties:
+      available_years:
+        items:
+          type: integer
+        type: array
+      expenses:
+        items:
+          $ref: '#/definitions/repositories.MonthlyCategoryExpense'
+        type: array
+    type: object
+  presenters.GetMonthlyExpensesByTagYearOutputDto:
+    properties:
+      available_years:
+        items:
+          type: integer
+        type: array
+      expenses:
+        items:
+          $ref: '#/definitions/repositories.MonthlyTagExpense'
+        type: array
+    type: object
+  presenters.GetTotalExpensesForCurrentMonthOutputDto:
+    properties:
+      current_month:
+        type: string
+      total_expenses:
+        type: number
+    type: object
+  presenters.GetTotalExpensesForCurrentWeekOutputDto:
+    properties:
+      current_week:
+        type: string
+      total_expenses:
+        type: number
+    type: object
+  presenters.GetTotalExpensesForPeriodOutputDto:
+    properties:
+      total:
+        type: number
+    type: object
+  presenters.GetTotalExpensesMonthCurrentYearOutputDto:
+    properties:
+      expenses_month_current_year:
+        $ref: '#/definitions/repositories.ExpensesMonthCurrentYear'
+    type: object
+  repositories.CategoryExpense:
+    properties:
+      category_color:
+        type: string
+      category_name:
+        type: string
+      total:
+        type: number
+    type: object
+  repositories.CategoryTagTotal:
+    properties:
+      name:
+        type: string
+      tag_amount:
+        type: number
+    type: object
+  repositories.CategoryTagsTotals:
+    properties:
+      available_months:
+        items:
+          $ref: '#/definitions/repositories.MonthOption'
+        type: array
+      available_years:
+        items:
+          type: integer
+        type: array
+      categories:
+        items:
+          $ref: '#/definitions/repositories.CategoryWithTags'
+        type: array
+      expenses_amount:
+        type: number
+      month:
+        type: string
+      year:
+        type: integer
+    type: object
+  repositories.CategoryWithTags:
+    properties:
+      category_amount:
+        type: number
+      name:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/repositories.CategoryTagTotal'
+        type: array
+    type: object
+  repositories.DayExpense:
+    properties:
+      day:
+        type: string
+      day_name:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/repositories.ExpenseTag'
+        type: array
+      total:
+        type: number
+    type: object
+  repositories.ExpenseTag:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
+      total:
+        type: number
+    type: object
+  repositories.ExpensesMonthCurrentYear:
+    properties:
+      available_years:
+        items:
+          type: integer
+        type: array
+      months:
+        items:
+          $ref: '#/definitions/repositories.MonthCurrentYear'
+        type: array
+      total:
+        type: number
+      year:
+        type: integer
+    type: object
+  repositories.MonthCurrentYear:
+    properties:
+      month:
+        type: string
+      total:
+        type: number
+    type: object
+  repositories.MonthExpenses:
+    properties:
+      available_years:
+        items:
+          type: integer
+        type: array
+      month:
+        type: string
+      total_expenses:
+        type: number
+      weeks:
+        items:
+          $ref: '#/definitions/repositories.WeekExpenses'
+        type: array
+      year:
+        type: integer
+    type: object
+  repositories.MonthOption:
+    properties:
+      label:
+        type: string
+      value:
+        type: string
+    type: object
+  repositories.MonthlyCategoryExpense:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/repositories.CategoryExpense'
+        type: array
+      month:
+        type: string
+      total:
+        type: number
+      year:
+        type: integer
+    type: object
+  repositories.MonthlyTagExpense:
+    properties:
+      month:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/repositories.TagExpense'
+        type: array
+      total:
+        type: number
+      year:
+        type: integer
+    type: object
+  repositories.TagExpense:
+    properties:
+      tag_color:
+        type: string
+      tag_name:
+        type: string
+      total:
+        type: number
+    type: object
+  repositories.WeekExpenses:
+    properties:
+      days:
+        items:
+          $ref: '#/definitions/repositories.DayExpense'
+        type: array
+      week:
+        type: integer
+    type: object
   usecases.CreateCategoryOutputDto:
     properties:
       category_id:
@@ -165,6 +399,26 @@ definitions:
       tag_id:
         type: string
     type: object
+  usecases.CreateUserInputDto:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  usecases.CreateUserOutputDto:
+    properties:
+      content_message:
+        type: string
+      name:
+        type: string
+      success_message:
+        type: string
+      user_id:
+        type: string
+    type: object
   usecases.DeleteCategoryOutputDto:
     properties:
       content_message:
@@ -180,6 +434,13 @@ definitions:
         type: string
     type: object
   usecases.DeleteTagOutputDto:
+    properties:
+      content_message:
+        type: string
+      success_message:
+        type: string
+    type: object
+  usecases.DeleteUserOutputDto:
     properties:
       content_message:
         type: string
@@ -222,6 +483,38 @@ definitions:
           $ref: '#/definitions/entities.Tag'
         type: array
     type: object
+  usecases.GetUserOutputDto:
+    properties:
+      user:
+        $ref: '#/definitions/usecases.UserOutput'
+    type: object
+  usecases.GetUsersOutputDto:
+    properties:
+      users:
+        items:
+          $ref: '#/definitions/usecases.UserOutput'
+        type: array
+    type: object
+  usecases.LoginInputDto:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  usecases.LoginOutputDto:
+    properties:
+      access_token:
+        type: string
+      content_message:
+        type: string
+      name:
+        type: string
+      success_message:
+        type: string
+      user_id:
+        type: string
+    type: object
   usecases.UpdateCategoryOutputDto:
     properties:
       category_id:
@@ -247,6 +540,37 @@ definitions:
       success_message:
         type: string
       tag_id:
+        type: string
+    type: object
+  usecases.UpdateUserInputDto:
+    properties:
+      name:
+        type: string
+      user_id:
+        type: string
+    type: object
+  usecases.UpdateUserOutputDto:
+    properties:
+      content_message:
+        type: string
+      success_message:
+        type: string
+      user_id:
+        type: string
+    type: object
+  usecases.UserOutput:
+    properties:
+      active:
+        type: boolean
+      created_at:
+        type: string
+      deactivated_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
         type: string
     type: object
   util.ProblemDetails:
@@ -277,30 +601,6 @@ info:
   version: "1.0"
 paths:
   /categories:
-    get:
-      consumes:
-      - application/json
-      description: Retrieve all categories for the authenticated user
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/usecases.GetCategoriesOutputDto'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/util.ProblemDetails'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/util.ProblemDetails'
-      summary: Get all categories
-      tags:
-      - categories
     post:
       consumes:
       - application/json
@@ -335,7 +635,7 @@ paths:
       - BearerAuth: []
       summary: Create a new category
       tags:
-      - categories
+      - Categories
   /categories/{category_id}:
     delete:
       consumes:
@@ -358,6 +658,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
         "404":
           description: Not Found
           schema:
@@ -366,9 +670,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
       summary: Delete a category
       tags:
-      - categories
+      - Categories
     get:
       consumes:
       - application/json
@@ -406,7 +712,7 @@ paths:
       - BearerAuth: []
       summary: Get category details
       tags:
-      - categories
+      - Categories
     patch:
       consumes:
       - application/json
@@ -429,6 +735,10 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
         "404":
           description: Not Found
           schema:
@@ -437,14 +747,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
       summary: Update a category
       tags:
-      - categories
-  /expenses:
+      - Categories
+  /categories/all:
     get:
       consumes:
       - application/json
-      description: Retrieve all expenses for the authenticated user
+      description: Retrieve all categories for the authenticated user
       produces:
       - application/json
       responses:
@@ -452,8 +764,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/usecases.GetExpensesOutputDto'
+              $ref: '#/definitions/usecases.GetCategoriesOutputDto'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
         "401":
           description: Unauthorized
           schema:
@@ -462,9 +778,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/util.ProblemDetails'
-      summary: Get all expenses
+      security:
+      - BearerAuth: []
+      summary: Get all categories
       tags:
-      - expenses
+      - Categories
+  /expenses:
     post:
       consumes:
       - application/json
@@ -495,9 +814,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
       summary: Create an expense
       tags:
-      - expenses
+      - Expenses
   /expenses/{expense_id}:
     delete:
       consumes:
@@ -532,9 +853,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
       summary: Delete an expense
       tags:
-      - expenses
+      - Expenses
     get:
       consumes:
       - application/json
@@ -560,17 +883,15 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/util.ProblemDetails'
-        "404":
-          description: Expense Not Found
-          schema:
-            $ref: '#/definitions/util.ProblemDetails'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
       summary: Get a specific expense
       tags:
-      - expenses
+      - Expenses
     patch:
       consumes:
       - application/json
@@ -605,9 +926,426 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
       summary: Update an expense
       tags:
-      - expenses
+      - Expenses
+  /expenses/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all expenses for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/usecases.GetExpensesOutputDto'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get all expenses
+      tags:
+      - Expenses
+  /expenses/available-months-years:
+    get:
+      description: Retrieves the list of months and years for which expense data is
+        available for a user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetAvailableMonthsYearsOutputDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get available months and years
+      tags:
+      - Utility
+  /expenses/categories:
+    get:
+      description: Retrieves the expenses of a user categorized by category for a
+        specified date range
+      parameters:
+      - description: Start date (DDMMYYYY)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (DDMMYYYY)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetExpensesByCategoryPeriodOutputDto'
+        "400":
+          description: Bad Request - Missing start date or end date
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get expenses by category for a period
+      tags:
+      - Presenters
+  /expenses/categories/monthly:
+    get:
+      description: Retrieves the monthly expenses of a user categorized by category
+        for a specific year
+      parameters:
+      - description: Year (YYYY)
+        in: query
+        name: year
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetMonthlyExpensesByCategoryYearOutputDto'
+        "400":
+          description: Bad Request - Missing or invalid year
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get monthly expenses by category for a specific year
+      tags:
+      - Presenters
+  /expenses/monthly/total:
+    get:
+      description: Retrieves the total expenses of a user for the current month
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetTotalExpensesForCurrentMonthOutputDto'
+        "400":
+          description: Bad Request - Invalid parameters
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get total expenses for the current month
+      tags:
+      - Presenters
+  /expenses/monthly/year:
+    get:
+      description: Retrieves expenses of a user for a specific month and year
+      parameters:
+      - description: Year of the expenses
+        format: year
+        in: query
+        name: year
+        required: true
+        type: string
+      - description: Month of the expenses
+        format: month
+        in: query
+        name: month
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetExpensesByMonthYearOutputDto'
+        "400":
+          description: Bad Request - Missing or invalid parameters
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get expenses by month and year
+      tags:
+      - Presenters
+  /expenses/tags/monthly:
+    get:
+      description: Retrieves the monthly expenses of a user categorized by tags for
+        a specific year
+      parameters:
+      - description: Year (YYYY)
+        in: query
+        name: year
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetMonthlyExpensesByTagYearOutputDto'
+        "400":
+          description: Bad Request - Missing or invalid year
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get monthly expenses by tag for a specific year
+      tags:
+      - Presenters
+  /expenses/tags/monthly/total:
+    get:
+      description: Retrieves the total expenses by category tags for a given month
+        and year for a user
+      parameters:
+      - description: Year for which to retrieve expenses by category tags
+        in: query
+        name: year
+        required: true
+        type: string
+      - description: Month for which to retrieve expenses by category tags
+        in: query
+        name: month
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetCategoryTagsTotalsByMonthYearOutputDto'
+        "400":
+          description: Bad Request - Missing or invalid year/month
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get totals of expenses by category tags for a specific month and year
+      tags:
+      - Presenters
+  /expenses/total:
+    get:
+      description: Retrieves the total expenses of a user for a specified date range
+      parameters:
+      - description: Start date (DDMMYYYY)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (DDMMYYYY)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetTotalExpensesForPeriodOutputDto'
+        "400":
+          description: Bad Request - Missing start date or end date
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get total expenses for a period
+      tags:
+      - Presenters
+  /expenses/total/monthly/year:
+    get:
+      description: Retrieves the total expenses for each month of the specified year
+        for a user
+      parameters:
+      - description: Year for which to retrieve monthly expenses
+        in: query
+        name: year
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetTotalExpensesMonthCurrentYearOutputDto'
+        "400":
+          description: Bad Request - Missing or invalid year
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get total expenses for each month in the specified year
+      tags:
+      - Presenters
+  /expenses/weekly/total:
+    get:
+      description: Retrieves the total expenses of a user for the current week
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetTotalExpensesForCurrentWeekOutputDto'
+        "400":
+          description: Bad Request - Invalid parameters
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get total expenses for the current week
+      tags:
+      - Presenters
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: User credentials
+        in: body
+        name: LoginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/usecases.LoginInputDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.LoginOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Login a user
+      tags:
+      - Authentication
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user in the system
+      parameters:
+      - description: User data
+        in: body
+        name: CreateUserRequest
+        required: true
+        schema:
+          $ref: '#/definitions/usecases.CreateUserInputDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/usecases.CreateUserOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Create a new user
+      tags:
+      - Authentication
   /tags:
     get:
       description: Retrieve all tags for the authenticated user
@@ -746,6 +1484,115 @@ paths:
       summary: Update a tag by ID
       tags:
       - Tags
+  /users:
+    delete:
+      description: Deletes a specific user by their user_id
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.DeleteUserOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Delete a user by ID
+      tags:
+      - Users
+    get:
+      description: Retrieves the details of a user by their user_id
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.GetUserOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get a user by ID
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Updates details of a specific user
+      parameters:
+      - description: User data to update
+        in: body
+        name: UpdateUserRequest
+        required: true
+        schema:
+          $ref: '#/definitions/usecases.UpdateUserInputDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.UpdateUserOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Update a user
+      tags:
+      - Users
+  /users/all:
+    get:
+      description: Retrieves a list of all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/usecases.GetUsersOutputDto'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
 schemes:
 - http
 securityDefinitions:

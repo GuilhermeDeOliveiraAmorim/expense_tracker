@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/api"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/config"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
 	repositoriesgorm "github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/repositories_gorm"
@@ -11,6 +12,8 @@ import (
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title Expense Tracker API
@@ -32,7 +35,7 @@ import (
 // @in header
 // @name Authorization
 func main() {
-	db, sqlDB, err := util.SetupDatabaseConnection(util.NEON)
+	db, sqlDB, err := util.SetupDatabaseConnection(util.LOCAL)
 	if err != nil {
 		panic("Failed to connect database")
 	}
@@ -70,6 +73,8 @@ func main() {
 	{
 		public.POST("/signup", userHandler.CreateUser)
 		public.POST("/login", userHandler.Login)
+
+		public.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
 	protected := r.Group("/").Use(util.AuthMiddleware())
