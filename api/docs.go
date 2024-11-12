@@ -2217,9 +2217,6 @@ const docTemplate = `{
                 },
                 "success_message": {
                     "type": "string"
-                },
-                "user_id": {
-                    "type": "string"
                 }
             }
         },

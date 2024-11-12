@@ -416,8 +416,6 @@ definitions:
         type: string
       success_message:
         type: string
-      user_id:
-        type: string
     type: object
   usecases.DeleteCategoryOutputDto:
     properties:
