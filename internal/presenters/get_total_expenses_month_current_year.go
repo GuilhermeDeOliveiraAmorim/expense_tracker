@@ -1,6 +1,7 @@
 package presenters
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
@@ -9,7 +10,7 @@ import (
 
 type GetTotalExpensesMonthCurrentYearInputDto struct {
 	UserID string `json:"user_id"`
-	Year   int    `json:"year"`
+	Year   string `json:"year"`
 }
 
 type GetTotalExpensesMonthCurrentYearOutputDto struct {
@@ -55,7 +56,20 @@ func (c *GetTotalExpensesMonthCurrentYearUseCase) Execute(input GetTotalExpenses
 		}
 	}
 
-	if input.Year < 1900 || input.Year > 99999 {
+	year, errYear := strconv.Atoi(input.Year)
+	if errYear != nil {
+		return GetTotalExpensesMonthCurrentYearOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Bad Request",
+				Title:    "Invalid year",
+				Status:   400,
+				Detail:   errYear.Error(),
+				Instance: util.RFC400,
+			},
+		}
+	}
+
+	if year < 1900 || year > 99999 {
 		return GetTotalExpensesMonthCurrentYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
@@ -67,7 +81,7 @@ func (c *GetTotalExpensesMonthCurrentYearUseCase) Execute(input GetTotalExpenses
 		}
 	}
 
-	if input.Year > time.Now().Year() {
+	if year > time.Now().Year() {
 		return GetTotalExpensesMonthCurrentYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
@@ -79,7 +93,7 @@ func (c *GetTotalExpensesMonthCurrentYearUseCase) Execute(input GetTotalExpenses
 		}
 	}
 
-	expensesMonthCurrentYear, getTotalExpensesMonthCurrentYearErr := c.PresentersRepository.GetTotalExpensesMonthCurrentYear(input.UserID, input.Year)
+	expensesMonthCurrentYear, getTotalExpensesMonthCurrentYearErr := c.PresentersRepository.GetTotalExpensesMonthCurrentYear(input.UserID, year)
 	if getTotalExpensesMonthCurrentYearErr != nil {
 		return GetTotalExpensesMonthCurrentYearOutputDto{}, []util.ProblemDetails{
 			{
