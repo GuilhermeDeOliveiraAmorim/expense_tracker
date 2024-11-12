@@ -13,6 +13,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @title Expense Tracker API
+// @version 1.0
+// @description This is an API for managing expenses.
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name Guilherme Amorim
+// @contact.url http://www.guilhermedeoliveiraamorim.com
+// @contact.email guilherme.o.a.ufal@gmail.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @BasePath /
+// @schemes http
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	db, sqlDB, err := util.SetupDatabaseConnection(util.NEON)
 	if err != nil {

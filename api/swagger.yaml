@@ -1,4 +1,756 @@
+basePath: /
+definitions:
+  entities.Category:
+    properties:
+      active:
+        type: boolean
+      color:
+        type: string
+      created_at:
+        type: string
+      deactivated_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  entities.Expense:
+    properties:
+      active:
+        type: boolean
+      amount:
+        example: "0"
+        type: string
+      category:
+        $ref: '#/definitions/entities.Category'
+      category_id:
+        type: string
+      created_at:
+        type: string
+      deactivated_at:
+        type: string
+      expense_date:
+        type: string
+      id:
+        type: string
+      notes:
+        type: string
+      tag_ids:
+        items:
+          type: string
+        type: array
+      tags:
+        items:
+          $ref: '#/definitions/entities.Tag'
+        type: array
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  entities.Tag:
+    properties:
+      active:
+        type: boolean
+      color:
+        type: string
+      created_at:
+        type: string
+      deactivated_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  handlers.CreateCategoryRequest:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
+    type: object
+  handlers.CreateExpenseRequest:
+    properties:
+      amount:
+        example: "0"
+        type: string
+      category_id:
+        type: string
+      expense_date:
+        type: string
+      notes:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  handlers.CreateTagRequest:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
+    type: object
+  handlers.UpdateCategoryRequest:
+    properties:
+      category_id:
+        type: string
+      color:
+        type: string
+      name:
+        type: string
+    type: object
+  handlers.UpdateExpenseRequest:
+    properties:
+      amount:
+        example: "0"
+        type: string
+      category_id:
+        type: string
+      expense_date:
+        type: string
+      expense_id:
+        type: string
+      notes:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  handlers.UpdateTagRequest:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
+      tag_id:
+        type: string
+    type: object
+  usecases.CreateCategoryOutputDto:
+    properties:
+      category_id:
+        type: string
+      content_message:
+        type: string
+      success_message:
+        type: string
+    type: object
+  usecases.CreateExpenseOutputDto:
+    properties:
+      content_message:
+        type: string
+      expense_id:
+        type: string
+      success_message:
+        type: string
+    type: object
+  usecases.CreateTagOutputDto:
+    properties:
+      content_message:
+        type: string
+      success_message:
+        type: string
+      tag_id:
+        type: string
+    type: object
+  usecases.DeleteCategoryOutputDto:
+    properties:
+      content_message:
+        type: string
+      success_message:
+        type: string
+    type: object
+  usecases.DeleteExpenseOutputDto:
+    properties:
+      content_message:
+        type: string
+      success_message:
+        type: string
+    type: object
+  usecases.DeleteTagOutputDto:
+    properties:
+      content_message:
+        type: string
+      success_message:
+        type: string
+    type: object
+  usecases.GetCategoriesOutputDto:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/entities.Category'
+        type: array
+    type: object
+  usecases.GetCategoryOutputDto:
+    properties:
+      category:
+        $ref: '#/definitions/entities.Category'
+    type: object
+  usecases.GetExpenseOutputDto:
+    properties:
+      expense:
+        $ref: '#/definitions/entities.Expense'
+    type: object
+  usecases.GetExpensesOutputDto:
+    properties:
+      expenses:
+        items:
+          $ref: '#/definitions/entities.Expense'
+        type: array
+    type: object
+  usecases.GetTagOutputDto:
+    properties:
+      tag:
+        $ref: '#/definitions/entities.Tag'
+    type: object
+  usecases.GetTagsOutputDto:
+    properties:
+      tags:
+        items:
+          $ref: '#/definitions/entities.Tag'
+        type: array
+    type: object
+  usecases.UpdateCategoryOutputDto:
+    properties:
+      category_id:
+        type: string
+      content_message:
+        type: string
+      success_message:
+        type: string
+    type: object
+  usecases.UpdateExpenseOutputDto:
+    properties:
+      content_message:
+        type: string
+      expense_id:
+        type: string
+      success_message:
+        type: string
+    type: object
+  usecases.UpdateTagOutputDto:
+    properties:
+      content_message:
+        type: string
+      success_message:
+        type: string
+      tag_id:
+        type: string
+    type: object
+  util.ProblemDetails:
+    properties:
+      detail:
+        type: string
+      instance:
+        type: string
+      status:
+        type: integer
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+host: localhost:8080
 info:
-  contact: {}
-paths: {}
+  contact:
+    email: guilherme.o.a.ufal@gmail.com
+    name: Guilherme Amorim
+    url: http://www.guilhermedeoliveiraamorim.com
+  description: This is an API for managing expenses.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Expense Tracker API
+  version: "1.0"
+paths:
+  /categories:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all categories for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/usecases.GetCategoriesOutputDto'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Get all categories
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Create a new category with the provided details
+      parameters:
+      - description: Request body to create a new category
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/usecases.CreateCategoryOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Create a new category
+      tags:
+      - categories
+  /categories/{category_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a category by its ID
+      parameters:
+      - description: Category ID
+        in: query
+        name: category_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.DeleteCategoryOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Delete a category
+      tags:
+      - categories
+    get:
+      consumes:
+      - application/json
+      description: Get details of a category by its ID
+      parameters:
+      - description: Category ID
+        in: query
+        name: category_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.GetCategoryOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get category details
+      tags:
+      - categories
+    patch:
+      consumes:
+      - application/json
+      description: Update details of an existing category
+      parameters:
+      - description: Request body to update a category
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.UpdateCategoryOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Update a category
+      tags:
+      - categories
+  /expenses:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all expenses for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/usecases.GetExpensesOutputDto'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Get all expenses
+      tags:
+      - expenses
+    post:
+      consumes:
+      - application/json
+      description: Create a new expense entry
+      parameters:
+      - description: Expense data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/usecases.CreateExpenseOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Create an expense
+      tags:
+      - expenses
+  /expenses/{expense_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an expense by its ID
+      parameters:
+      - description: Expense ID
+        in: query
+        name: expense_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.DeleteExpenseOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "404":
+          description: Expense Not Found
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Delete an expense
+      tags:
+      - expenses
+    get:
+      consumes:
+      - application/json
+      description: Retrieve an expense by its ID
+      parameters:
+      - description: Expense ID
+        in: query
+        name: expense_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.GetExpenseOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "404":
+          description: Expense Not Found
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Get a specific expense
+      tags:
+      - expenses
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing expense
+      parameters:
+      - description: Updated expense data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateExpenseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.UpdateExpenseOutputDto'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "404":
+          description: Expense Not Found
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      summary: Update an expense
+      tags:
+      - expenses
+  /tags:
+    get:
+      description: Retrieve all tags for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.GetTagsOutputDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get all tags
+      tags:
+      - Tags
+    post:
+      consumes:
+      - application/json
+      description: Create a tag with a name and color
+      parameters:
+      - description: Tag data
+        in: body
+        name: CreateTagRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateTagRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/usecases.CreateTagOutputDto'
+        "400":
+          description: Did not bind JSON
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Create a new tag
+      tags:
+      - Tags
+  /tags/{tag_id}:
+    delete:
+      description: Delete a specific tag by its ID
+      parameters:
+      - description: Tag ID
+        in: query
+        name: tag_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.DeleteTagOutputDto'
+        "400":
+          description: Missing Tag ID
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Delete a tag by ID
+      tags:
+      - Tags
+    get:
+      description: Retrieve a tag by its ID
+      parameters:
+      - description: Tag ID
+        in: query
+        name: tag_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.GetTagOutputDto'
+        "400":
+          description: Missing Tag ID
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get a tag by ID
+      tags:
+      - Tags
+    put:
+      consumes:
+      - application/json
+      description: Update a tag's name and color by its ID
+      parameters:
+      - description: Updated tag data
+        in: body
+        name: UpdateTagRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateTagRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usecases.UpdateTagOutputDto'
+        "400":
+          description: Did not bind JSON
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Update a tag by ID
+      tags:
+      - Tags
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

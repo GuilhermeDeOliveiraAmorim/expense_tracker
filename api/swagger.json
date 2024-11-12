@@ -1,7 +1,1163 @@
 {
+    "schemes": [
+        "http"
+    ],
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "This is an API for managing expenses.",
+        "title": "Expense Tracker API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Guilherme Amorim",
+            "url": "http://www.guilhermedeoliveiraamorim.com",
+            "email": "guilherme.o.a.ufal@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
     },
-    "paths": {}
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/categories": {
+            "get": {
+                "description": "Retrieve all categories for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get all categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/usecases.GetCategoriesOutputDto"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new category with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Create a new category",
+                "parameters": [
+                    {
+                        "description": "Request body to create a new category",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.CreateCategoryOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/categories/{category_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get details of a category by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Get category details",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "category_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.GetCategoryOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a category by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Delete a category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category ID",
+                        "name": "category_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.DeleteCategoryOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update details of an existing category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "Update a category",
+                "parameters": [
+                    {
+                        "description": "Request body to update a category",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpdateCategoryRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.UpdateCategoryOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses": {
+            "get": {
+                "description": "Retrieve all expenses for the authenticated user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Get all expenses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/usecases.GetExpensesOutputDto"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new expense entry",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Create an expense",
+                "parameters": [
+                    {
+                        "description": "Expense data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateExpenseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.CreateExpenseOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/expenses/{expense_id}": {
+            "get": {
+                "description": "Retrieve an expense by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Get a specific expense",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense ID",
+                        "name": "expense_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.GetExpenseOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an expense by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Delete an expense",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Expense ID",
+                        "name": "expense_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.DeleteExpenseOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update an existing expense",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "expenses"
+                ],
+                "summary": "Update an expense",
+                "parameters": [
+                    {
+                        "description": "Updated expense data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpdateExpenseRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.UpdateExpenseOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "404": {
+                        "description": "Expense Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/tags": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve all tags for the authenticated user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Get all tags",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.GetTagsOutputDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a tag with a name and color",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Create a new tag",
+                "parameters": [
+                    {
+                        "description": "Tag data",
+                        "name": "CreateTagRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateTagRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.CreateTagOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Did not bind JSON",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/tags/{tag_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a tag by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Get a tag by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag ID",
+                        "name": "tag_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.GetTagOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing Tag ID",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a tag's name and color by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Update a tag by ID",
+                "parameters": [
+                    {
+                        "description": "Updated tag data",
+                        "name": "UpdateTagRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpdateTagRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.UpdateTagOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Did not bind JSON",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a specific tag by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Delete a tag by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Tag ID",
+                        "name": "tag_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usecases.DeleteTagOutputDto"
+                        }
+                    },
+                    "400": {
+                        "description": "Missing Tag ID",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entities.Category": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deactivated_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Expense": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "amount": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "category": {
+                    "$ref": "#/definitions/entities.Category"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deactivated_at": {
+                    "type": "string"
+                },
+                "expense_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "tag_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Tag"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "entities.Tag": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "deactivated_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateCategoryRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateExpenseRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "expense_date": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "handlers.CreateTagRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UpdateCategoryRequest": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UpdateExpenseRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "string",
+                    "example": "0"
+                },
+                "category_id": {
+                    "type": "string"
+                },
+                "expense_date": {
+                    "type": "string"
+                },
+                "expense_id": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "handlers.UpdateTagRequest": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tag_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.CreateCategoryOutputDto": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.CreateExpenseOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "expense_id": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.CreateTagOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                },
+                "tag_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.DeleteCategoryOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.DeleteExpenseOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.DeleteTagOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.GetCategoriesOutputDto": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Category"
+                    }
+                }
+            }
+        },
+        "usecases.GetCategoryOutputDto": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "$ref": "#/definitions/entities.Category"
+                }
+            }
+        },
+        "usecases.GetExpenseOutputDto": {
+            "type": "object",
+            "properties": {
+                "expense": {
+                    "$ref": "#/definitions/entities.Expense"
+                }
+            }
+        },
+        "usecases.GetExpensesOutputDto": {
+            "type": "object",
+            "properties": {
+                "expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Expense"
+                    }
+                }
+            }
+        },
+        "usecases.GetTagOutputDto": {
+            "type": "object",
+            "properties": {
+                "tag": {
+                    "$ref": "#/definitions/entities.Tag"
+                }
+            }
+        },
+        "usecases.GetTagsOutputDto": {
+            "type": "object",
+            "properties": {
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.Tag"
+                    }
+                }
+            }
+        },
+        "usecases.UpdateCategoryOutputDto": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "string"
+                },
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.UpdateExpenseOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "expense_id": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                }
+            }
+        },
+        "usecases.UpdateTagOutputDto": {
+            "type": "object",
+            "properties": {
+                "content_message": {
+                    "type": "string"
+                },
+                "success_message": {
+                    "type": "string"
+                },
+                "tag_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "util.ProblemDetails": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string"
+                },
+                "instance": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
 }
