@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/util"
 	"gorm.io/gorm"
@@ -47,7 +48,7 @@ func (p *PresentersRepository) GetExpensesByCategoryPeriod(userID string, startD
 		Select("categories.name as category_name, categories.color as category_color, SUM(expenses.amount) as total").
 		Joins("JOIN categories ON expenses.category_id = categories.id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
-		Group("categories.name, categories.color").Order("total").
+		Group("categories.name, categories.color").Order("total DESC").
 		Scan(&expensesByCategory).Error; err != nil {
 		return nil, errors.New("failed to fetch expenses by category: " + err.Error())
 	}
@@ -554,4 +555,39 @@ func (p *PresentersRepository) GetAvailableMonthsYears(userID string) ([]int, []
 	}
 
 	return availableYears, monthOptions, nil
+}
+
+func (p *PresentersRepository) GetDayToDayExpensesPeriod(userID string, startDate time.Time, endDate time.Time) ([]entities.Expense, error) {
+	var expensesModel []Expenses
+
+	if err := p.gorm.
+		Where("user_id = ? AND active = ? AND expanse_date BETWEEN ? AND ?", userID, true, startDate, endDate).
+		Find(&expensesModel).Error; err != nil {
+		return []entities.Expense{}, errors.New("failed to fetch expenses: " + err.Error())
+	}
+
+	var expenses []entities.Expense
+
+	if len(expensesModel) > 0 {
+		for _, expenseModel := range expensesModel {
+
+			expense := entities.Expense{
+				SharedEntity: entities.SharedEntity{
+					ID: expenseModel.ID,
+				},
+				Amount:      expenseModel.Amount,
+				ExpenseDate: expenseModel.ExpanseDate,
+			}
+
+			expenses = append(expenses, expense)
+		}
+
+		sort.Slice(expenses, func(i, j int) bool {
+			return expenses[i].ExpenseDate.After(expenses[j].ExpenseDate)
+		})
+	} else {
+		expenses = []entities.Expense{}
+	}
+
+	return expenses, nil
 }

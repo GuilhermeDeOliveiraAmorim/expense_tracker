@@ -111,6 +111,7 @@ func main() {
 		protected.GET("/expenses/weekly/total", presentersHandler.GetTotalExpensesForCurrentWeek)
 		protected.GET("/expenses/total/monthly/year", presentersHandler.GetTotalExpensesMonthCurrentYear)
 		protected.GET("/expenses/tags/monthly/total", presentersHandler.GetCategoryTagsTotalsByMonthYear)
+		protected.GET("/expenses/day/day/period", presentersHandler.GetDayToDayExpensesPeriod)
 
 		protected.GET("/util/months/years", presentersHandler.GetAvailableMonthsYears)
 	}

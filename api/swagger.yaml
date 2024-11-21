@@ -138,6 +138,17 @@ definitions:
       tag_id:
         type: string
     type: object
+  presenters.DayToDayExpense:
+    properties:
+      amount:
+        type: number
+      day:
+        type: string
+      day_name:
+        type: string
+      month:
+        type: string
+    type: object
   presenters.GetAvailableMonthsYearsOutputDto:
     properties:
       available_months:
@@ -153,6 +164,13 @@ definitions:
     properties:
       expenses:
         $ref: '#/definitions/repositories.CategoryTagsTotals'
+    type: object
+  presenters.GetDayToDayExpensesPeriodOutputDto:
+    properties:
+      expenses:
+        items:
+          $ref: '#/definitions/presenters.DayToDayExpense'
+        type: array
     type: object
   presenters.GetExpensesByCategoryPeriodOutputDto:
     properties:
@@ -1051,6 +1069,29 @@ paths:
       security:
       - BearerAuth: []
       summary: Get monthly expenses by category for a specific year
+      tags:
+      - Presenters
+  /expenses/day/day/period:
+    get:
+      description: A date range is passed to return a set of expenses in that range
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetDayToDayExpensesPeriodOutputDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get expenses in a time interval
       tags:
       - Presenters
   /expenses/monthly/total:

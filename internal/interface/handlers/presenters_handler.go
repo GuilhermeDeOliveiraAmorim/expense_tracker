@@ -471,3 +471,58 @@ func (h *PresentersHandler) GetAvailableMonthsYears(c *gin.Context) {
 
 	c.JSON(http.StatusOK, output)
 }
+
+// @Summary Get expenses in a time interval
+// @Description A date range is passed to return a set of expenses in that range
+// @Tags Presenters
+// @Produce json
+// @Success 200 {object} presenters.GetDayToDayExpensesPeriodOutputDto
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Failure 500 {object} util.ProblemDetails "Internal Server Error"
+// @Security BearerAuth
+// @Router /expenses/day/day/period [get]
+func (h *PresentersHandler) GetDayToDayExpensesPeriod(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+		return
+	}
+
+	startDate := c.Query("start_date")
+	if startDate == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing start date",
+			Status:   http.StatusBadRequest,
+			Detail:   "Start date is required",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	endDate := c.Query("end_date")
+	if endDate == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing end date",
+			Status:   http.StatusBadRequest,
+			Detail:   "End date is required",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	input := presenters.GetDayToDayExpensesPeriodInputDto{
+		UserID:    userID,
+		StartDate: startDate,
+		EndDate:   endDate,
+	}
+
+	output, errs := h.presenterFactory.GetDayToDayExpensesPeriod.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}

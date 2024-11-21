@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"time"
+
+	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/entities"
 )
 
 type CategoryExpense struct {
@@ -104,4 +106,5 @@ type PresentersRepositoryInterface interface {
 	GetTotalExpensesMonthCurrentYear(userID string, year int) (ExpensesMonthCurrentYear, error)
 	GetCategoryTagsTotalsByMonthYear(userID string, month int, year int) (CategoryTagsTotals, error)
 	GetAvailableMonthsYears(userID string) ([]int, []MonthOption, error)
+	GetDayToDayExpensesPeriod(userID string, StartDate time.Time, EndDate time.Time) ([]entities.Expense, error)
 }

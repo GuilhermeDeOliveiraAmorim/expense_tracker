@@ -559,6 +559,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/expenses/day/day/period": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "A date range is passed to return a set of expenses in that range",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get expenses in a time interval",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetDayToDayExpensesPeriodOutputDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
         "/expenses/monthly/total": {
             "get": {
                 "security": [
@@ -1787,6 +1824,23 @@ const docTemplate = `{
                 }
             }
         },
+        "presenters.DayToDayExpense": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "day": {
+                    "type": "string"
+                },
+                "day_name": {
+                    "type": "string"
+                },
+                "month": {
+                    "type": "string"
+                }
+            }
+        },
         "presenters.GetAvailableMonthsYearsOutputDto": {
             "type": "object",
             "properties": {
@@ -1809,6 +1863,17 @@ const docTemplate = `{
             "properties": {
                 "expenses": {
                     "$ref": "#/definitions/repositories.CategoryTagsTotals"
+                }
+            }
+        },
+        "presenters.GetDayToDayExpensesPeriodOutputDto": {
+            "type": "object",
+            "properties": {
+                "expenses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/presenters.DayToDayExpense"
+                    }
                 }
             }
         },
