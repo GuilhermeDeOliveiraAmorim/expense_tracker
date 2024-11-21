@@ -121,7 +121,7 @@ func (c *GetDayToDayExpensesPeriodUseCase) Execute(input GetDayToDayExpensesPeri
 		dayToDayExpenses = append(dayToDayExpenses, DayToDayExpense{
 			Day:     expense.ExpenseDate.Format("02"),
 			DayName: expense.ExpenseDate.Weekday().String(),
-			Month:   expense.ExpenseDate.Format("01"),
+			Month:   expense.ExpenseDate.Month().String(),
 			Year:    strconv.Itoa(expense.ExpenseDate.Year()),
 			Amount:  expense.Amount,
 		})

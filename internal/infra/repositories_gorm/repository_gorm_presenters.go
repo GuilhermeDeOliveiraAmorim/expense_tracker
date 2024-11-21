@@ -583,7 +583,7 @@ func (p *PresentersRepository) GetDayToDayExpensesPeriod(userID string, startDat
 		}
 
 		sort.Slice(expenses, func(i, j int) bool {
-			return expenses[i].ExpenseDate.After(expenses[j].ExpenseDate)
+			return expenses[i].ExpenseDate.Before(expenses[j].ExpenseDate)
 		})
 	} else {
 		expenses = []entities.Expense{}
