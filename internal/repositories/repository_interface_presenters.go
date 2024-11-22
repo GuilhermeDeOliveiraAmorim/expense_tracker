@@ -73,11 +73,13 @@ type ExpensesMonthCurrentYear struct {
 type CategoryTagTotal struct {
 	Name      string  `json:"name"`
 	TagAmount float64 `json:"tag_amount"`
+	Color     string  `json:"color"`
 }
 
 type CategoryWithTags struct {
 	Name           string             `json:"name"`
 	CategoryAmount float64            `json:"category_amount"`
+	Color          string             `json:"color"`
 	Tags           []CategoryTagTotal `json:"tags"`
 }
 

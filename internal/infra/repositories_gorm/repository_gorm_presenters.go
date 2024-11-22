@@ -451,13 +451,14 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 	var results []struct {
 		CategoryName  string
 		CategoryTotal float64
+		CategoryColor string
 	}
 
 	if err := p.gorm.Table("expenses").
-		Select("categories.name as category_name, COALESCE(SUM(expenses.amount), 0) as category_total").
+		Select("categories.name as category_name, COALESCE(SUM(expenses.amount), 0) as category_total, categories.color as category_color").
 		Joins("LEFT JOIN categories ON categories.id = expenses.category_id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
-		Group("categories.name").
+		Group("categories.name, categories.color").
 		Scan(&results).Error; err != nil {
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category: " + err.Error())
 	}
@@ -467,6 +468,7 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		categoryMap[result.CategoryName] = &repositories.CategoryWithTags{
 			Name:           result.CategoryName,
 			CategoryAmount: result.CategoryTotal,
+			Color:          result.CategoryColor,
 			Tags:           []repositories.CategoryTagTotal{},
 		}
 	}
@@ -475,15 +477,16 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 		CategoryName string
 		TagName      string
 		TagTotal     float64
+		TagColor     string
 	}
 
 	if err := p.gorm.Table("expenses").
-		Select("categories.name as category_name, tags.name as tag_name, COALESCE(SUM(expenses.amount), 0) as tag_total").
+		Select("categories.name as category_name, tags.name as tag_name, COALESCE(SUM(expenses.amount), 0) as tag_total, tags.color as tag_color").
 		Joins("LEFT JOIN categories ON categories.id = expenses.category_id").
 		Joins("LEFT JOIN expense_tags ON expense_tags.expenses_id = expenses.id").
 		Joins("LEFT JOIN tags ON tags.id = expense_tags.tags_id").
 		Where("expenses.user_id = ? AND expenses.expanse_date BETWEEN ? AND ? AND expenses.active = ?", userID, startDate, endDate, true).
-		Group("categories.name, tags.name").
+		Group("categories.name, tags.name, tags.color").
 		Scan(&resultsTags).Error; err != nil {
 		return repositories.CategoryTagsTotals{}, errors.New("failed to fetch expenses by category and tags: " + err.Error())
 	}
@@ -493,6 +496,7 @@ func (p *PresentersRepository) GetCategoryTagsTotalsByMonthYear(userID string, m
 			category.Tags = append(category.Tags, repositories.CategoryTagTotal{
 				Name:      result.TagName,
 				TagAmount: result.TagTotal,
+				Color:     result.TagColor,
 			})
 		}
 	}
