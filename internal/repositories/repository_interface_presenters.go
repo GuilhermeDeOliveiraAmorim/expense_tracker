@@ -109,4 +109,5 @@ type PresentersRepositoryInterface interface {
 	GetCategoryTagsTotalsByMonthYear(userID string, month int, year int) (CategoryTagsTotals, error)
 	GetAvailableMonthsYears(userID string) ([]int, []MonthOption, error)
 	GetDayToDayExpensesPeriod(userID string, StartDate time.Time, EndDate time.Time) ([]entities.Expense, error)
+	GetTagsDayToDay(userID string, year int, month int) ([]entities.Expense, error)
 }

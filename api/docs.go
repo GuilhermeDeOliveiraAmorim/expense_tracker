@@ -700,6 +700,59 @@ const docTemplate = `{
                 }
             }
         },
+        "/expenses/tags/day/day/": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "A date range is passed to return a set of expenses in that range",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Presenters"
+                ],
+                "summary": "Get tags in a time interval",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Year for which to retrieve expenses",
+                        "name": "year",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Month for which to retrieve expenses",
+                        "name": "month",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/presenters.GetTagsDayToDayOutputDto"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/util.ProblemDetails"
+                        }
+                    }
+                }
+            }
+        },
         "/expenses/tags/monthly": {
             "get": {
                 "security": [
@@ -1824,6 +1877,46 @@ const docTemplate = `{
                 }
             }
         },
+        "presenters.CategoryDayToDay": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/presenters.TagDayToDay"
+                    }
+                }
+            }
+        },
+        "presenters.DayToDay": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/presenters.CategoryDayToDay"
+                    }
+                },
+                "date": {
+                    "type": "string"
+                },
+                "day_of_week": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "number"
+                }
+            }
+        },
         "presenters.DayToDayExpense": {
             "type": "object",
             "properties": {
@@ -1837,6 +1930,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "month": {
+                    "type": "string"
+                },
+                "year": {
                     "type": "string"
                 }
             }
@@ -1930,6 +2026,17 @@ const docTemplate = `{
                 }
             }
         },
+        "presenters.GetTagsDayToDayOutputDto": {
+            "type": "object",
+            "properties": {
+                "days": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/presenters.DayToDay"
+                    }
+                }
+            }
+        },
         "presenters.GetTotalExpensesForCurrentMonthOutputDto": {
             "type": "object",
             "properties": {
@@ -1968,6 +2075,20 @@ const docTemplate = `{
                 }
             }
         },
+        "presenters.TagDayToDay": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "repositories.CategoryExpense": {
             "type": "object",
             "properties": {
@@ -1985,6 +2106,9 @@ const docTemplate = `{
         "repositories.CategoryTagTotal": {
             "type": "object",
             "properties": {
+                "color": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -2030,6 +2154,9 @@ const docTemplate = `{
             "properties": {
                 "category_amount": {
                     "type": "number"
+                },
+                "color": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/infra/factory"
@@ -519,6 +520,65 @@ func (h *PresentersHandler) GetDayToDayExpensesPeriod(c *gin.Context) {
 	}
 
 	output, errs := h.presenterFactory.GetDayToDayExpensesPeriod.Execute(input)
+	if len(errs) > 0 {
+		handleErrors(c, errs)
+		return
+	}
+
+	c.JSON(http.StatusOK, output)
+}
+
+// @Summary Get expenses in a time interval with categories and tags
+// @Description A date range is passed to return a set of expenses in that range
+// @Tags Presenters
+// @Produce json
+// @Param year query string true "Year for which to retrieve expenses"
+// @Param month query string true "Month for which to retrieve expenses"
+// @Success 200 {object} presenters.GetTagsDayToDayOutputDto
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Failure 500 {object} util.ProblemDetails "Internal Server Error"
+// @Security BearerAuth
+// @Router /expenses/tags/day/day/ [get]
+func (h *PresentersHandler) GetTagsDayToDay(c *gin.Context) {
+	userID, err := getUserID(c)
+	if err != nil {
+		c.AbortWithStatusJSON(err.Status, gin.H{"error": err})
+		return
+	}
+
+	year := c.Query("year")
+	if year == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing year",
+			Status:   http.StatusBadRequest,
+			Detail:   "Year is required",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	month := c.Query("month")
+	if month == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": util.ProblemDetails{
+			Type:     "Bad Request",
+			Title:    "Missing month",
+			Status:   http.StatusBadRequest,
+			Detail:   "Month is required",
+			Instance: util.RFC400,
+		}})
+		return
+	}
+
+	input := presenters.GetTagsDayToDayInputDto{
+		UserID: userID,
+		Year:   year,
+		Month:  month,
+	}
+
+	fmt.Println(input)
+
+	output, errs := h.presenterFactory.GetTagsDayToDay.Execute(input)
 	if len(errs) > 0 {
 		handleErrors(c, errs)
 		return

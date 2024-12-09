@@ -138,6 +138,32 @@ definitions:
       tag_id:
         type: string
     type: object
+  presenters.CategoryDayToDay:
+    properties:
+      amount:
+        type: number
+      color:
+        type: string
+      name:
+        type: string
+      tags:
+        items:
+          $ref: '#/definitions/presenters.TagDayToDay'
+        type: array
+    type: object
+  presenters.DayToDay:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/presenters.CategoryDayToDay'
+        type: array
+      date:
+        type: string
+      day_of_week:
+        type: string
+      total_amount:
+        type: number
+    type: object
   presenters.DayToDayExpense:
     properties:
       amount:
@@ -147,6 +173,8 @@ definitions:
       day_name:
         type: string
       month:
+        type: string
+      year:
         type: string
     type: object
   presenters.GetAvailableMonthsYearsOutputDto:
@@ -206,6 +234,13 @@ definitions:
           $ref: '#/definitions/repositories.MonthlyTagExpense'
         type: array
     type: object
+  presenters.GetTagsDayToDayOutputDto:
+    properties:
+      days:
+        items:
+          $ref: '#/definitions/presenters.DayToDay'
+        type: array
+    type: object
   presenters.GetTotalExpensesForCurrentMonthOutputDto:
     properties:
       current_month:
@@ -230,6 +265,15 @@ definitions:
       expenses_month_current_year:
         $ref: '#/definitions/repositories.ExpensesMonthCurrentYear'
     type: object
+  presenters.TagDayToDay:
+    properties:
+      amount:
+        type: number
+      color:
+        type: string
+      name:
+        type: string
+    type: object
   repositories.CategoryExpense:
     properties:
       category_color:
@@ -241,6 +285,8 @@ definitions:
     type: object
   repositories.CategoryTagTotal:
     properties:
+      color:
+        type: string
       name:
         type: string
       tag_amount:
@@ -271,6 +317,8 @@ definitions:
     properties:
       category_amount:
         type: number
+      color:
+        type: string
       name:
         type: string
       tags:
@@ -1159,6 +1207,40 @@ paths:
       security:
       - BearerAuth: []
       summary: Get expenses by month and year
+      tags:
+      - Presenters
+  /expenses/tags/day/day/:
+    get:
+      description: A date range is passed to return a set of expenses in that range
+      parameters:
+      - description: Year for which to retrieve expenses
+        in: query
+        name: year
+        required: true
+        type: string
+      - description: Month for which to retrieve expenses
+        in: query
+        name: month
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/presenters.GetTagsDayToDayOutputDto'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/util.ProblemDetails'
+      security:
+      - BearerAuth: []
+      summary: Get tags in a time interval
       tags:
       - Presenters
   /expenses/tags/monthly:

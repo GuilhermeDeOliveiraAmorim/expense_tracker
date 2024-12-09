@@ -595,3 +595,82 @@ func (p *PresentersRepository) GetDayToDayExpensesPeriod(userID string, startDat
 
 	return expenses, nil
 }
+
+func (p *PresentersRepository) GetTagsDayToDay(userID string, year int, month int) ([]entities.Expense, error) {
+	// startOfMonth := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	// endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second)
+
+	var expensesModel []Expenses
+
+	if err := p.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Order("expense_date DESC").Error; err != nil {
+		return []entities.Expense{}, err
+	}
+
+	var expenses []entities.Expense
+
+	if len(expensesModel) > 0 {
+		for _, expenseModel := range expensesModel {
+			category := entities.Category{
+
+				SharedEntity: entities.SharedEntity{
+					ID:            expenseModel.Category.ID,
+					Active:        expenseModel.Category.Active,
+					CreatedAt:     expenseModel.Category.CreatedAt,
+					UpdatedAt:     expenseModel.Category.UpdatedAt,
+					DeactivatedAt: expenseModel.Category.DeactivatedAt,
+				},
+				UserID: expenseModel.Category.UserID,
+				Name:   expenseModel.Category.Name,
+				Color:  expenseModel.Category.Color,
+			}
+
+			var tags []entities.Tag
+			var tagsIDs []string
+
+			for _, tag := range expenseModel.Tags {
+				tags = append(tags, entities.Tag{
+					SharedEntity: entities.SharedEntity{
+						ID:            tag.ID,
+						Active:        tag.Active,
+						CreatedAt:     tag.CreatedAt,
+						UpdatedAt:     tag.UpdatedAt,
+						DeactivatedAt: tag.DeactivatedAt,
+					},
+					UserID: tag.UserID,
+					Name:   tag.Name,
+					Color:  tag.Color,
+				})
+
+				tagsIDs = append(tagsIDs, tag.ID)
+			}
+
+			expense := entities.Expense{
+				SharedEntity: entities.SharedEntity{
+					ID:            expenseModel.ID,
+					Active:        expenseModel.Active,
+					CreatedAt:     expenseModel.CreatedAt,
+					UpdatedAt:     expenseModel.UpdatedAt,
+					DeactivatedAt: expenseModel.DeactivatedAt,
+				},
+				UserID:      expenseModel.UserID,
+				Amount:      expenseModel.Amount,
+				ExpenseDate: expenseModel.ExpanseDate,
+				Notes:       expenseModel.Notes,
+				CategoryID:  expenseModel.Category.ID,
+				TagIDs:      tagsIDs,
+				Category:    category,
+				Tags:        tags,
+			}
+
+			expenses = append(expenses, expense)
+		}
+
+		sort.Slice(expenses, func(i, j int) bool {
+			return expenses[i].ExpenseDate.After(expenses[j].ExpenseDate)
+		})
+	} else {
+		expenses = []entities.Expense{}
+	}
+
+	return expenses, nil
+}
