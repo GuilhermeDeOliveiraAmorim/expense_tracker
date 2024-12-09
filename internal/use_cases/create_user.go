@@ -15,7 +15,6 @@ type CreateUserInputDto struct {
 }
 
 type CreateUserOutputDto struct {
-	UserID         string `json:"user_id"`
 	Name           string `json:"name"`
 	SuccessMessage string `json:"success_message"`
 	ContentMessage string `json:"content_message"`
@@ -135,7 +134,6 @@ func (c *CreateUserUseCase) Execute(input CreateUserInputDto) (CreateUserOutputD
 	}
 
 	return CreateUserOutputDto{
-		UserID:         newUser.ID,
 		Name:           newUser.Name,
 		SuccessMessage: "User created successfully",
 		ContentMessage: "Welcome, " + newUser.Name + "!",

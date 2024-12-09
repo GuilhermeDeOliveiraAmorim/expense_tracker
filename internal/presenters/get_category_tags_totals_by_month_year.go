@@ -1,6 +1,7 @@
 package presenters
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/GuilhermeDeOliveiraAmorim/expense-tracker/internal/repositories"
@@ -9,8 +10,8 @@ import (
 
 type GetCategoryTagsTotalsByMonthYearInputDto struct {
 	UserID string `json:"user_id"`
-	Month  int    `json:"month"`
-	Year   int    `json:"year"`
+	Month  string `json:"month"`
+	Year   string `json:"year"`
 }
 
 type GetCategoryTagsTotalsByMonthYearOutputDto struct {
@@ -56,7 +57,33 @@ func (c *GetCategoryTagsTotalsByMonthYearUseCase) Execute(input GetCategoryTagsT
 		}
 	}
 
-	if input.Year < 1900 || input.Year > 99999 {
+	year, errYear := strconv.Atoi(input.Year)
+	if errYear != nil {
+		return GetCategoryTagsTotalsByMonthYearOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Bad Request",
+				Title:    "Invalid year",
+				Status:   400,
+				Detail:   errYear.Error(),
+				Instance: util.RFC400,
+			},
+		}
+	}
+
+	month, errMonth := strconv.Atoi(input.Month)
+	if errMonth != nil {
+		return GetCategoryTagsTotalsByMonthYearOutputDto{}, []util.ProblemDetails{
+			{
+				Type:     "Bad Request",
+				Title:    "Invalid month",
+				Status:   400,
+				Detail:   errMonth.Error(),
+				Instance: util.RFC400,
+			},
+		}
+	}
+
+	if year < 1900 || year > 99999 {
 		return GetCategoryTagsTotalsByMonthYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
@@ -68,7 +95,7 @@ func (c *GetCategoryTagsTotalsByMonthYearUseCase) Execute(input GetCategoryTagsT
 		}
 	}
 
-	if input.Year > time.Now().Year() {
+	if year > time.Now().Year() {
 		return GetCategoryTagsTotalsByMonthYearOutputDto{}, []util.ProblemDetails{
 			{
 				Type:     "Bad Request",
@@ -80,7 +107,7 @@ func (c *GetCategoryTagsTotalsByMonthYearUseCase) Execute(input GetCategoryTagsT
 		}
 	}
 
-	expenses, getExpensesByMonthYearErr := c.PresentersRepository.GetCategoryTagsTotalsByMonthYear(input.UserID, input.Month, input.Year)
+	expenses, getExpensesByMonthYearErr := c.PresentersRepository.GetCategoryTagsTotalsByMonthYear(input.UserID, month, year)
 	if getExpensesByMonthYearErr != nil {
 		return GetCategoryTagsTotalsByMonthYearOutputDto{}, []util.ProblemDetails{
 			{

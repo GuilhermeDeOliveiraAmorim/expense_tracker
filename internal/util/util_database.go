@@ -14,8 +14,8 @@ import (
 
 const (
 	POSTGRES = "postgres"
-	MYSQL    = "mysql"
 	NEON     = "neon"
+	LOCAL    = "local"
 )
 
 func NewLogger() logger.Interface {
@@ -34,7 +34,19 @@ func NewLogger() logger.Interface {
 }
 
 func NewPostgresDB() *gorm.DB {
-	dsn := "host=" + config.DB_POSTGRES.DB_HOST + " user=" + config.DB_POSTGRES.DB_USER + " password=" + config.DB_POSTGRES.DB_PASSWORD + " dbname=" + config.DB_POSTGRES.DB_NAME + " port=" + config.DB_POSTGRES.DB_PORT + " sslmode=disable"
+	dsn := "host=" + config.DB_POSTGRES_CONTAINER.DB_HOST + " user=" + config.DB_POSTGRES_CONTAINER.DB_USER + " password=" + config.DB_POSTGRES_CONTAINER.DB_PASSWORD + " dbname=" + config.DB_POSTGRES_CONTAINER.DB_NAME + " port=" + config.DB_POSTGRES_CONTAINER.DB_PORT + " sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: NewLogger(),
+	})
+	if err != nil {
+		log.Printf("Error connecting to database: %v", err)
+		return nil
+	}
+	return db
+}
+
+func NewPostgresDBLocal() *gorm.DB {
+	dsn := "host=" + config.DB_POSTGRES_LOCAL.DB_HOST + " user=" + config.DB_POSTGRES_LOCAL.DB_USER + " password=" + config.DB_POSTGRES_LOCAL.DB_PASSWORD + " dbname=" + config.DB_POSTGRES_LOCAL.DB_NAME + " port=" + config.DB_POSTGRES_LOCAL.DB_PORT + " sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: NewLogger(),
 	})
@@ -53,6 +65,8 @@ func SetupDatabaseConnection(SGBD string) (*gorm.DB, *sql.DB, error) {
 		db = NewPostgresDB()
 	case NEON:
 		db = NeonConnection()
+	case LOCAL:
+		db = NewPostgresDBLocal()
 	default:
 		return nil, nil, nil
 	}

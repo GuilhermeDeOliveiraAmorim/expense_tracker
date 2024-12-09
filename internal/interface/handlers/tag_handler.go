@@ -19,6 +19,17 @@ func NewTagHandler(factory *factory.TagFactory) *TagHandler {
 	}
 }
 
+// @Summary Create a new tag
+// @Description Create a tag with a name and color
+// @Tags Tags
+// @Accept json
+// @Produce json
+// @Param CreateTagRequest body CreateTagRequest true "Tag data"
+// @Success 201 {object} usecases.CreateTagOutputDto
+// @Failure 400 {object} util.ProblemDetails "Did not bind JSON"
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
+// @Router /tags [post]
 func (h *TagHandler) CreateTag(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -53,6 +64,16 @@ func (h *TagHandler) CreateTag(c *gin.Context) {
 	c.JSON(http.StatusCreated, output)
 }
 
+// @Summary Get a tag by ID
+// @Description Retrieve a tag by its ID
+// @Tags Tags
+// @Produce json
+// @Param tag_id query string true "Tag ID"
+// @Success 200 {object} usecases.GetTagOutputDto
+// @Failure 400 {object} util.ProblemDetails "Missing Tag ID"
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
+// @Router /tags/{tag_id} [get]
 func (h *TagHandler) GetTag(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -86,6 +107,14 @@ func (h *TagHandler) GetTag(c *gin.Context) {
 	c.JSON(http.StatusOK, output)
 }
 
+// @Summary Get all tags
+// @Description Retrieve all tags for the authenticated user
+// @Tags Tags
+// @Produce json
+// @Success 200 {object} usecases.GetTagsOutputDto
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
+// @Router /tags [get]
 func (h *TagHandler) GetTags(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -106,6 +135,16 @@ func (h *TagHandler) GetTags(c *gin.Context) {
 	c.JSON(http.StatusOK, output)
 }
 
+// @Summary Delete a tag by ID
+// @Description Delete a specific tag by its ID
+// @Tags Tags
+// @Produce json
+// @Param tag_id query string true "Tag ID"
+// @Success 200 {object} usecases.DeleteTagOutputDto
+// @Failure 400 {object} util.ProblemDetails "Missing Tag ID"
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
+// @Router /tags/{tag_id} [delete]
 func (h *TagHandler) DeleteTag(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
@@ -139,6 +178,17 @@ func (h *TagHandler) DeleteTag(c *gin.Context) {
 	c.JSON(http.StatusOK, output)
 }
 
+// @Summary Update a tag by ID
+// @Description Update a tag's name and color by its ID
+// @Tags Tags
+// @Accept json
+// @Produce json
+// @Param UpdateTagRequest body UpdateTagRequest true "Updated tag data"
+// @Success 200 {object} usecases.UpdateTagOutputDto
+// @Failure 400 {object} util.ProblemDetails "Did not bind JSON"
+// @Failure 401 {object} util.ProblemDetails "Unauthorized"
+// @Security BearerAuth
+// @Router /tags/{tag_id} [put]
 func (h *TagHandler) UpdateTag(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {

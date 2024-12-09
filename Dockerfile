@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.21.5 AS builder
+FROM golang:1.22.0 AS builder
 
 WORKDIR /build
 
@@ -7,12 +7,14 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+
+RUN go install github.com/swaggo/swag/cmd/swag@latest && \
+    swag init -g ./main.go -o ./api
+    
 RUN go build -o /build/app .
 
-# Final Stage
-FROM golang:1.21.5
+FROM golang:1.22.0 as final
 
-# Crie o diretório /app se ele não existir
 RUN mkdir -p /app
 
 COPY --from=builder /build/app /app
