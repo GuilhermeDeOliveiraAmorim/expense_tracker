@@ -597,12 +597,17 @@ func (p *PresentersRepository) GetDayToDayExpensesPeriod(userID string, startDat
 }
 
 func (p *PresentersRepository) GetTagsDayToDay(userID string, year int, month int) ([]entities.Expense, error) {
-	// startOfMonth := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	// endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second)
+	location, err := time.LoadLocation(util.TIMEZONE)
+	if err != nil {
+		return []entities.Expense{}, err
+	}
+
+	startOfMonth := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, location)
+	endOfMonth := startOfMonth.AddDate(0, 1, 0).Add(-time.Second)
 
 	var expensesModel []Expenses
 
-	if err := p.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ?", userID, true).Find(&expensesModel).Order("expense_date DESC").Error; err != nil {
+	if err := p.gorm.Preload("Tags", "active = ?", true).Preload("Category", "active = ?", true).Where("user_id = ? AND active = ? AND expanse_date BETWEEN ? AND ?", userID, true, startOfMonth, endOfMonth).Find(&expensesModel).Order("expense_date DESC").Error; err != nil {
 		return []entities.Expense{}, err
 	}
 

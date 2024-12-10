@@ -25,6 +25,7 @@ type CategoryDayToDay struct {
 
 type DayToDay struct {
 	Date        time.Time          `json:"date"`
+	NumberOfDay int                `json:"number_of_day"`
 	DayOfWeek   string             `json:"day_of_week"`
 	Month       string             `json:"month"`
 	Year        string             `json:"year"`
@@ -122,17 +123,16 @@ func (c *GetTagsDayToDayUseCase) Execute(input GetTagsDayToDayInputDto) (GetTags
 
 	daysMap := make(map[string]*DayToDay)
 
-	// Processar as despesas
 	for _, expense := range expenses {
 		year := expense.ExpenseDate.Year()
-		month := expense.ExpenseDate.Month().String()       // Exemplo: "January", "February"
-		dayOfWeek := expense.ExpenseDate.Weekday().String() // Exemplo: "Monday", "Tuesday"
-		dateKey := expense.ExpenseDate.Format("2006-01-02") // Formato YYYY-MM-DD
+		month := expense.ExpenseDate.Month().String()
+		dayOfWeek := expense.ExpenseDate.Weekday().String()
+		dateKey := expense.ExpenseDate.Format("2006-01-02")
 
-		// Verificar se o dia já existe no mapa, se não, criar
 		if _, exists := daysMap[dateKey]; !exists {
 			daysMap[dateKey] = &DayToDay{
 				Date:        expense.ExpenseDate,
+				NumberOfDay: expense.ExpenseDate.Day(),
 				DayOfWeek:   dayOfWeek,
 				Month:       month,
 				Year:        fmt.Sprint(year),
@@ -141,19 +141,16 @@ func (c *GetTagsDayToDayUseCase) Execute(input GetTagsDayToDayInputDto) (GetTags
 			}
 		}
 
-		// Obter o objeto DayToDay correspondente à chave
 		day := daysMap[dateKey]
 		day.TotalAmount += expense.Amount
 
-		// Verificar se a categoria já existe nesse dia
 		categoryExists := false
 		for i, category := range day.Categories {
 			if category.Name == expense.Category.Name {
 				categoryExists = true
-				// Atualizar o valor da categoria
+
 				day.Categories[i].Amount += expense.Amount
 
-				// Adicionar a tag na categoria, se houver tags
 				if len(expense.Tags) > 0 {
 					day.Categories[i].Tags = append(day.Categories[i].Tags, TagDayToDay{
 						Amount: expense.Amount,
@@ -165,7 +162,6 @@ func (c *GetTagsDayToDayUseCase) Execute(input GetTagsDayToDayInputDto) (GetTags
 			}
 		}
 
-		// Caso a categoria não exista, adicioná-la
 		if !categoryExists {
 			category := CategoryDayToDay{
 				Amount: expense.Amount,
@@ -173,7 +169,6 @@ func (c *GetTagsDayToDayUseCase) Execute(input GetTagsDayToDayInputDto) (GetTags
 				Color:  expense.Category.Color,
 			}
 
-			// Se houver tags, adicioná-las
 			if len(expense.Tags) > 0 {
 				category.Tags = append(category.Tags, TagDayToDay{
 					Amount: expense.Amount,
@@ -182,23 +177,19 @@ func (c *GetTagsDayToDayUseCase) Execute(input GetTagsDayToDayInputDto) (GetTags
 				})
 			}
 
-			// Adicionar a categoria à lista
 			day.Categories = append(day.Categories, category)
 		}
 	}
 
-	// Preparar o resultado final
 	var daysToDay []DayToDay
 	for _, day := range daysMap {
 		daysToDay = append(daysToDay, *day)
 	}
 
-	// Ordenar os dias por data
 	sort.Slice(daysToDay, func(i, j int) bool {
 		return daysToDay[i].Date.Before(daysToDay[j].Date)
 	})
 
-	// Retornar o resultado
 	return GetTagsDayToDayOutputDto{
 		Days: daysToDay,
 	}, nil
